@@ -1,0 +1,15 @@
+inherit_gem:
+  betterlint:
+    - config/default.yml
+
+AllCops:
+  NewCops: enable
+  Exclude:
+    - gemfiles/vendor/**/*
+    - vendor/**/*
+
+Betterment/ActiveJobPerformable:
+  Enabled: false
+
+Betterment/UnscopedFind:
+  Enabled: false

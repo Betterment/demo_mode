@@ -1,0 +1,40 @@
+name: Tests
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby: ['2.7', '3.0', '3.1']
+        gemfile:
+          - gemfiles/rails_5_2.gemfile
+          - gemfiles/rails_6_0.gemfile
+          - gemfiles/rails_6_1.gemfile
+          - gemfiles/rails_7_0.gemfile
+        exclude:
+          - ruby: '3.1'
+            gemfile: gemfiles/rails_5_2.gemfile
+          - ruby: '3.0'
+            gemfile: gemfiles/rails_5_2.gemfile
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: nanasess/setup-chromedriver@v1
+    - run: |
+        export DISPLAY=:99
+        chromedriver --url-base=/wd/hub &
+        sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 &
+    - uses: ruby/setup-ruby@v1
+      env:
+        BUNDLE_GEMFILE: ${{ matrix.gemfile }}
+      with:
+        ruby-version: ${{ matrix.ruby }}
+        bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+    - name: Run tests
+      env:
+        BUNDLE_GEMFILE: ${{ matrix.gemfile }}
+      run: bundle exec rake spec

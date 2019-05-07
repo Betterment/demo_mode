@@ -1,0 +1,13 @@
+.bundle/
+log/*.log
+pkg/
+spec/examples.txt
+spec/dummy/log
+spec/dummy/db/*.sqlite3
+spec/dummy/config/deprecations.ignore
+spec/dummy/tmp
+doc/
+.yardoc/
+Gemfile.lock
+/gemfiles/*.gemfile.lock
+*.sqlite

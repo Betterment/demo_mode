@@ -1,0 +1,39 @@
+<% if @session.signinable %>
+  <article class="middle">
+
+    <fieldset>
+      <legend><h2>Your credentials</h2></legend>
+
+      <label for='signinable_username'>Username</label>
+      <input readonly='readonly' onclick='this.select()' type='text' id='signinable_username' value="<%= @session.signinable_username %>" />
+      <label for='signinable_password'>Password</label>
+      <input readonly='readonly' onclick='this.select()' type='text' id="signinable_password" value="<%= @session.signinable_password %>" />
+
+      <%= form_for @session do |f| %>
+        <%= f.submit 'Sign in' %>
+        <%= link_to "Enter manually ⭢", DemoMode.sign_in_path(main_app), target: '_blank', class: 'button secondary' if DemoMode.sign_in_path(main_app) %>
+      <% end %>
+    </fieldset>
+  </article>
+<% else %>
+  <article class="middle center" data-polling-refresh-url='<%= session_path(@session, format: :json) %>'>
+    <figure>
+      <%= instance_eval(&DemoMode.loader) %>
+      <h4><span id="DemoTypedText"></span></h4>
+    </figure>
+
+    <script type="text/javascript">
+      new Typed('#DemoTypedText', {
+        strings: [
+          'Just a moment...',
+          'Launching the demo...',
+          'Generating demo account...',
+          'This could take a few minutes...'
+        ],
+        typeSpeed: 40,
+        backSpeed: 40,
+        showCursor: true
+      });
+    </script>
+  </article>
+<% end %>

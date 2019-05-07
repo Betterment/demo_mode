@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Demo Mode</title>
+  <%= favicon_link_tag '/favicon.ico' %>
+  <%= stylesheet_link_tag 'demo_mode/application', media: 'all' %>
+  <%= javascript_include_tag 'demo_mode/application' %>
+  <%= csrf_meta_tags %>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0 maximum-scale=1.0, user-scalable=0">
+</head>
+
+<body>
+  <header>
+    <%= link_to instance_eval(&DemoMode.logo), new_session_path, aria: { label: 'Homepage' } %>
+    <small>Demo Mode</small>
+    <nav>
+      <%= link_to "Sign Up", DemoMode.sign_up_path(main_app) if DemoMode.sign_up_path(main_app) %>
+    </nav>
+  </header>
+
+  <main>
+    <%= yield %>
+  </main>
+  <footer></footer>
+</body>
+</html>

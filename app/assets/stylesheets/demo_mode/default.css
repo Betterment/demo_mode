@@ -1,0 +1,318 @@
+:root {
+  --font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --primary-color: #228be6;
+}
+
+*,
+*:before,
+*:after {
+    box-sizing: inherit;
+    -webkit-box-sizing: inherit;
+    box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+}
+
+html {
+    color: #333;
+    font-size: 10px;
+    line-height: 1.15;
+    font-family: var(--font-family);
+    font-smoothing: antialiased;
+    -webkit-font-smoothing: antialiased;
+    osx-font-smoothing: grayscale;
+    -moz-osx-font-smoothing: grayscale;
+    text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%;
+}
+
+body {
+    max-width: 1264px;
+    height: 100vh;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    margin: 0 auto;
+    padding: 0 32px;
+    font-size: 1.6rem;
+    line-height: 2.4rem;
+}
+
+header,
+main,
+footer {
+    width: 100%;
+    margin: 0 auto;
+    padding: 0;
+}
+
+article {
+    padding-top: 3.2rem;
+}
+section {
+    margin-bottom: 3.2rem;
+}
+
+h1,
+h2,
+h3,
+h4 {
+    color: #222;
+    margin-top: 0;
+}
+h1:last-child, h2:last-child, h3:last-child, h4:last-child {
+    margin-bottom: 0;
+}
+
+a {
+    color: var(--primary-color);
+    cursor: pointer;
+    text-decoration: none;
+}
+a:hover,
+a:focus,
+a:active {
+    text-decoration: underline;
+}
+
+hr {
+    border: 0;
+    width: 100%;
+    border-top: 1px solid #e3e3e3;
+    margin: 1.4rem 0;
+}
+
+header {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 1.6rem;
+    align-items: center;
+    height: 6.4rem;
+}
+
+header small {
+    padding-left: 1.6rem;
+    border-left: 1px solid #e3e3e3;
+    color: #666;
+    font-size: 1.2rem;
+    line-height: 1.6rem;
+}
+
+.personas-callout {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(20em, 1fr));
+    gap: 3rem;
+}
+
+.personas-callout section {
+    display: grid;
+    grid-template-rows: auto auto auto 1fr auto;
+    gap: 1rem;
+    justify-items: center;
+    text-align: center;
+    border: 3px solid #e3e3e3;
+    padding: 3.2rem;
+    margin-bottom: 2rem;
+}
+.personas-callout section:hover {
+    border-color: #cdcdcd;
+    cursor: pointer;
+    text-decoration: none;
+}
+.personas-callout figure {
+    width: 7em;
+}
+.personas-callout img, svg {
+    max-width: 100%;
+}
+.personas-callout h2,
+.personas-callout select,
+.personas-callout input {
+    margin: 0;
+}
+.personas-callout ul {
+    margin: 0 0 0.5rem 0;
+    padding: 0;
+    list-style-type: none;
+    list-style-position: outside;
+}
+.personas-callout li {
+    color: #666;
+    font-size: 1.4rem;
+    line-height: 2rem;
+}
+
+form,
+input,
+select,
+textarea,
+button {
+    display: block;
+    width: 100%;
+    max-width: 40rem;
+}
+
+input,
+select,
+textarea,
+button {
+    border: 1px solid #444;
+    border-radius: 0.3rem;
+    background-color: white;
+    font-family: inherit;
+    padding: 1.1rem 1.6rem;
+    font-size: 1.6rem;
+    line-height: 2.4rem;
+    margin-bottom: 2rem;
+    color: #222;
+    font-weight: 500;
+}
+
+select {
+    padding-right: 3.5rem;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1em;
+}
+
+input[type="submit"],
+button,
+a.button {
+    font-size: 1.6rem;
+    line-height: 2rem;
+    font-weight: 600;
+    color: white;
+    text-align: center;
+    background-color: var(--primary-color);
+    border: 0;
+    cursor: pointer;
+    padding: 1.4rem 2.4rem;
+    margin: 0.8rem 0 0.8rem;
+    width: auto;
+    display: inline-block;
+    border-radius: 0.3rem;
+}
+input[type="submit"]:hover,
+button:hover,
+a.button:hover {
+    background-color: var(--primary-color);
+    filter: brightness(0.85);
+    text-decoration: none;
+}
+input[type="submit"]:focus,
+button:focus,
+a.button:focus {
+    outline: 2px solid rgba(29, 106, 229, 0.5);
+    outline-offset: 1px;
+    text-decoration: underline;
+}
+
+input[type="submit"].secondary,
+button.secondary,
+a.button.secondary {
+    color: #212121;
+    background-color: #ffffff;
+    border: 0.1rem solid #a3a3a3;
+    padding: 1.3rem 2.3rem;
+    padding-top: 1.3rem;
+    padding-bottom: 1.3rem;
+    padding-right: 2.4rem;
+    line-height: 2rem;
+}
+input[type="submit"].secondary:hover,
+button.secondary:hover,
+a.button.secondary:hover {
+    filter: none;
+    background-color: #e3e3e3;
+    color: #212121;
+}
+
+input[type="submit"].small,
+button.small,
+a.button.small {
+    font-size: 1.4rem;
+    line-height: 2rem;
+    margin-top: 0;
+    padding: 0.5rem 2.3rem;
+}
+
+label {
+    font-size: 1.6rem;
+    line-height: 2.4rem;
+    font-weight: 500;
+    color: #222;
+    display: block;
+    margin-bottom: 0.8rem;
+}
+
+fieldset {
+    background-color: white;
+    border: 1px solid #e3e3e3;
+    border-radius: 0.4rem;
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 2.4rem;
+}
+
+legend {
+    float: left;
+    width: 100%;
+    margin-bottom: 1.5em;
+    padding-bottom: 1em;
+    border-bottom: 1px solid #e3e3e3;
+}
+
+table {
+    font-size: 1.6rem;
+    line-height: 2.4rem;
+    border-collapse: collapse;
+    color: #363636;
+    width: 100%;
+    overflow-x: auto;
+    vertical-align: middle;
+}
+
+table select,
+table input,
+table input[type="submit"],
+table button {
+    white-space: nowrap;
+}
+table select {
+    font-size: 1.4rem;
+    line-height: 2rem;
+    padding: 0.5rem 2.3rem;
+}
+
+th {
+    font-size: 1.6rem;
+    line-height: 2.4rem;
+    font-weight: 500;
+    color: #222;
+}
+
+th,
+td {
+    padding: 1.6rem;
+    min-width: 8rem;
+    border-bottom: 1px solid #eee;
+    text-align: left;
+    white-space: normal;
+}
+
+.middle {
+    height: 100%;
+    display: grid;
+    grid-template-rows: auto auto;
+    justify-items: center;
+    align-items: center;
+    align-content: space-evenly;
+    gap: 1rem;
+}
+
+.center {
+    text-align: center;
+}

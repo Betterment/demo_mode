@@ -1,0 +1,12 @@
+<% if persona.variants.keys == %w(default) %>
+  <%= f.hidden_field :variant, value: :default %>
+<% else %>
+  <%= f.collection_select(
+    :variant,
+    persona.variants.values,
+    :name,
+    :title,
+    {},
+    form: persona.name.to_s.underscore,
+  ) %>
+<% end %>
