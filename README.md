@@ -1,7 +1,7 @@
 Demo Mode
 =========
 [![Gem Version](https://badge.fury.io/rb/demo_mode.svg)](https://rubygems.org/gems/demo_mode)
-![CI](https://github.com/Betterment/demo_mode/workflows/CI/badge.svg)
+[![Tests](https://github.com/Betterment/demo_mode/actions/workflows/tests.yml/badge.svg)](https://github.com/Betterment/demo_mode/actions/workflows/tests.yml)
 
 `DemoMode` is a drop-in "demo" interface for Rails apps, replacing your app's
 sign-in form with a very customizable "persona" picker, with a list of
