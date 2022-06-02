@@ -23,14 +23,16 @@ module DemoMode
             DemoMode.app_base_controller_name.constantize.include Demoable
           end
         end
-
-        app.config.assets.precompile << 'demo_mode/application.css'
-        app.config.assets.precompile << 'demo_mode/application.js'
-        app.config.assets.precompile << 'demo_mode/icon--user.png'
-        app.config.assets.precompile << 'demo_mode/icon--users.png'
-        app.config.assets.precompile << 'demo_mode/icon--tophat.png'
-        app.config.assets.precompile << 'demo_mode/loader.png'
       end
+    end
+
+    initializer 'demo_mode.assets' do |app|
+      app.config.assets.precompile << 'demo_mode/application.css'
+      app.config.assets.precompile << 'demo_mode/application.js'
+      app.config.assets.precompile << 'demo_mode/icon--user.png'
+      app.config.assets.precompile << 'demo_mode/icon--users.png'
+      app.config.assets.precompile << 'demo_mode/icon--tophat.png'
+      app.config.assets.precompile << 'demo_mode/loader.png'
     end
   end
 end
