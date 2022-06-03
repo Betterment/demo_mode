@@ -12,9 +12,9 @@ Gem::Specification.new do |s|
   s.description = 'A configurable demo mode for your Rails app. Specify your desired "personas" and DemoMode will handle the rest.'
   s.license = 'MIT'
   s.metadata['rubygems_mfa_required'] = 'true'
+  s.metadata['changelog_uri'] = 'https://github.com/Betterment/demo_mode/blob/main/CHANGELOG.md'
 
   s.files = Dir['{app,config,lib}/**/*', "LICENSE", "Rakefile", "README.md"]
-  s.test_files = Dir['spec/**/*']
 
   s.required_ruby_version = ">= 2.7"
 
