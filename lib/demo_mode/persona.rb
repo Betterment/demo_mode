@@ -66,7 +66,7 @@ module DemoMode
     end
 
     def callout?
-      instance_variable_defined?('@callout') && @callout
+      instance_variable_defined?(:@callout) && @callout
     end
 
     def display_credentials(display_credentials = true) # rubocop:disable Style/OptionalBooleanParameter
@@ -74,7 +74,7 @@ module DemoMode
     end
 
     def display_credentials?
-      if instance_variable_defined?('@display_credentials')
+      if instance_variable_defined?(:@display_credentials)
         @display_credentials
       else
         DemoMode.display_credentials?

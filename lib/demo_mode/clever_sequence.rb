@@ -45,7 +45,7 @@ class CleverSequence
   end
 
   def reset!
-    remove_instance_variable(:@last_value) if instance_variable_defined?('@last_value')
+    remove_instance_variable(:@last_value) if instance_variable_defined?(:@last_value)
   end
 
   private
