@@ -29,9 +29,9 @@ accounts concisely). That said, you'll get the most mileage out of whatever
 tools you _already use_ in local development & testing, so if you already have
 solutions for isolating your app and generating users, use those!
 
-To learn more about how we use `demo_mode` at **Betterment**, stay tuned for
-our ✨ [upcoming RailsConf talk entitled
-"RAILS_ENV=demo"](https://railsconf.com/program/sessions#session-1284) ✨!
+To learn more about how we use `demo_mode` at **Betterment**, check out :sparkles: ["RAILS_ENV=demo" (RailsConf 2022)](https://youtu.be/VibJu9IMohc) :sparkles::
+
+<p align="center"><a href="https://youtu.be/VibJu9IMohc"><img width="50%" src="https://user-images.githubusercontent.com/83998/180073238-b59f42e5-5c3d-4027-9558-e5a6ad6333fe.png" /></a></p>
 
 ## Table of Contents
 
@@ -640,9 +640,8 @@ that this demo environment _is_ a "production-like" environment
 and should expect "production-like" uptime guarantees.
 
 Again, to learn more about how we use and operate our "demo"
-environments at **Betterment**, stay tuned for our ✨ [upcoming
-RailsConf talk entitled
-"RAILS_ENV=demo"](https://railsconf.com/program/sessions#session-1284)
+environments at **Betterment**, check out our ✨ [RailsConf 2022 talk entitled
+"RAILS_ENV=demo"](https://youtu.be/VibJu9IMohc)
 ✨!
 
 ## How to Contribute
