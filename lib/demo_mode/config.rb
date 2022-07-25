@@ -103,7 +103,7 @@ module DemoMode
     end
 
     def personas
-      unless instance_variable_defined?('@personas')
+      unless instance_variable_defined?(:@personas)
         @personas = []
         auto_load_personas!
       end
