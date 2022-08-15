@@ -1,4 +1,5 @@
 require 'rails/generators/base'
+require 'demo_mode/engine'
 
 module DemoMode
   class InstallGenerator < Rails::Generators::Base

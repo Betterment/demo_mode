@@ -17,6 +17,13 @@ and this project aims to adhere to [Semantic Versioning](http://semver.org/spec/
 
 ### Fixed <!-- for any bug fixes. -->
 
+## [1.0.2] - 2022-08-15
+
+### Fixed
+
+- Fixes `demo_mode:install` generator, which was failing to find
+  `demo_mode:install:migrations` task on newer Rails versions.
+
 ## [1.0.1] - 2022-06-03
 
 ### Fixed
@@ -29,5 +36,6 @@ and this project aims to adhere to [Semantic Versioning](http://semver.org/spec/
 
 - Initial release!
 
+[1.0.2]: https://github.com/betterment/demo_mode/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/betterment/demo_mode/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/betterment/demo_mode/releases/tag/v1.0.0
