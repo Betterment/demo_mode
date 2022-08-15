@@ -14,7 +14,7 @@ Gem::Specification.new do |s|
   s.metadata['rubygems_mfa_required'] = 'true'
   s.metadata['changelog_uri'] = 'https://github.com/Betterment/demo_mode/blob/main/CHANGELOG.md'
 
-  s.files = Dir['{app,config,lib}/**/*', "LICENSE", "Rakefile", "README.md"]
+  s.files = Dir['{app,config,lib,db}/**/*', "LICENSE", "Rakefile", "README.md"]
 
   s.required_ruby_version = ">= 2.7"
 
