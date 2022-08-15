@@ -17,6 +17,12 @@ and this project aims to adhere to [Semantic Versioning](http://semver.org/spec/
 
 ### Fixed <!-- for any bug fixes. -->
 
+## [1.0.3] - 2022-08-15
+
+### Fixed
+
+- Fixes `demo_mode:install` generator on Rail edge (7.1)
+
 ## [1.0.2] - 2022-08-15
 
 ### Fixed
