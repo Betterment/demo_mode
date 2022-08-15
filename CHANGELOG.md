@@ -21,7 +21,8 @@ and this project aims to adhere to [Semantic Versioning](http://semver.org/spec/
 
 ### Fixed
 
-- Fixes `demo_mode:install` generator on Rail edge (7.1)
+- Fixes rubygems release of the gem so that the `db/migrate` folder is actually
+  present.
 
 ## [1.0.2] - 2022-08-15
 

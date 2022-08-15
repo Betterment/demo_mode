@@ -26,14 +26,6 @@ module DemoMode
       end
     end
 
-    initializer 'demo_mode.migrations' do |app|
-      unless app.root.to_s.match root.to_s
-        config.paths["db/migrate"].expanded.each do |expanded_path|
-          app.config.paths["db/migrate"] << expanded_path
-        end
-      end
-    end
-
     initializer 'demo_mode.assets' do |app|
       app.config.assets.precompile << 'demo_mode/application.css'
       app.config.assets.precompile << 'demo_mode/application.js'
