@@ -113,7 +113,7 @@ module DemoMode
     private
 
     def auto_load_personas!
-      Dir.glob(Rails.root.join(personas_path, '**', '*.rb')).sort.each do |persona|
+      Rails.root.glob("#{personas_path}/**/*.rb").sort.each do |persona|
         raise <<~ERROR if File.readlines(persona).grep(/DemoMode\.add_persona/).empty?
           This file does not define a persona: #{persona}\n
           Please use `DemoMode.add_persona`

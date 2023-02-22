@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe DemoMode::SessionsController, type: :request do
+RSpec.describe DemoMode::SessionsController, type: :request do # rubocop:disable RSpec/Rails/InferredSpecType
   let(:response_json) { JSON.parse(response.body) }
   let(:request_headers) { { 'CONTENT_TYPE' => 'application/json', 'Accept' => 'application/json' } }
 

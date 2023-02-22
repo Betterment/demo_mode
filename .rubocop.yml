@@ -13,3 +13,6 @@ Betterment/ActiveJobPerformable:
 
 Betterment/UnscopedFind:
   Enabled: false
+
+Gemspec/DevelopmentDependencies:
+  EnforcedStyle: gemspec
