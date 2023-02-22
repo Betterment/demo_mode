@@ -167,7 +167,6 @@ describe 'Demo Splash' do
         after = page.text
         if before != after
           puts "Before: #{before.inspect}\nAfter: #{after.inspect}"
-          exit 2
         end
 
         expect(page).not_to have_text('The Everyperson')
