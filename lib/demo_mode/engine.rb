@@ -10,7 +10,7 @@ module DemoMode
         load 'demo_mode/tasks.rb'
       end
 
-      initializer 'demo_mode' do |app|
+      initializer 'demo_mode' do |_app|
         require 'zeitwerk/version'
         raise 'DemoMode only supports Zeitwerk::VERSION >= 2.4.2' unless Gem::Version.new(Zeitwerk::VERSION) >= Gem::Version.new('2.4.2')
 
