@@ -21,15 +21,4 @@ Gem::Specification.new do |s|
   s.add_dependency 'rails', '>= 5.2'
   s.add_dependency 'sprockets-rails'
   s.add_dependency 'typedjs-rails'
-
-  s.add_development_dependency 'appraisal'
-  s.add_development_dependency 'betterlint'
-  s.add_development_dependency 'capybara'
-  s.add_development_dependency 'combustion'
-  s.add_development_dependency 'factory_bot'
-  s.add_development_dependency 'net-smtp' # required by combustion on newer rubies
-  s.add_development_dependency 'rspec-rails'
-  s.add_development_dependency 'selenium-webdriver'
-  s.add_development_dependency 'uncruft'
-  s.add_development_dependency 'webrick'
 end
