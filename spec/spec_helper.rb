@@ -62,6 +62,7 @@ RSpec.configure do |config|
   config.example_status_persistence_file_path = 'spec/examples.txt'
   config.include Capybara::DSL
   config.include ActiveSupport::Testing::TimeHelpers
+  config.infer_spec_type_from_file_location!
 
   config.before(:each, type: :system) do
     driven_by capybara_driver
