@@ -11,17 +11,11 @@ module DemoMode
       end
 
       initializer 'demo_mode' do |app|
-        if app.config.respond_to?(:autoloader) && app.config.autoloader.to_sym == :zeitwerk
-          require 'zeitwerk/version'
-          raise 'DemoMode only supports Zeitwerk::VERSION >= 2.4.2' unless Gem::Version.new(Zeitwerk::VERSION) >= Gem::Version.new('2.4.2')
+        require 'zeitwerk/version'
+        raise 'DemoMode only supports Zeitwerk::VERSION >= 2.4.2' unless Gem::Version.new(Zeitwerk::VERSION) >= Gem::Version.new('2.4.2')
 
-          Rails.autoloaders.main.on_load(DemoMode.app_base_controller_name) do
-            DemoMode.app_base_controller_name.constantize.include Demoable
-          end
-        else
-          ActiveSupport.on_load(:action_controller) do
-            DemoMode.app_base_controller_name.constantize.include Demoable
-          end
+        Rails.autoloaders.main.on_load(DemoMode.app_base_controller_name) do
+          DemoMode.app_base_controller_name.constantize.include Demoable
         end
       end
     end

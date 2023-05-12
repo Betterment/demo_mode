@@ -9,10 +9,9 @@ require 'webrick'
 
 Combustion.path = 'spec/dummy'
 Combustion.initialize! :all do
-  config.active_record.sqlite3.represent_boolean_as_integer = true if Rails::VERSION::MAJOR < 6
   config.assets.precompile << 'path/to/test-icon.png'
 
-  config.autoloader = :zeitwerk if Rails::VERSION::MAJOR >= 6
+  config.autoloader = :zeitwerk
   config.active_job.queue_adapter = :inline
 end
 

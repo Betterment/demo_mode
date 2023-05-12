@@ -22,11 +22,7 @@ module DemoMode
     configurations << :sign_in_path
 
     def self.app_name
-      if Rails::VERSION::MAJOR >= 6
-        Rails.application.class.module_parent.name
-      else
-        Rails.application.class.parent.name
-      end
+      Rails.application.class.module_parent.name
     end
 
     def logo(&block)
