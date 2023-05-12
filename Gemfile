@@ -5,13 +5,13 @@ gem 'sqlite3'
 
 gemspec
 
-gem 'appraisal'
-gem 'betterlint'
-gem 'capybara'
-gem 'combustion'
-gem 'factory_bot'
-gem 'net-smtp' # required by combustion on newer rubies
-gem 'rspec-rails'
-gem 'selenium-webdriver'
-gem 'uncruft'
-gem 'webrick'
+gem 'appraisal', require: false
+gem 'betterlint', require: false
+gem 'capybara', require: false
+gem 'combustion', require: false
+gem 'factory_bot', require: false
+gem 'net-smtp', require: false # required by combustion on newer rubies
+gem 'rspec-rails', require: false
+gem 'selenium-webdriver', require: false
+gem 'uncruft', require: false
+gem 'webrick', require: false

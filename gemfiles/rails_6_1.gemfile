@@ -2,7 +2,17 @@
 
 source "https://rubygems.org"
 
+gem "appraisal", require: false
+gem "betterlint", require: false
+gem "capybara", require: false
+gem "combustion", require: false
+gem "factory_bot", require: false
+gem "net-smtp", require: false
 gem "rails", "~> 6.1.0"
+gem "rspec-rails", require: false
+gem "selenium-webdriver", require: false
 gem "sqlite3"
+gem "uncruft", require: false
+gem "webrick", require: false
 
 gemspec path: "../"
