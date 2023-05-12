@@ -1,7 +1,7 @@
 require 'spec_helper'
 
-RSpec.describe DemoMode::SessionsController, type: :request do
-  let(:response_json) { JSON.parse(response.body) }
+RSpec.describe DemoMode::SessionsController do
+  let(:response_json) { response.parsed_body }
   let(:request_headers) { { 'CONTENT_TYPE' => 'application/json', 'Accept' => 'application/json' } }
 
   context 'when demo mode is enabled', :demo_mode_enabled do

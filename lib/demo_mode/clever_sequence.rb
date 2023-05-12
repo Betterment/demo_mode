@@ -3,7 +3,7 @@ class CleverSequence
 
   class << self
     def reset!
-      sequences.values.each(&:reset!)
+      sequences.each_value(&:reset!)
     end
 
     def next(klass, name)
