@@ -8,10 +8,10 @@ gemspec
 gem 'appraisal', require: false
 gem 'betterlint', require: false
 gem 'capybara', require: false
-gem 'combustion', require: false
-gem 'factory_bot', require: false
+gem 'combustion'
+gem 'factory_bot'
 gem 'net-smtp', require: false # required by combustion on newer rubies
 gem 'rspec-rails', require: false
-gem 'selenium-webdriver', require: false
+gem 'selenium-webdriver'
 gem 'uncruft', require: false
 gem 'webrick', require: false
