@@ -22,11 +22,7 @@ module DemoMode
     configurations << :sign_in_path
 
     def self.app_name
-      if Rails::VERSION::MAJOR >= 6
-        Rails.application.class.module_parent.name
-      else
-        Rails.application.class.parent.name
-      end
+      Rails.application.class.module_parent.name
     end
 
     def logo(&block)
@@ -113,7 +109,7 @@ module DemoMode
     private
 
     def auto_load_personas!
-      Dir.glob(Rails.root.join(personas_path, '**', '*.rb')).sort.each do |persona|
+      Rails.root.glob("#{personas_path}/**/*.rb").sort.each do |persona|
         raise <<~ERROR if File.readlines(persona).grep(/DemoMode\.add_persona/).empty?
           This file does not define a persona: #{persona}\n
           Please use `DemoMode.add_persona`

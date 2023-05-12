@@ -9,10 +9,9 @@ require 'webrick'
 
 Combustion.path = 'spec/dummy'
 Combustion.initialize! :all do
-  config.active_record.sqlite3.represent_boolean_as_integer = true if Rails::VERSION::MAJOR < 6
   config.assets.precompile << 'path/to/test-icon.png'
 
-  config.autoloader = :zeitwerk if Rails::VERSION::MAJOR >= 6
+  config.autoloader = :zeitwerk
   config.active_job.queue_adapter = :inline
 end
 
@@ -63,6 +62,7 @@ RSpec.configure do |config|
   config.example_status_persistence_file_path = 'spec/examples.txt'
   config.include Capybara::DSL
   config.include ActiveSupport::Testing::TimeHelpers
+  config.infer_spec_type_from_file_location!
 
   config.before(:each, type: :system) do
     driven_by capybara_driver
