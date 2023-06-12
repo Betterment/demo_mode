@@ -11,6 +11,32 @@ RSpec.describe DemoMode::SessionsController do
       end
     end
 
+    describe 'POST /sessions' do
+      context 'with forgery protection enabled' do
+        around do |example|
+          original_forgery_protection = ActionController::Base.allow_forgery_protection
+          ActionController::Base.allow_forgery_protection = true
+
+          example.run
+
+          ActionController::Base.allow_forgery_protection = original_forgery_protection
+        end
+
+        it 'creates a session and redirects to the session' do
+          post '/ohno/sessions', params: {
+            session: { persona_name: 'the_everyperson', variant: 'alternate bruce' },
+          }
+
+          last_session = DemoMode::Session.last
+          expect(last_session.variant).to eq 'alternate bruce'
+
+          expect(response).to redirect_to "/ohno/sessions/#{last_session.id}"
+
+          expect(controller.session.to_hash['session_id']).not_to be_nil
+        end
+      end
+    end
+
     describe 'POST /sessions.json' do
       context 'without a variant' do
         it 'creates a session and returns processing json' do
