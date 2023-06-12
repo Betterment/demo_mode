@@ -2,6 +2,9 @@ module DemoMode
   class SessionsController < DemoMode::ApplicationController
     skip_before_action :demo_splash!, raise: false
 
+    # Support link based session creation
+    skip_forgery_protection only: :create
+
     def show
       @session = Session.find(params[:id])
       respond_to do |f|
