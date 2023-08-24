@@ -12,6 +12,6 @@ gem 'combustion'
 gem 'factory_bot'
 gem 'net-smtp', require: false # required by combustion on newer rubies
 gem 'rspec-rails', require: false
-gem 'selenium-webdriver'
+gem 'cuprite'
 gem 'uncruft', require: false
 gem 'webrick', require: false
