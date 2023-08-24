@@ -16,9 +16,9 @@ Gem::Specification.new do |s|
 
   s.files = Dir['{app,config,lib,db}/**/*', "LICENSE", "Rakefile", "README.md"]
 
-  s.required_ruby_version = ">= 2.7"
+  s.required_ruby_version = ">= 3.0"
 
-  s.add_dependency 'rails', '>= 5.2'
+  s.add_dependency 'rails', '>= 6.1'
   s.add_dependency 'sprockets-rails'
   s.add_dependency 'typedjs-rails'
 end
