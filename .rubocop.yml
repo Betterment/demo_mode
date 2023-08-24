@@ -13,3 +13,7 @@ Betterment/ActiveJobPerformable:
 
 Betterment/UnscopedFind:
   Enabled: false
+
+Bundler/OrderedGems:
+  Exclude:
+    - 'gemfiles/*.gemfile'

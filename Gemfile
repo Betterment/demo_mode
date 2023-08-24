@@ -9,9 +9,9 @@ gem 'appraisal', require: false
 gem 'betterlint', require: false
 gem 'capybara', require: false
 gem 'combustion'
+gem 'cuprite'
 gem 'factory_bot'
 gem 'net-smtp', require: false # required by combustion on newer rubies
 gem 'rspec-rails', require: false
-gem 'cuprite'
 gem 'uncruft', require: false
 gem 'webrick', require: false
