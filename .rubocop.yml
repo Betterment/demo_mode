@@ -4,6 +4,7 @@ inherit_gem:
 
 AllCops:
   NewCops: enable
+  TargetRubyVersion: 3.0
   Exclude:
     - gemfiles/vendor/**/*
     - vendor/**/*
@@ -13,3 +14,7 @@ Betterment/ActiveJobPerformable:
 
 Betterment/UnscopedFind:
   Enabled: false
+
+Bundler/OrderedGems:
+  Exclude:
+    - 'gemfiles/*.gemfile'

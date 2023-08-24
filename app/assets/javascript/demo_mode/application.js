@@ -90,6 +90,8 @@
     return {
       init: function() {
         var input = document.querySelector('input[data-behavior=table-filter]');
+        if (!input) return;
+
         input.oninput = debounce(onInputEvent, 250);
         var urlParams = new URLSearchParams(window.location.search);
         var search = urlParams.get('search');

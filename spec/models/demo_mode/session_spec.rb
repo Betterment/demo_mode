@@ -11,13 +11,13 @@ RSpec.describe DemoMode::Session do
 
   it 'validates persona name' do
     subject.persona_name = nil
-    expect(subject).to be_invalid
+    expect(subject).not_to be_valid
     expect(subject.errors.full_messages).to match_array("Persona name can't be blank")
   end
 
   it 'validates persona variant' do
     subject.variant = nil
-    expect(subject).to be_invalid
+    expect(subject).not_to be_valid
     expect(subject.errors[:variant]).to match_array("can't be blank")
   end
 
