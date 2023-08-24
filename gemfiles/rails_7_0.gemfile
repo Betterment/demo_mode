@@ -7,10 +7,10 @@ gem "appraisal", require: false
 gem "betterlint", require: false
 gem "capybara", require: false
 gem "combustion"
+gem "cuprite"
 gem "factory_bot"
 gem "net-smtp", require: false
 gem "rspec-rails", require: false
-gem "cuprite"
 gem "uncruft", require: false
 gem "webrick", require: false
 gem "rails", "~> 7.0.0"
