@@ -16,7 +16,7 @@ module Configurable
     def configurable_boolean(name, default: false)
       configurable(name, -> { default })
       alias_method :"#{name}?", name
-      configurations << "#{name}?".to_sym
+      configurations << :"#{name}?"
     end
 
     private
