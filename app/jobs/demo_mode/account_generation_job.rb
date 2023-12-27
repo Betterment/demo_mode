@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module DemoMode
   class AccountGenerationJob < DemoMode.base_job_name.constantize
     def perform(session)

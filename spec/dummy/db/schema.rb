@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 ActiveRecord::Schema.define do
   create_table :delayed_jobs do |t|
     t.integer :attempts, default: 0, null: false

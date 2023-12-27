@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module FactoryBot
   class DefinitionProxy
     def clever_sequence(name, &block)

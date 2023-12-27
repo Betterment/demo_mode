@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # See README at https://github.com/Betterment/demo_mode
 
 DemoMode.configure do

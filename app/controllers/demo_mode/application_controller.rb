@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module DemoMode
   class ApplicationController < DemoMode.splash_base_controller_name.constantize
     protect_from_forgery with: :null_session

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 DemoMode.add_persona do
   # See README at https://github.com/Betterment/demo_mode
 

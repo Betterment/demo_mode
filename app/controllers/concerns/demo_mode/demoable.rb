@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module DemoMode
   module Demoable
     extend ActiveSupport::Concern
