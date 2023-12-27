@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe DemoMode::SessionsController do
+RSpec.describe DemoMode::SessionsController do # rubocop:disable RSpec/FilePath
   let(:response_json) { response.parsed_body }
   let(:request_headers) { { 'CONTENT_TYPE' => 'application/json', 'Accept' => 'application/json' } }
 
