@@ -21,13 +21,13 @@ describe 'Demo Splash' do
       expect(page).not_to have_text('Enter manually')
 
       within '.dm-Persona--theEveryperson' do
-        click_on 'Sign In'
+        click_button 'Sign In'
       end
 
       expect(page).to have_text('Your Name: Spruce Bringsteen')
 
       # it redirects back to splash after logging out:
-      click_on 'Log out'
+      click_link 'Log out'
       expect(page).to have_current_path('/ohno/sessions/new')
     end
 
@@ -41,13 +41,13 @@ describe 'Demo Splash' do
 
         within '.dm-Persona--zendaya' do
           select('MJ', from: 'session_variant')
-          click_on 'Sign In'
+          click_button 'Sign In'
         end
 
         expect(page).to have_text('Your Name: MJ')
 
         # it redirects back to splash after logging out:
-        click_on 'Log out'
+        click_link 'Log out'
         expect(page).to have_current_path('/ohno/sessions/new')
       end
     end
@@ -66,12 +66,12 @@ describe 'Demo Splash' do
         expect(page).to have_text('The Everyperson')
 
         within '.dm-Persona--theEveryperson' do
-          click_on 'Sign In'
+          click_button 'Sign In'
         end
 
         expect(find_field('Username').value).to eq('Spruce Bringsteen')
         expect(find_field('Password').value).to eq('aTESTpassword!123')
-        click_on 'Sign in'
+        click_button 'Sign in'
         expect(page).to have_text('Your Name: Spruce Bringsteen')
       end
 
@@ -82,7 +82,7 @@ describe 'Demo Splash' do
 
         within '.dm-Persona--theEveryperson' do
           select('alternate bruce', from: 'session_variant')
-          click_on 'Sign In'
+          click_button 'Sign In'
         end
 
         expect(find_field('Username').value).to eq('Spruce Sringbeen')
@@ -105,13 +105,13 @@ describe 'Demo Splash' do
           expect(page).to have_text('The Everyperson')
 
           within '.dm-Persona--theEveryperson' do
-            click_on 'Sign In'
+            click_button 'Sign In'
           end
 
           expect(find_field('Username').value).to eq('Spruce Bringsteen')
           expect(find_field('Password').value).to eq('aTESTpassword!123')
 
-          new_window = window_opened_by { click_on 'Enter manually' }
+          new_window = window_opened_by { click_link 'Enter manually' }
           within_window new_window do
             expect(page).to have_text('Not a real sign in page')
 
@@ -143,7 +143,7 @@ describe 'Demo Splash' do
       it 'shows a link to the expected path' do
         visit '/'
         expect(page).to have_text('Sign Up')
-        click_on 'Sign Up'
+        click_link 'Sign Up'
         expect(page).to have_text('Not a real sign up page!')
       end
     end
@@ -179,7 +179,7 @@ describe 'Demo Splash' do
         expect(page).not_to have_text('A Second Persona')
 
         within '.dm-Persona--theEveryperson' do
-          click_on 'Sign In'
+          click_button 'Sign In'
         end
 
         expect(page).to have_text('Your Name: Spruce Bringsteen')
@@ -206,7 +206,7 @@ describe 'Demo Splash' do
         expect(page).to have_text('Redirects To Not Found')
 
         within '.dm-Persona--redirectsToNotFound' do
-          click_on 'Sign In'
+          click_button 'Sign In'
         end
 
         expect(page).to have_current_path('/not_found_oh_no')
