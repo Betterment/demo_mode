@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class AddDemoModeSessionsPassword < ActiveRecord::Migration[5.1]
   def change
     add_column :demo_mode_sessions, :signinable_password, :string, null: false, default: ''

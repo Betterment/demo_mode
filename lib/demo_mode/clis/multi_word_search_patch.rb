@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # FIXME: This patches the 'f' option so that it is capable of multi-word searches.
 #        Otherwise entering 'word1 word3' will fail to find 'word1 word2 word3'
 #        LINES CHANGED: 17-20

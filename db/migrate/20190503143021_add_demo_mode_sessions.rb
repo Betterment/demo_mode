@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class AddDemoModeSessions < ActiveRecord::Migration[5.1]
   def change
     # Uncomment this line to enable :uuid support on PostgreSQL >= 9.4

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module DemoMode
   class Session < ActiveRecord::Base
     attribute :variant, default: :default

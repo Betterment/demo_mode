@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 DemoMode.add_persona do
   features << 'Can sing'
 

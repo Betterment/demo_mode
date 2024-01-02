@@ -8,6 +8,4 @@ spec/dummy/config/deprecations.ignore
 spec/dummy/tmp
 doc/
 .yardoc/
-Gemfile.lock
-/gemfiles/*.gemfile.lock
 *.sqlite

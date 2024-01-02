@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module DemoMode
   class SessionsController < DemoMode::ApplicationController
     skip_before_action :demo_splash!, raise: false

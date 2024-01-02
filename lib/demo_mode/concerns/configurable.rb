@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Configurable
   extend ActiveSupport::Concern
 
@@ -13,8 +15,8 @@ module Configurable
 
     def configurable_boolean(name, default: false)
       configurable(name, -> { default })
-      alias_method "#{name}?", name
-      configurations << "#{name}?".to_sym
+      alias_method :"#{name}?", name
+      configurations << :"#{name}?"
     end
 
     private

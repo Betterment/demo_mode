@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 DemoMode.add_persona :zendaya do
   features << 'Can sing and dance and act'
   callout true

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class CleverSequence
   DEFAULT_BLOCK = ->(i) { i }
 

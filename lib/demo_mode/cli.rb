@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'demo_mode/clis/multi_word_search_patch'
 
 # rubocop:disable Rails/Output, Rails/Exit

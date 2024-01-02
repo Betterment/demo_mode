@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'demo_mode/cli'
 
 namespace :persona do

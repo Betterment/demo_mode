@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Widget < ActiveRecord::Base
   alias_attribute :encrypted_column, :encrypted_column_crypt
   alias_attribute :integer_aliased, :integer_column
