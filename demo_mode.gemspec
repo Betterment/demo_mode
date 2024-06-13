@@ -20,6 +20,7 @@ Gem::Specification.new do |s|
 
   s.required_ruby_version = ">= 3.0"
 
+  s.add_dependency 'cli-ui'
   s.add_dependency 'rails', '>= 6.1'
   s.add_dependency 'sprockets-rails'
   s.add_dependency 'typedjs-rails'
