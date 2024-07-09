@@ -13,6 +13,13 @@ module DemoMode
       if session.key?(:demo_session)
         @current_demo_session = nil if @current_demo_session&.id != session[:demo_session]['id']
         @current_demo_session ||= Session.find_by(id: session[:demo_session]['id'])
+
+        if @current_demo_session.nil?
+          session.delete(:demo_session)
+          sign_out
+        end
+
+        @current_demo_session
       end
     end
 
@@ -28,7 +35,7 @@ module DemoMode
     end
 
     def demo_splash!
-      if current_demo_session.nil? || (_demo_mode_current_signinable.blank? && !current_demo_session&.custom_sign_in?)
+      if _demo_mode_current_signinable.blank? && !current_demo_session&.custom_sign_in?
         sign_out
         redirect_to demo_mode.new_session_path
       end
