@@ -213,6 +213,25 @@ describe 'Demo Splash' do
         expect(DemoMode::Session.last.signinable).to be_a(Widget)
       end
     end
+
+    context "When the session no longer exists in the database" do
+      it 'redirects to the splash screen' do
+        visit '/'
+
+        within '.dm-Persona--theEveryperson' do
+          click_button 'Sign In'
+        end
+
+        expect(page).to have_text('Your Name: Spruce Bringsteen')
+
+        DemoMode::Session.delete_all
+
+        visit '/'
+
+        expect(page).to have_text('Demo Mode')
+        expect(page).to have_text('The Everyperson')
+      end
+    end
   end
 
   context 'when demo mode is not enabled' do
