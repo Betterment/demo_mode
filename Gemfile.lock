@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    demo_mode (1.2.2)
+    demo_mode (1.2.3)
       cli-ui
       rails (>= 6.1)
       sprockets-rails
