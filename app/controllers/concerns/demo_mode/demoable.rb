@@ -12,7 +12,14 @@ module DemoMode
     def current_demo_session
       if session.key?(:demo_session)
         @current_demo_session = nil if @current_demo_session&.id != session[:demo_session]['id']
-        @current_demo_session ||= Session.find(session[:demo_session]['id'])
+        @current_demo_session ||= Session.find_by(id: session[:demo_session]['id'])
+
+        if @current_demo_session.nil?
+          session.delete(:demo_session)
+          sign_out
+        end
+
+        @current_demo_session
       end
     end
 
