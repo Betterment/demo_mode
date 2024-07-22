@@ -25,6 +25,13 @@ module DemoMode
       DemoMode.personas.find { |p| p.name.to_s == persona_name.to_s }
     end
 
+    def save_and_generate_account!
+      transaction do
+        save!
+        AccountGenerationJob.perform_later(self)
+      end
+    end
+
     private
 
     def set_password!
