@@ -12,7 +12,7 @@ RSpec.describe DemoMode::Session do
   it 'validates persona exists on create' do
     subject.persona_name = 'garbage'
     expect(subject).not_to be_valid
-    expect(subject.errors.full_messages).to match_array("Persona name does not exist")
+    expect(subject.errors.full_messages).to match_array("Persona does not exist")
   end
 
   it 'allows persisted records to reference non-existent personas' do
@@ -20,7 +20,7 @@ RSpec.describe DemoMode::Session do
     subject.variant = 'XIV'
 
     expect(subject).not_to be_valid
-    expect(subject.errors.full_messages).to match_array("Persona name does not exist")
+    expect(subject.errors.full_messages).to match_array("Persona does not exist")
 
     subject.save!(validate: false) # bypass validations on create
     expect(subject).to be_valid

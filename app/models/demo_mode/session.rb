@@ -5,7 +5,7 @@ module DemoMode
     attribute :variant, default: :default
 
     validates :persona_name, :variant, presence: true
-    validate :persona_must_exist, on: :create
+    validates :persona, presence: { message: 'does not exist' }, on: :create, if: :persona_name?
     belongs_to :signinable, polymorphic: true, optional: true
 
     before_create :set_password!
@@ -29,10 +29,6 @@ module DemoMode
 
     def set_password!
       self.signinable_password ||= DemoMode.current_password
-    end
-
-    def persona_must_exist
-      errors.add(:persona_name, 'does not exist') if persona_name? && persona.nil?
     end
   end
 end
