@@ -6,13 +6,13 @@ RSpec.describe DemoMode::SessionsController do # rubocop:disable RSpec/FilePath
   let(:response_json) { response.parsed_body }
   let(:request_headers) { { 'CONTENT_TYPE' => 'application/json', 'Accept' => 'application/json' } }
 
-  context 'when demo mode is enabled', :demo_mode_enabled do
-    before(:all) do # rubocop:disable RSpec/BeforeAfterAll
-      DemoMode.configure do
-        personas_path 'config/system-test-personas'
-      end
+  before do
+    DemoMode.configure do
+      personas_path 'config/system-test-personas'
     end
+  end
 
+  context 'when demo mode is enabled', :demo_mode_enabled do
     describe 'POST /sessions' do
       context 'with forgery protection enabled' do
         around do |example|

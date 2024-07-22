@@ -53,6 +53,12 @@ RSpec.configure do |config|
     driven_by :cuprite
   end
 
+  # Reset configuration
+  config.before(:each) do
+    DemoMode.send(:remove_instance_variable, '@configuration')
+    load Rails.root.join('config/initializers/demo_mode.rb')
+  end
+
   config.around(:each, :demo_mode_enabled) do |example|
     ENV['DEMO_MODE'] = '1'
     example.run
