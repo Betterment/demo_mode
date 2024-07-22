@@ -5,10 +5,10 @@ module DemoMode
     attribute :variant, default: :default
 
     validates :persona_name, :variant, presence: true
+    validates :persona, presence: { message: :required }, on: :create, if: :persona_name?
     belongs_to :signinable, polymorphic: true, optional: true
 
     before_create :set_password!
-    after_create -> { AccountGenerationJob.perform_later(self) }
 
     delegate :begin_demo,
              :custom_sign_in?,
@@ -20,15 +20,22 @@ module DemoMode
       signinable.public_send(DemoMode.signinable_username_method)
     end
 
+    # Heads up: finding a persona is not guaranteed (e.g. past sessions)
+    def persona
+      DemoMode.personas.find { |p| p.name.to_s == persona_name.to_s }
+    end
+
+    def save_and_generate_account!
+      transaction do
+        save!
+        AccountGenerationJob.perform_later(self)
+      end
+    end
+
     private
 
     def set_password!
       self.signinable_password ||= DemoMode.current_password
-    end
-
-    # Heads up: finding a persona is not guaranteed (e.g. past sessions)
-    def persona
-      DemoMode.personas.find { |p| p.name.to_s == persona_name.to_s }
     end
   end
 end

@@ -25,7 +25,7 @@ module DemoMode
 
     def create
       @session = Session.new(create_params)
-      @session.save!
+      @session.save_and_generate_account!
       session[:demo_session] = { 'id' => @session.id, 'last_request_at' => Time.zone.now }
       respond_to do |f|
         f.html { redirect_to @session }

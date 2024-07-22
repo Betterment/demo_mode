@@ -6,6 +6,7 @@ AllCops:
   NewCops: enable
   TargetRubyVersion: 3.0
   Exclude:
+    - gemfiles/*.gemfile
     - gemfiles/vendor/**/*
     - vendor/**/*
 

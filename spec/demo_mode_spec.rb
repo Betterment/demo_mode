@@ -61,11 +61,6 @@ RSpec.describe DemoMode do
   end
 
   describe '.configure' do
-    after do
-      described_class.send(:remove_instance_variable, '@configuration')
-      load Rails.root.join('config/initializers/demo_mode.rb')
-    end
-
     it 'accepts a mostly empty configuration' do
       generated_persona = false
 

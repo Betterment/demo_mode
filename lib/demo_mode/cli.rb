@@ -48,12 +48,12 @@ class DemoMode::Cli
                 puts "👉 #{feature}"
               end
 
-              named_tags = SemanticLogger.named_tags
+              named_tags = SemanticLogger.named_tags if defined?(SemanticLogger)
 
               variant = variant_for(persona, persona_name)
 
               CLI::UI::Spinner.spin("generating account...") do |spinner|
-                SemanticLogger.push_named_tags(named_tags)
+                SemanticLogger.push_named_tags(named_tags) if defined?(SemanticLogger)
                 password = DemoMode.current_password
                 signinable = persona.generate!(variant: variant)
                 spinner.update_title('done!')
