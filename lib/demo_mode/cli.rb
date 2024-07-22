@@ -20,8 +20,8 @@ class DemoMode::Cli
       prompt_persona
     end
 
-    def created_personas
-      @created_personas ||= []
+    def created_sessions
+      @created_sessions ||= []
     end
 
     private
@@ -55,10 +55,10 @@ class DemoMode::Cli
               CLI::UI::Spinner.spin("generating account...") do |spinner|
                 SemanticLogger.push_named_tags(named_tags) if defined?(SemanticLogger)
 
-                password = DemoMode.current_password
-                signinable = persona.generate!(variant: variant)
+                session = DemoMode::Session.new(persona_name: persona.name, variant: variant)
+                session.save_and_generate_account!
                 spinner.update_title('done!')
-                created_personas << { name: persona_label, email: signinable.email, password: password }
+                created_sessions << session
               end
             end
           end
@@ -80,10 +80,10 @@ class DemoMode::Cli
     end
 
     def display_personas
-      created_personas.each do |persona|
-        CLI::UI::Frame.open("{{*}} #{persona[:name]} {{*}}") do
-          puts "👤 :: #{persona[:email]}"
-          puts "🔑 :: #{persona[:password]}"
+      created_sessions.each do |session|
+        CLI::UI::Frame.open("{{*}} #{session.persona_name} {{*}}") do
+          puts "👤 :: #{session.signinable.email}"
+          puts "🔑 :: #{session.signinable_password}"
         end
       end
     end
