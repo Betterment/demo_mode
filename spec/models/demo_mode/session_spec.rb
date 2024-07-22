@@ -32,6 +32,24 @@ RSpec.describe DemoMode::Session do
     expect(subject.errors[:variant]).to match_array("can't be blank")
   end
 
+  describe '#persona' do
+    before do
+      DemoMode.configure do
+        personas_path 'config/system-test-personas'
+      end
+    end
+
+    it 'finds the persona by name' do
+      session = described_class.new(persona_name: :the_everyperson)
+      expect(session.persona).to be_a(DemoMode::Persona)
+    end
+
+    it 'does not find the persona when the persona does not exist' do
+      session = described_class.new(persona_name: :garbage)
+      expect(session.persona).to be_nil
+    end
+  end
+
   describe '#begin_demo' do
     it 'returns nil' do
       expect(subject.begin_demo).to be_nil
