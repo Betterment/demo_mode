@@ -5,7 +5,7 @@ module DemoMode
     attribute :variant, default: :default
 
     validates :persona_name, :variant, presence: true
-    validates :persona, presence: { message: 'does not exist' }, on: :create, if: :persona_name?
+    validates :persona, presence: { message: :required }, on: :create, if: :persona_name?
     belongs_to :signinable, polymorphic: true, optional: true
 
     before_create :set_password!

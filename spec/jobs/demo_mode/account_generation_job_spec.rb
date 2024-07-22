@@ -19,7 +19,7 @@ RSpec.describe DemoMode::AccountGenerationJob do
     }.to change { session.reload.signinable }.from(nil).to(kind_of(DummyUser))
   end
 
-  context 'when the persona does not exist' do
+  context 'when the persona must exist' do
     let(:session) do
       session = DemoMode::Session.new(persona_name: :garbage)
       session.save!(validate: false)
