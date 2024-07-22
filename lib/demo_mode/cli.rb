@@ -41,23 +41,24 @@ class DemoMode::Cli
       CLI::UI::Frame.open("{{*}} Generate an Account! {{*}}") do
         CLI::UI::Prompt.ask('Which persona should we use?') do |handler|
           DemoMode.personas.sort_by { |p| p.name.to_s }.each do |persona|
-            persona_name = persona.name.to_s.titleize
+            persona_label = persona.name.to_s.titleize
 
-            handler.option(persona_name) do
+            handler.option(persona_label) do
               persona.features.each do |feature|
                 puts "👉 #{feature}"
               end
 
               named_tags = SemanticLogger.named_tags if defined?(SemanticLogger)
 
-              variant = variant_for(persona, persona_name)
+              variant = variant_for(persona, persona_label)
 
               CLI::UI::Spinner.spin("generating account...") do |spinner|
                 SemanticLogger.push_named_tags(named_tags) if defined?(SemanticLogger)
+
                 password = DemoMode.current_password
                 signinable = persona.generate!(variant: variant)
                 spinner.update_title('done!')
-                created_personas << { name: persona_name, email: signinable.email, password: password }
+                created_personas << { name: persona_label, email: signinable.email, password: password }
               end
             end
           end
@@ -67,12 +68,12 @@ class DemoMode::Cli
       ask_next_step
     end
 
-    def variant_for(persona, persona_name)
+    def variant_for(persona, persona_label)
       if persona.variants.keys == ['default']
         :default
       else
         CLI::UI::Prompt.ask(
-          "Which variant should we use for #{persona_name}?",
+          "Which variant should we use for #{persona_label}?",
           options: persona.variants.keys,
         )
       end
