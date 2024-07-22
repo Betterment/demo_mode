@@ -26,6 +26,7 @@ module DemoMode
     def create
       @session = Session.new(create_params)
       @session.save!
+      AccountGenerationJob.perform_later(@session)
       session[:demo_session] = { 'id' => @session.id, 'last_request_at' => Time.zone.now }
       respond_to do |f|
         f.html { redirect_to @session }

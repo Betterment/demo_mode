@@ -8,7 +8,6 @@ module DemoMode
     belongs_to :signinable, polymorphic: true, optional: true
 
     before_create :set_password!
-    after_create -> { AccountGenerationJob.perform_later(self) }
 
     delegate :begin_demo,
              :custom_sign_in?,
