@@ -3,8 +3,6 @@
 require 'spec_helper'
 
 RSpec.describe DemoMode::Session do
-  include ActiveJob::TestHelper
-
   it 'validates persona name' do
     subject.persona_name = nil
     expect(subject).not_to be_valid
