@@ -28,6 +28,13 @@ module DemoMode
     def save_and_generate_account!
       transaction do
         save!
+        AccountGenerationJob.perform_now(self)
+      end
+    end
+
+    def save_and_generate_account_later!
+      transaction do
+        save!
         AccountGenerationJob.perform_later(self)
       end
     end
