@@ -46,6 +46,16 @@ module DemoMode
       Thread.current[:_demo_mode_password] = value
     end
 
+    def session_url(session)
+      routes = DemoMode::Engine.routes
+
+      options = routes.default_url_options.presence
+      options ||= ActionMailer::Base.default_url_options.presence if defined?(ActionMailer::Base)
+      options ||= { only_path: true }
+
+      routes.url_for(controller: 'demo_mode/sessions', action: 'show', id: session, **options)
+    end
+
     private
 
     def configuration

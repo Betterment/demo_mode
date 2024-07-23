@@ -204,4 +204,40 @@ RSpec.describe DemoMode do
       ERR
     end
   end
+
+  describe '.session_url' do
+    let(:session) { DemoMode::Session.new(id: 2) }
+    let(:demo_mode_options) { {} }
+    let(:action_mailer_options) { {} }
+
+    before do
+      allow(DemoMode::Engine.routes).to receive(:default_url_options).and_return(demo_mode_options)
+      allow(ActionMailer::Base).to receive(:default_url_options).and_return(action_mailer_options)
+    end
+
+    context 'when URL configuration is not provided' do
+      it 'generates a path' do
+        expect(DemoMode.session_url('1')).to eq('/ohno/sessions/1')
+        expect(DemoMode.session_url(session)).to eq('/ohno/sessions/2')
+      end
+    end
+
+    context 'when DemoMode has url configuration' do
+      let(:demo_mode_options) { { host: 'demo_mode.local', port: 4242 } }
+
+      it 'generates a URL' do
+        expect(DemoMode.session_url('1')).to eq('http://demo_mode.local:4242/ohno/sessions/1')
+        expect(DemoMode.session_url(session)).to eq('http://demo_mode.local:4242/ohno/sessions/2')
+      end
+    end
+
+    context 'when ActionMailer has url configuration' do
+      let(:action_mailer_options) { { host: 'mailer.local', port: 4242 } }
+
+      it 'generates a URL' do
+        expect(DemoMode.session_url('1')).to eq('http://mailer.local:4242/ohno/sessions/1')
+        expect(DemoMode.session_url(session)).to eq('http://mailer.local:4242/ohno/sessions/2')
+      end
+    end
+  end
 end

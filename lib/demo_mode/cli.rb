@@ -84,19 +84,9 @@ class DemoMode::Cli
         CLI::UI::Frame.open("{{*}} #{session.persona_name} {{*}}") do
           puts "👤 :: #{session.signinable.email}"
           puts "🔑 :: #{session.signinable_password}"
-          puts "🌐 :: #{infer_session_url(session)}"
+          puts "🌐 :: #{DemoMode.session_url(session)}"
         end
       end
-    end
-
-    def infer_session_url(session)
-      routes = DemoMode::Engine.routes.url_helpers
-
-      options = routes.url_options.presence
-      options ||= ActionMailer::Base.default_url_options.presence if defined?(ActionMailer::Base)
-      options ||= { only_path: true }
-
-      routes.session_url(session, options)
     end
   end
 end
