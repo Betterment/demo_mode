@@ -11,8 +11,7 @@ RSpec.describe DemoMode::Cli do
     end
 
     # Just keep pressing enter
-    allow($stdin).to receive(:tty?).and_return(false)
-    allow($stdin).to receive(:getc).and_return("\r")
+    allow($stdin).to receive_messages(tty?: false, getc: "\r")
 
     # Disable the spinner because it causes the program to freeze?
     allow(CLI::UI::Spinner).to receive(:spin).and_yield(double(update_title: nil))
@@ -24,6 +23,6 @@ RSpec.describe DemoMode::Cli do
       '🌐 :: http://www.example.com/ohno/sessions/1',
     )
 
-    expect { DemoMode::Cli.start }.to output(expected_output).to_stdout
+    expect { described_class.start }.to output(expected_output).to_stdout
   end
 end
