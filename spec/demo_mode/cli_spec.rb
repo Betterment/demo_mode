@@ -4,6 +4,8 @@ require 'spec_helper'
 require 'demo_mode/cli'
 
 RSpec.describe DemoMode::Cli do
+  let(:spinner) { instance_double(CLI::UI::Spinner::SpinGroup::Task, update_title: nil) }
+
   it 'creates a persona' do
     DemoMode.current_password = 'testing123'
     DemoMode.configure do
@@ -14,7 +16,7 @@ RSpec.describe DemoMode::Cli do
     allow($stdin).to receive_messages(tty?: false, getc: "\r")
 
     # Disable the spinner because it causes the program to freeze?
-    allow(CLI::UI::Spinner).to receive(:spin).and_yield(double(update_title: nil))
+    allow(CLI::UI::Spinner).to receive(:spin).and_yield(spinner)
 
     expected_output = include(
       'the_everyperson',
