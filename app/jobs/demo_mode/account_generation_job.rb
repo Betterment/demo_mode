@@ -2,12 +2,12 @@
 
 module DemoMode
   class AccountGenerationJob < DemoMode.base_job_name.constantize
-    def perform(session)
+    def perform(session, option = {})
       session.with_lock do
         persona = session.persona
         raise "Unknown persona: #{session.persona_name}" if persona.blank?
 
-        signinable = persona.generate!(variant: session.variant, password: session.signinable_password)
+        signinable = persona.generate!(variant: session.variant, password: session.signinable_password, option: option)
         session.update!(signinable: signinable)
       end
       raise "Failed to create signinable persona!" if session.signinable.blank?
