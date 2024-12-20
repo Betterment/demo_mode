@@ -25,7 +25,7 @@ module DemoMode
 
     def create
       @session = Session.new(create_params)
-      @session.save_and_generate_account_later!(option_params)
+      @session.save_and_generate_account_later!(options_params)
       session[:demo_session] = { 'id' => @session.id, 'last_request_at' => Time.zone.now }
       respond_to do |f|
         f.html { redirect_to @session }
@@ -78,8 +78,8 @@ module DemoMode
       params.require(:session).permit(:persona_name, :variant)
     end
 
-    def option_params
-      params.fetch(:option, {}).permit!
+    def options_params
+      params.fetch(:options, {}).permit!
     end
   end
 end

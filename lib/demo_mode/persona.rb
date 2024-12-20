@@ -54,11 +54,11 @@ module DemoMode
       @variants ||= {}.with_indifferent_access
     end
 
-    def generate!(variant: :default, password: nil, option: nil)
+    def generate!(variant: :default, password: nil, options: nil)
       variant = variants[variant]
       CleverSequence.reset! if defined?(CleverSequence)
       DemoMode.current_password = password if password
-      DemoMode.around_persona_generation.call(variant.signinable_generator, option)
+      DemoMode.around_persona_generation.call(variant.signinable_generator, options)
     ensure
       DemoMode.current_password = nil
     end
