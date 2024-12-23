@@ -25,17 +25,17 @@ module DemoMode
       DemoMode.personas.find { |p| p.name.to_s == persona_name.to_s }
     end
 
-    def save_and_generate_account!(options = nil)
+    def save_and_generate_account!(**options)
       transaction do
         save!
-        AccountGenerationJob.perform_now(self, options)
+        AccountGenerationJob.perform_now(self, **options)
       end
     end
 
-    def save_and_generate_account_later!(options = nil)
+    def save_and_generate_account_later!(**options)
       transaction do
         save!
-        AccountGenerationJob.perform_later(self, options)
+        AccountGenerationJob.perform_later(self, **options)
       end
     end
 
