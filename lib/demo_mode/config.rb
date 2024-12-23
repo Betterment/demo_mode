@@ -18,6 +18,7 @@ module DemoMode
     configurations << :loader
     configurations << :icon
     configurations << :password
+    configurations << :options_allow_list
     configurations << :around_persona_generation
     configurations << :personas
     configurations << :sign_up_path
@@ -74,6 +75,14 @@ module DemoMode
         @around_persona_generation = block
       else
         @around_persona_generation ||= :call.to_proc
+      end
+    end
+
+    def options_allow_list(ctx = nil, &block)
+      if block
+        @options_allow_list = block
+      elsif @options_allow_list
+        ctx.instance_eval(&@options_allow_list)
       end
     end
 

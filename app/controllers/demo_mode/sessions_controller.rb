@@ -79,7 +79,7 @@ module DemoMode
     end
 
     def options_params
-      params.fetch(:options, {}).permit!
+      params.fetch(:options, {}).fetch(*DemoMode.options_allow_list, {}).permit!
     end
   end
 end
