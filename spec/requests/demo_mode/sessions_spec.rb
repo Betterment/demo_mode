@@ -9,6 +9,7 @@ RSpec.describe DemoMode::SessionsController do # rubocop:disable RSpec/FilePath
   before do
     DemoMode.configure do
       personas_path 'config/system-test-personas'
+      options_allow_list %i(example_custom_option)
     end
   end
 
@@ -27,7 +28,7 @@ RSpec.describe DemoMode::SessionsController do # rubocop:disable RSpec/FilePath
         it 'creates a session and redirects to the session' do
           post '/ohno/sessions', params: {
             session: { persona_name: 'the_everyperson', variant: 'alternate bruce' },
-            options: { example_custom_option: 'this is an example' },
+            options: { example_custom_option: { custom_option_1: true  } },
           }
 
           last_session = DemoMode::Session.last
@@ -45,7 +46,7 @@ RSpec.describe DemoMode::SessionsController do # rubocop:disable RSpec/FilePath
         it 'creates a session and returns processing json' do
           post '/ohno/sessions', params: {
             session: { persona_name: 'the_everyperson' },
-            options: { example_custom_option: 'this is an example' },
+            options: { example_custom_option: { custom_option_1: true  } },
           }.to_json, headers: request_headers
 
           last_session = DemoMode::Session.last
@@ -64,7 +65,7 @@ RSpec.describe DemoMode::SessionsController do # rubocop:disable RSpec/FilePath
               persona_name: 'the_everyperson',
               variant: 'alternate bruce',
             },
-            options: { example_custom_option: 'this is an example' },
+            options: { example_custom_option: { custom_option_1: true  } },
           }.to_json, headers: request_headers
 
           last_session = DemoMode::Session.last
