@@ -78,8 +78,8 @@ RSpec.describe DemoMode::SessionsController do # rubocop:disable RSpec/FilePath
 
       context 'with option' do
         before do
-          DemoMode.configure do  
-            around_persona_generation do |generator, options|
+          DemoMode.configure do
+            around_persona_generation do |_, options|
               if options.present? && options[:example_custom_option].present?
                 DummyUser.create!(name: options[:example_custom_option][:name])
               end
@@ -87,7 +87,7 @@ RSpec.describe DemoMode::SessionsController do # rubocop:disable RSpec/FilePath
           end
         end
 
-        let (:options) { { example_custom_option: { name: 'Tester' } } }
+        let(:options) { { example_custom_option: { name: 'Tester' } } }
 
         it 'creates a session and returns processing json saving the option on the created session' do
           post '/ohno/sessions', params: {
