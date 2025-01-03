@@ -27,6 +27,7 @@ RSpec.describe DemoMode::SessionsController do # rubocop:disable RSpec/FilePath
         it 'creates a session and redirects to the session' do
           post '/ohno/sessions', params: {
             session: { persona_name: 'the_everyperson', variant: 'alternate bruce' },
+            options: { example_custom_option: 'this is an example' },
           }
 
           last_session = DemoMode::Session.last
@@ -44,6 +45,7 @@ RSpec.describe DemoMode::SessionsController do # rubocop:disable RSpec/FilePath
         it 'creates a session and returns processing json' do
           post '/ohno/sessions', params: {
             session: { persona_name: 'the_everyperson' },
+            options: { example_custom_option: 'this is an example' },
           }.to_json, headers: request_headers
 
           last_session = DemoMode::Session.last
@@ -62,10 +64,41 @@ RSpec.describe DemoMode::SessionsController do # rubocop:disable RSpec/FilePath
               persona_name: 'the_everyperson',
               variant: 'alternate bruce',
             },
+            options: { example_custom_option: 'this is an example' },
           }.to_json, headers: request_headers
 
           last_session = DemoMode::Session.last
           expect(last_session.variant).to eq 'alternate bruce'
+          expect(response_json['id']).to eq last_session.id
+          expect(response_json['processing']).to be true
+          expect(response_json['username']).to be_nil
+          expect(response_json['password']).to be_nil
+        end
+      end
+
+      context 'with option' do
+        before do
+          DemoMode.configure do
+            around_persona_generation do |generator, options|
+              generator.call.tap do |dummy_user|
+                if options.present? && options[:example_custom_option].present?
+                  dummy_user.update!(name: options[:example_custom_option][:name])
+                end
+              end
+            end
+          end
+        end
+
+        it 'creates a session and returns processing json saving the option on the created session' do
+          post '/ohno/sessions', params: {
+            session: { persona_name: 'the_everyperson' },
+            options: { example_custom_option: { name: 'Tester' } },
+          }.to_json, headers: request_headers
+
+          last_session = DemoMode::Session.last
+          perform_enqueued_jobs
+
+          expect(DummyUser.last.name).to eq 'Tester'
           expect(response_json['id']).to eq last_session.id
           expect(response_json['processing']).to be true
           expect(response_json['username']).to be_nil
