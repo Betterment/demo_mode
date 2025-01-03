@@ -79,24 +79,24 @@ RSpec.describe DemoMode::SessionsController do # rubocop:disable RSpec/FilePath
       context 'with option' do
         before do
           DemoMode.configure do
-            around_persona_generation do |_, options|
-              if options.present? && options[:example_custom_option].present?
-                DummyUser.create!(name: options[:example_custom_option][:name])
+            around_persona_generation do |generator, options|
+              generator.call.tap do |dummy_user|
+                if options.present? && options[:example_custom_option].present?
+                  dummy_user.update!(name: options[:example_custom_option][:name])
+                end
               end
             end
           end
         end
 
-        let(:options) { { example_custom_option: { name: 'Tester' } } }
-
         it 'creates a session and returns processing json saving the option on the created session' do
           post '/ohno/sessions', params: {
             session: { persona_name: 'the_everyperson' },
-            options: options,
+            options: { example_custom_option: { name: 'Tester' } },
           }.to_json, headers: request_headers
 
           last_session = DemoMode::Session.last
-          DemoMode::AccountGenerationJob.perform_now(last_session, **options)
+          perform_enqueued_jobs
 
           expect(DummyUser.last.name).to eq 'Tester'
           expect(response_json['id']).to eq last_session.id
