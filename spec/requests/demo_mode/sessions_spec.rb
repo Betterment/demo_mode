@@ -77,32 +77,61 @@ RSpec.describe DemoMode::SessionsController do # rubocop:disable RSpec/FilePath
       end
 
       context 'with option' do
-        before do
-          DemoMode.configure do
-            around_persona_generation do |generator, options|
-              generator.call.tap do |dummy_user|
-                if options.present? && options[:example_custom_option].present?
-                  dummy_user.update!(name: options[:example_custom_option][:name])
+        context 'and override with around_persona_generation' do
+          before do
+            DemoMode.configure do
+              around_persona_generation do |generator, options|
+                generator.call.tap do |dummy_user|
+                  if options.present? && options[:example_custom_option].present?
+                    dummy_user.update!(name: options[:example_custom_option][:name])
+                  end
                 end
               end
             end
           end
+
+          it 'creates a session and returns processing json saving the option on the created session' do
+            post '/ohno/sessions', params: {
+              session: { persona_name: 'the_everyperson' },
+              options: { example_custom_option: { name: 'Tester' } },
+            }.to_json, headers: request_headers
+
+            last_session = DemoMode::Session.last
+            perform_enqueued_jobs
+
+            expect(DummyUser.last.name).to eq 'Tester'
+            expect(response_json['id']).to eq last_session.id
+            expect(response_json['processing']).to be true
+            expect(response_json['username']).to be_nil
+            expect(response_json['password']).to be_nil
+          end
         end
 
-        it 'creates a session and returns processing json saving the option on the created session' do
-          post '/ohno/sessions', params: {
-            session: { persona_name: 'the_everyperson' },
-            options: { example_custom_option: { name: 'Tester' } },
-          }.to_json, headers: request_headers
+        context 'and override with sign_in_as persona' do
+          before do
+            DemoMode.add_persona :example_tester do
+              features << ""
+              sign_in_as do |**options|
+                DummyUser.create!(name: options.dig(:example_custom_option, :name) || 'Example Tester')
+              end
+            end
+          end
 
-          last_session = DemoMode::Session.last
-          perform_enqueued_jobs
+          it 'creates a session and returns processing json saving the option on the created session' do
+            post '/ohno/sessions', params: {
+              session: { persona_name: 'example_tester' },
+              options: { example_custom_option: { name: 'New Example Tester' } },
+            }.to_json, headers: request_headers
 
-          expect(DummyUser.last.name).to eq 'Tester'
-          expect(response_json['id']).to eq last_session.id
-          expect(response_json['processing']).to be true
-          expect(response_json['username']).to be_nil
-          expect(response_json['password']).to be_nil
+            last_session = DemoMode::Session.last
+            perform_enqueued_jobs
+
+            expect(DummyUser.last.name).to eq 'New Example Tester'
+            expect(response_json['id']).to eq last_session.id
+            expect(response_json['processing']).to be true
+            expect(response_json['username']).to be_nil
+            expect(response_json['password']).to be_nil
+          end
         end
       end
     end
