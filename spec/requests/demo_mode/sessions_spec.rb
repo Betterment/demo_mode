@@ -115,12 +115,6 @@ RSpec.describe DemoMode::SessionsController do # rubocop:disable RSpec/FilePath
                 DummyUser.create!(name: params.dig(:options, :example_custom_option, :name) || 'Tester')
               end
             end
-
-            DemoMode.configure do
-              around_persona_generation do |generator, options|
-                generator.call(options: options)
-              end
-            end
           end
 
           it 'creates a session and returns processing json saving the option on the created session' do

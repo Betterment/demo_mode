@@ -73,7 +73,7 @@ module DemoMode
       if block
         @around_persona_generation = block
       else
-        @around_persona_generation ||= :call.to_proc
+        @around_persona_generation ||= ->(generator, options = {}) { generator.call(options: options) }
       end
     end
 
