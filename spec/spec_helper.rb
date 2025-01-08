@@ -21,10 +21,15 @@ require 'rspec/rails'
 require 'capybara/cuprite'
 
 Capybara.register_driver(:cuprite) do |app|
+  browser_options = {}.tap do |opts|
+    opts['no-sandbox'] = nil if ENV['CI']
+  end
+
   options = {
     window_size: [1280, 1024],
     headless: ENV['CAPYBARA_DEBUG'] != '1',
     js_errors: true,
+    browser_options: browser_options,
   }
 
   Capybara::Cuprite::Driver.new(app, **options)
