@@ -17,9 +17,9 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Setup Chrome
-      uses: browser-actions/setup-chrome@latest
+      uses: browser-actions/setup-chrome@v1
       with:
-        chrome-version: stable
+        chrome-version: 131.0.6778.85
     - uses: ruby/setup-ruby@v1
       env:
         BUNDLE_GEMFILE: ${{ matrix.gemfile }}
