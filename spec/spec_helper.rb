@@ -24,6 +24,7 @@ Capybara.register_driver(:cuprite) do |app|
   options = {
     window_size: [1280, 1024],
     headless: ENV['CAPYBARA_DEBUG'] != '1',
+    process_timeout: 20,
     js_errors: true,
   }
 
