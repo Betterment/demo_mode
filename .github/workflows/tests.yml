@@ -13,7 +13,7 @@ jobs:
         gemfile:
           - gemfiles/rails_6_1.gemfile
           - gemfiles/rails_7_0.gemfile
-
+          - gemfiles/rails_7_1.gemfile
     steps:
     - uses: actions/checkout@v2
     - name: Setup Chrome

@@ -2,17 +2,11 @@
 
 source "https://rubygems.org"
 
-gem "sqlite3"
-gem "appraisal", require: false
-gem "betterlint", require: false
-gem "capybara", require: false
-gem "combustion"
-gem "cuprite"
-gem "factory_bot"
-gem "net-smtp", require: false
-gem "rspec-rails", require: false
-gem "uncruft", require: false
-gem "webrick", require: false
-gem "rails", "~> 7.0.0"
+gem "actionmailer", "~> 7.0.0"
+gem "actionpack", "~> 7.0.0"
+gem "activejob", "~> 7.0.0"
+gem "activerecord", "~> 7.0.0"
+gem "activesupport", "~> 7.0.0"
+gem "sqlite3", "~> 1.4"
 
 gemspec path: "../"

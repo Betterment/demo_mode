@@ -90,13 +90,14 @@ RSpec.describe DemoMode::SessionsController do # rubocop:disable RSpec/FilePath
         end
 
         it 'creates a session and returns processing json saving the option on the created session' do
-          post '/ohno/sessions', params: {
-            session: { persona_name: 'the_everyperson' },
-            options: { example_custom_option: { name: 'Tester' } },
-          }.to_json, headers: request_headers
+          perform_enqueued_jobs do
+            post '/ohno/sessions', params: {
+              session: { persona_name: 'the_everyperson' },
+              options: { example_custom_option: { name: 'Tester' } },
+            }.to_json, headers: request_headers
+          end
 
           last_session = DemoMode::Session.last
-          perform_enqueued_jobs
 
           expect(DummyUser.last.name).to eq 'Tester'
           expect(response_json['id']).to eq last_session.id

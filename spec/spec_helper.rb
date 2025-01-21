@@ -15,6 +15,13 @@ Combustion.initialize! :all do
 
   config.autoloader = :zeitwerk
   config.active_job.queue_adapter = :inline
+  config.active_support.to_time_preserves_timezone = :zone
+
+  config.action_dispatch.show_exceptions = if ActiveSupport.version >= Gem::Version.new('7.1.0')
+                                             :none
+                                           else
+                                             false
+                                           end
 end
 
 require 'rspec/rails'

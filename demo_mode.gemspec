@@ -20,8 +20,25 @@ Gem::Specification.new do |s|
 
   s.required_ruby_version = ">= 3.0"
 
+  rails_constraints = ['>= 6.1', '< 8.1']
+
+  s.add_dependency 'actionmailer', rails_constraints
+  s.add_dependency 'actionpack', rails_constraints
+  s.add_dependency 'activejob', rails_constraints
+  s.add_dependency 'activerecord', rails_constraints
+  s.add_dependency 'activesupport', rails_constraints
   s.add_dependency 'cli-ui'
-  s.add_dependency 'rails', '>= 6.1'
   s.add_dependency 'sprockets-rails'
   s.add_dependency 'typedjs-rails'
+
+  s.add_development_dependency 'appraisal'
+  s.add_development_dependency 'betterlint'
+  s.add_development_dependency 'capybara'
+  s.add_development_dependency 'combustion'
+  s.add_development_dependency 'cuprite'
+  s.add_development_dependency 'factory_bot'
+  s.add_development_dependency 'net-smtp'
+  s.add_development_dependency 'rspec-rails'
+  s.add_development_dependency 'uncruft'
+  s.add_development_dependency 'webrick'
 end
