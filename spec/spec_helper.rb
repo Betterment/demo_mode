@@ -20,20 +20,6 @@ end
 require 'rspec/rails'
 require 'capybara/cuprite'
 
-Capybara.register_driver(:better_cuprite) do |app|
-  browser_options = ENV.fetch('CI', nil) ? { 'no-sandbox': nil } : {}
-
-  options = {
-    window_size: [1280, 1024],
-    headless: ENV['CAPYBARA_DEBUG'] != '1',
-    process_timeout: 20,
-    js_errors: true,
-    browser_options: browser_options,
-  }
-
-  Capybara::Cuprite::Driver.new(app, **options)
-end
-
 Capybara.configure do |config|
   config.match = :one
   config.ignore_hidden_elements = true
@@ -54,7 +40,17 @@ RSpec.configure do |config|
   config.infer_spec_type_from_file_location!
 
   config.before(:each, type: :system) do
-    driven_by :better_cuprite
+    browser_options = ENV.fetch('CI', nil) ? { 'no-sandbox': nil } : {}
+
+    options = {
+      window_size: [1280, 1024],
+      headless: ENV['CAPYBARA_DEBUG'] != '1',
+      process_timeout: 20,
+      js_errors: true,
+      browser_options: browser_options,
+    }
+
+    driven_by :cuprite, options: options
   end
 
   # Reset configuration
