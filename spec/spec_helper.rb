@@ -41,7 +41,7 @@ RSpec.configure do |config|
   config.include ActiveSupport::Testing::TimeHelpers
   config.infer_spec_type_from_file_location!
 
-  config.before(:each, type: :system) do
+  config.prepend_before(:each, type: :system) do
     browser_options = ENV.fetch('CI', nil) ? { 'no-sandbox': nil } : {}
 
     options = {
