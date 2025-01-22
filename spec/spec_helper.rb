@@ -24,8 +24,8 @@ Capybara.configure do |config|
   config.match = :one
   config.ignore_hidden_elements = true
   config.visible_text_only = true
-  config.default_driver = :better_cuprite
-  config.javascript_driver = :better_cuprite
+  config.default_driver = :cuprite
+  config.javascript_driver = :cuprite
 
   config.default_max_wait_time = ENV.fetch('CAPYBARA_WAIT_TIME', 2).to_i
   config.server = :webrick
