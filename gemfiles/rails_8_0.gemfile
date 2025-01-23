@@ -2,11 +2,7 @@
 
 source "https://rubygems.org"
 
-gem "actionmailer", "~> 8.0.0"
-gem "actionpack", "~> 8.0.0"
-gem "activejob", "~> 8.0.0"
-gem "activerecord", "~> 8.0.0"
-gem "activesupport", "~> 8.0.0"
+gem "railties", "~> 8.0.0"
 gem "sqlite3", ">= 2.1"
 
 gemspec path: "../"

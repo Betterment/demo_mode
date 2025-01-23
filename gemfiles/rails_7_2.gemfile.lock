@@ -8,6 +8,7 @@ PATH
       activerecord (>= 6.1, < 8.1)
       activesupport (>= 6.1, < 8.1)
       cli-ui
+      railties (>= 6.1, < 8.1)
       sprockets-rails
       typedjs-rails
 
@@ -274,11 +275,6 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
-  actionmailer (~> 7.2.0)
-  actionpack (~> 7.2.0)
-  activejob (~> 7.2.0)
-  activerecord (~> 7.2.0)
-  activesupport (~> 7.2.0)
   appraisal
   betterlint
   capybara
@@ -287,6 +283,7 @@ DEPENDENCIES
   demo_mode!
   factory_bot
   net-smtp
+  railties (~> 7.2.0)
   rspec-rails
   sqlite3 (>= 1.4)
   uncruft

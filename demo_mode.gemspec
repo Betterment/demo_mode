@@ -28,6 +28,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'activerecord', rails_constraints
   s.add_dependency 'activesupport', rails_constraints
   s.add_dependency 'cli-ui'
+  s.add_dependency 'railties', rails_constraints
   s.add_dependency 'sprockets-rails'
   s.add_dependency 'typedjs-rails'
 

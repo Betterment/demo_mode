@@ -8,6 +8,7 @@ PATH
       activerecord (>= 6.1, < 8.1)
       activesupport (>= 6.1, < 8.1)
       cli-ui
+      railties (>= 6.1, < 8.1)
       sprockets-rails
       typedjs-rails
 
@@ -134,7 +135,7 @@ GEM
     mini_mime (1.1.5)
     minitest (5.25.4)
     mutex_m (0.3.0)
-    net-imap (0.4.18)
+    net-imap (0.5.5)
       date
       net-protocol
     net-pop (0.1.2)
@@ -277,11 +278,6 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
-  actionmailer (~> 7.1.0)
-  actionpack (~> 7.1.0)
-  activejob (~> 7.1.0)
-  activerecord (~> 7.1.0)
-  activesupport (~> 7.1.0)
   appraisal
   betterlint
   capybara
@@ -290,6 +286,7 @@ DEPENDENCIES
   demo_mode!
   factory_bot
   net-smtp
+  railties (~> 7.1.0)
   rspec-rails
   sqlite3 (>= 1.4)
   uncruft

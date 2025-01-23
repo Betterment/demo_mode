@@ -8,6 +8,7 @@ PATH
       activerecord (>= 6.1, < 8.1)
       activesupport (>= 6.1, < 8.1)
       cli-ui
+      railties (>= 6.1, < 8.1)
       sprockets-rails
       typedjs-rails
 
@@ -128,7 +129,7 @@ GEM
     mini_mime (1.1.5)
     minitest (5.25.1)
     mutex_m (0.2.0)
-    net-imap (0.4.18)
+    net-imap (0.5.5)
       date
       net-protocol
     net-pop (0.1.2)
