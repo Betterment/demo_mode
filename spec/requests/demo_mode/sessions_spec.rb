@@ -81,7 +81,7 @@ RSpec.describe DemoMode::SessionsController do # rubocop:disable RSpec/FilePath
           before do
             DemoMode.configure do
               around_persona_generation do |generator, options|
-                generator.call.tap do |dummy_user|
+                generator.call(options).tap do |dummy_user|
                   if options.present? && options[:example_custom_option].present?
                     dummy_user.update!(name: options[:example_custom_option][:name])
                   end
@@ -111,8 +111,8 @@ RSpec.describe DemoMode::SessionsController do # rubocop:disable RSpec/FilePath
           before do
             DemoMode.add_persona :example_tester do
               features << ""
-              sign_in_as do |params|
-                DummyUser.create!(name: params.dig(:options, :example_custom_option, :name) || 'Tester')
+              sign_in_as do |options|
+                DummyUser.create!(name: options.dig(:example_custom_option, :name) || 'Tester')
               end
             end
           end
