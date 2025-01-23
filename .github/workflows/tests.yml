@@ -14,6 +14,10 @@ jobs:
           - gemfiles/rails_6_1.gemfile
           - gemfiles/rails_7_0.gemfile
           - gemfiles/rails_7_1.gemfile
+          - gemfiles/rails_7_2.gemfile
+        exclude:
+          - ruby: '3.0'
+            gemfile: gemfiles/rails_7_2.gemfile
     steps:
     - uses: actions/checkout@v2
     - name: Setup Chrome
