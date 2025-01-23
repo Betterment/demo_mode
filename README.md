@@ -439,8 +439,8 @@ modifies every persona you generate:
 
 ```ruby
 DemoMode.configure do
-  around_persona_generation do |generator|
-    generator.call.tap do |account|
+  around_persona_generation do |generator, options|
+    generator.call(options).tap do |account|
       account.update!(metadata: '123')
     end
   end
