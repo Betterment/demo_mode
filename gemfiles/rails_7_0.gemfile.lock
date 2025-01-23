@@ -1,7 +1,7 @@
 PATH
   remote: ..
   specs:
-    demo_mode (1.4.1)
+    demo_mode (1.5.0)
       actionmailer (>= 6.1, < 8.1)
       actionpack (>= 6.1, < 8.1)
       activejob (>= 6.1, < 8.1)
