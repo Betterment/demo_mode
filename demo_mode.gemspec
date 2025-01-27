@@ -22,7 +22,6 @@ Gem::Specification.new do |s|
 
   rails_constraints = ['>= 6.1', '< 8.1']
 
-  s.add_dependency 'actionmailer', rails_constraints
   s.add_dependency 'actionpack', rails_constraints
   s.add_dependency 'activejob', rails_constraints
   s.add_dependency 'activerecord', rails_constraints
@@ -32,6 +31,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'sprockets-rails'
   s.add_dependency 'typedjs-rails'
 
+  s.add_development_dependency 'actionmailer', rails_constraints
   s.add_development_dependency 'appraisal'
   s.add_development_dependency 'betterlint'
   s.add_development_dependency 'capybara'
