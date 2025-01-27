@@ -47,6 +47,8 @@ module DemoMode
     end
 
     def session_url(session)
+      Rails.application.reload_routes_unless_loaded if Rails.gem_version >= Gem::Version.new('8.0')
+
       routes = DemoMode::Engine.routes
 
       options = routes.default_url_options.presence

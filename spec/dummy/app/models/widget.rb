@@ -19,6 +19,14 @@ class Widget < ActiveRecord::Base
     end
   end
 
+  def encrypted_column
+    encrypted_column_crypt
+  end
+
+  def encrypted_column=(encrypted_column_crypt)
+    self.encrypted_column_crypt = encrypted_column_crypt
+  end
+
   def encrypted_column_crypt
     self.class.rot_13(super)
   end
