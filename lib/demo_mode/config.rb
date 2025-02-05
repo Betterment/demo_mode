@@ -39,7 +39,7 @@ module DemoMode
       if block
         @loader = block
       else
-        @loader ||= ->(_) { image_tag('/assets/demo_mode/loader.png') }
+        @loader ||= ->(_) { image_tag("/assets/demo_mode/loader.png?v=#{VERSION}") }
       end
     end
 

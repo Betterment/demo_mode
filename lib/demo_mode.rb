@@ -9,9 +9,9 @@ require 'demo_mode/persona'
 
 module DemoMode
   ICONS = {
-    tophat: '/assets/demo_mode/icon--tophat.png',
-    user: '/assets/demo_mode/icon--user.png',
-    users: '/assets/demo_mode/icon--users.png',
+    tophat: "/assets/demo_mode/icon--tophat.png?v=#{VERSION}",
+    user: "/assets/demo_mode/icon--user.png?v=#{VERSION}",
+    users: "/assets/demo_mode/icon--users.png?v=#{VERSION}",
   }.freeze
 
   class << self
