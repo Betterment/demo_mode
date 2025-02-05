@@ -40,6 +40,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'factory_bot'
   s.add_development_dependency 'net-smtp'
   s.add_development_dependency 'rspec-rails'
+  s.add_development_dependency 'sqlite3'
   s.add_development_dependency 'uncruft'
   s.add_development_dependency 'webrick'
 end
