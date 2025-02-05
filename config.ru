@@ -77,6 +77,11 @@ end
 Combustion.path = 'spec/dummy'
 Combustion.initialize! :all do
   config.active_job.queue_adapter = :async
+  config.action_dispatch.show_exceptions = if ActiveSupport.version >= Gem::Version.new('7.1')
+                                             :none
+                                           else
+                                             false
+                                           end
 end
 
 run Combustion::Application
