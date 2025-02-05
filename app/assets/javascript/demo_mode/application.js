@@ -1,4 +1,4 @@
-//= require typed
+//= require ./typed-v2.1.0
 
 (function(document, performance, location) {
   function* getJSON(url) {

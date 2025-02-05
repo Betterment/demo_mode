@@ -9,7 +9,6 @@ PATH
       cli-ui
       railties (>= 6.1, < 8.1)
       sprockets-rails
-      typedjs-rails
 
 GEM
   remote: https://rubygems.org/
@@ -211,8 +210,6 @@ GEM
     sqlite3 (1.7.0-x86_64-linux)
     thor (1.3.0)
     timeout (0.4.1)
-    typedjs-rails (2.0.9)
-      railties (>= 3.1)
     tzinfo (2.0.6)
       concurrent-ruby (~> 1.0)
     uncruft (0.3.4)

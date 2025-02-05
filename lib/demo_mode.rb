@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'rails'
-require 'typedjs-rails'
 require 'demo_mode/version'
 require 'demo_mode/clever_sequence'
 require 'demo_mode/config'
