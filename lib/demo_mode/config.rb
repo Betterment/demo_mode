@@ -39,7 +39,7 @@ module DemoMode
       if block
         @loader = block
       else
-        @loader ||= ->(_) { image_tag('demo_mode/loader.png') }
+        @loader ||= ->(_) { image_tag('/demo_mode/images/loader.png') }
       end
     end
 
@@ -47,9 +47,9 @@ module DemoMode
       if block
         @icon = block
       elsif name_or_path
-        @path = name_or_path.is_a?(Symbol) ? "demo_mode/icon--#{name_or_path}" : name_or_path
+        @path = ICONS.fetch(name_or_path, name_or_path)
       else
-        @path ||= 'demo_mode/icon--user'
+        @path ||= ICONS.fetch(:user)
         path = @path
         @icon ||= ->(_) { image_tag path }
       end

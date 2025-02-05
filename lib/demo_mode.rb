@@ -8,6 +8,15 @@ require 'demo_mode/engine'
 require 'demo_mode/persona'
 
 module DemoMode
+  ICONS = {
+    tophat: '/demo_mode/images/icon--tophat.png',
+    user: '/demo_mode/images/icon--user.png',
+    users: '/demo_mode/images/icon--users.png',
+    'demo_mode/icon--tophat': '/demo_mode/images/icon--tophat.png',
+    'demo_mode/icon--user': '/demo_mode/images/icon--user.png',
+    'demo_mode/icon--users': '/demo_mode/images/icon--users.png',
+  }.freeze
+
   class << self
     delegate(*Config.configurations, to: :configuration)
 

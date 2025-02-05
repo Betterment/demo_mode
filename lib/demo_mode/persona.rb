@@ -15,7 +15,7 @@ module DemoMode
       if block
         @icon = block
       elsif name_or_path
-        @path = name_or_path.is_a?(Symbol) ? "demo_mode/icon--#{name_or_path}" : name_or_path
+        @path = ICONS.fetch(name_or_path, name_or_path)
         path = @path
         @icon = ->(_) { image_tag path }
       else
