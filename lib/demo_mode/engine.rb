@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'sprockets/railtie'
-
 module DemoMode
   class Engine < ::Rails::Engine
     isolate_namespace DemoMode

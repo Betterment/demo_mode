@@ -8,7 +8,6 @@ PATH
       activesupport (>= 6.1, < 8.1)
       cli-ui
       railties (>= 6.1, < 8.1)
-      sprockets-rails
 
 GEM
   remote: https://rubygems.org/
@@ -240,7 +239,7 @@ GEM
     sprockets (4.2.1)
       concurrent-ruby (~> 1.0)
       rack (>= 2.2.4, < 4)
-    sprockets-rails (3.5.1)
+    sprockets-rails (3.5.2)
       actionpack (>= 6.1)
       activesupport (>= 6.1)
       sprockets (>= 3.0.0)
@@ -284,6 +283,7 @@ DEPENDENCIES
   net-smtp
   railties (~> 8.0.0)
   rspec-rails
+  sprockets-rails
   sqlite3 (>= 2.1)
   uncruft
   webrick
