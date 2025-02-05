@@ -25,7 +25,7 @@ end
 DemoMode.add_persona :the_sometimesperson do
   features << 'foobar'
   callout true
-  icon 'demo_mode/icon--tophat'
+  icon :tophat
   sign_in_as { DummyUser.create!(name: SecureRandom.uuid) }
 
   variant :the_rarely_person do

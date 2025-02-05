@@ -12,9 +12,6 @@ module DemoMode
     tophat: '/assets/demo_mode/icon--tophat.png',
     user: '/assets/demo_mode/icon--user.png',
     users: '/assets/demo_mode/icon--users.png',
-    'demo_mode/icon--tophat': '/assets/demo_mode/icon--tophat.png',
-    'demo_mode/icon--user': '/assets/demo_mode/icon--user.png',
-    'demo_mode/icon--users': '/assets/demo_mode/icon--users.png',
   }.freeze
 
   class << self
