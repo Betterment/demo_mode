@@ -25,8 +25,6 @@ module DemoMode
     end
 
     initializer 'demo_mode.assets' do |app|
-      app.config.assets.precompile << 'demo_mode/application.css'
-      app.config.assets.precompile << 'demo_mode/application.js'
       app.config.assets.precompile << 'demo_mode/icon--user.png'
       app.config.assets.precompile << 'demo_mode/icon--users.png'
       app.config.assets.precompile << 'demo_mode/icon--tophat.png'
