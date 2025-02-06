@@ -278,8 +278,8 @@ generation), and the default persona icon:
 
 ```ruby
 DemoMode.configure do
-  stylesheets.unshift 'first'
-  stylesheets.push 'last'
+  stylesheets.unshift 'first.css'
+  stylesheets.push 'last.css'
 
   logo { image_tag('my-company-logo.svg') }
   loader { render partial: 'shared/loading_spinner' }

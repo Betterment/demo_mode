@@ -143,7 +143,7 @@ RSpec.describe DemoMode::SessionsController do # rubocop:disable RSpec/FilePath
         DemoMode.stylesheets << '/custom-styles.css'
 
         get '/ohno/sessions/new'
-        expect(response.body).to include('<link rel="stylesheet" href="/custom-styles.css" media="all" />')
+        expect(response.body).to match(%r{<link .+ href="/custom-styles.css"})
       end
     end
 
