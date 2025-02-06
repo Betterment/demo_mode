@@ -278,6 +278,7 @@ generation), and the default persona icon:
 
 ```ruby
 DemoMode.configure do
+  head { stylesheet_link_tag('my_styles') }
   logo { image_tag('my-company-logo.svg') }
   loader { render partial: 'shared/loading_spinner' }
 
@@ -311,16 +312,9 @@ DemoMode.add_persona do
 end
 ```
 
-To customize or override the CSS entirely, create your own application.css
-file at `app/assets/stylesheets/demo_mode/application.css`:
+The styles use these CSS variables, which you can override.
 
 ```css
-/*
- *= require demo_mode/normalize
- *= require demo_mode/default
- *= require_self
- */
-
 /* Use CSS variables to override the default font and colors: */
 :root {
   --font-family: Papyrus, fantasy; 

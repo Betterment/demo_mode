@@ -14,6 +14,7 @@ module DemoMode
     configurable_value(:personas_path) { 'config/personas' }
     configurable_value(:session_timeout) { 30.minutes }
     configurable_boolean(:display_credentials)
+    configurations << :head
     configurations << :logo
     configurations << :loader
     configurations << :icon
@@ -25,6 +26,14 @@ module DemoMode
 
     def self.app_name
       Rails.application.class.module_parent.name
+    end
+
+    def head(&block)
+      if block
+        @head = block if block
+      else
+        @head ||= ->(_) {}
+      end
     end
 
     def logo(&block)

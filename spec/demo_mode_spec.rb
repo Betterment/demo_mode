@@ -96,6 +96,7 @@ RSpec.describe DemoMode do
         logo { '<marquee>The Logo</marquee>' }
         icon { ':-)' }
         loader { image_tag('loading-for-real.gif', skip_pipeline: true) }
+        head { content_tag(:style, nil, id: 'custom-styles') }
 
         persona :my_persona do
           icon :tophat
@@ -123,6 +124,7 @@ RSpec.describe DemoMode do
         end
       end
 
+      expect(render_value(described_class.head)).to eq '<style id="custom-styles"></style>'
       expect(render_value(described_class.logo)).to eq '<marquee>The Logo</marquee>'
       expect(render_value(described_class.loader)).to match %r{img src="/images/loading-for-real.gif"}
       expect(described_class.personas.count).to eq 3
