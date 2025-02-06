@@ -28,8 +28,6 @@ Gem::Specification.new do |s|
   s.add_dependency 'activesupport', rails_constraints
   s.add_dependency 'cli-ui'
   s.add_dependency 'railties', rails_constraints
-  s.add_dependency 'sprockets-rails'
-  s.add_dependency 'typedjs-rails'
 
   s.add_development_dependency 'actionmailer', rails_constraints
   s.add_development_dependency 'appraisal'
@@ -40,6 +38,8 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'factory_bot'
   s.add_development_dependency 'net-smtp'
   s.add_development_dependency 'rspec-rails'
+  s.add_development_dependency 'sprockets-rails'
+  s.add_development_dependency 'sqlite3'
   s.add_development_dependency 'uncruft'
   s.add_development_dependency 'webrick'
 end

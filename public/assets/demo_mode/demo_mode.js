@@ -1,5 +1,3 @@
-//= require typed
-
 (function(document, performance, location) {
   function* getJSON(url) {
     while(true) { yield fetch(url).then(resp => resp.json()); }

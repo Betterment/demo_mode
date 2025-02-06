@@ -25,7 +25,7 @@ end
 DemoMode.add_persona :the_sometimesperson do
   features << 'foobar'
   callout true
-  icon 'demo_mode/icon--tophat'
+  icon :tophat
   sign_in_as { DummyUser.create!(name: SecureRandom.uuid) }
 
   variant :the_rarely_person do
@@ -77,6 +77,11 @@ end
 Combustion.path = 'spec/dummy'
 Combustion.initialize! :all do
   config.active_job.queue_adapter = :async
+  config.action_dispatch.show_exceptions = if ActiveSupport.version >= Gem::Version.new('7.1')
+                                             :none
+                                           else
+                                             false
+                                           end
 end
 
 run Combustion::Application

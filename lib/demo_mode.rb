@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'rails'
-require 'typedjs-rails'
 require 'demo_mode/version'
 require 'demo_mode/clever_sequence'
 require 'demo_mode/config'
@@ -9,6 +8,12 @@ require 'demo_mode/engine'
 require 'demo_mode/persona'
 
 module DemoMode
+  ICONS = {
+    tophat: "/assets/demo_mode/icon--tophat.png?v=#{VERSION}",
+    user: "/assets/demo_mode/icon--user.png?v=#{VERSION}",
+    users: "/assets/demo_mode/icon--users.png?v=#{VERSION}",
+  }.freeze
+
   class << self
     delegate(*Config.configurations, to: :configuration)
 
