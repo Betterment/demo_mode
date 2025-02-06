@@ -278,7 +278,9 @@ generation), and the default persona icon:
 
 ```ruby
 DemoMode.configure do
-  head { stylesheet_link_tag('my_styles') }
+  stylesheets.unshift 'first'
+  stylesheets.push 'last'
+
   logo { image_tag('my-company-logo.svg') }
   loader { render partial: 'shared/loading_spinner' }
 
@@ -317,7 +319,7 @@ The styles use these CSS variables, which you can override.
 ```css
 /* Use CSS variables to override the default font and colors: */
 :root {
-  --font-family: Papyrus, fantasy; 
+  --font-family: Papyrus, fantasy;
   --primary-color: red;
 }
 ```

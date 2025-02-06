@@ -140,10 +140,10 @@ RSpec.describe DemoMode::SessionsController do # rubocop:disable RSpec/FilePath
 
     describe 'GET /sessions/new' do
       it 'renders head tags' do
-        DemoMode.head { content_tag(:style, nil, id: 'custom-styles') }
+        DemoMode.stylesheets << '/custom-styles.css'
 
         get '/ohno/sessions/new'
-        expect(response.body).to include('<style id="custom-styles"></style>')
+        expect(response.body).to include('<link rel="stylesheet" href="/custom-styles.css" media="all" />')
       end
     end
 
