@@ -4,6 +4,7 @@ DemoMode.add_persona do
   features << 'Can sing'
 
   sign_in_as do |_pwd|
+    raise "error"
     DummyUser.create!(name: 'Spruce Bringsteen')
   end
 
