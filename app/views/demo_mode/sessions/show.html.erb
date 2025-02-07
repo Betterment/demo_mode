@@ -17,10 +17,11 @@
   </article>
 <% else %>
   <article class="middle center" data-polling-refresh-url='<%= session_path(@session, format: :json) %>'>
-    <figure>
+    <figure id="LoadingMessage">
       <%= instance_eval(&DemoMode.loader) %>
       <h4><span id="DemoTypedText"></span></h4>
     </figure>
+    <div id="ErrorMessage"></div>
 
     <script type="text/javascript">
       new Typed('#DemoTypedText', {
