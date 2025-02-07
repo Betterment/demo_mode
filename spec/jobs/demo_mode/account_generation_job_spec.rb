@@ -30,6 +30,7 @@ RSpec.describe DemoMode::AccountGenerationJob do
       expect {
         described_class.perform_now(session)
       }.to raise_error(RuntimeError, 'Unknown persona: garbage')
+      expect(session.error).to eq('Unknown persona: garbage')
     end
   end
 end
