@@ -3,7 +3,6 @@ log/*.log
 pkg/
 spec/examples.txt
 spec/dummy/log
-spec/dummy/db/combustion_test.*
 spec/dummy/config/deprecations.ignore
 spec/dummy/tmp
 doc/
