@@ -27,56 +27,63 @@ class DemoMode::Cli
     private
 
     def ask_next_step
-      CLI::UI::Prompt.ask('What next?') do |handler|
-        handler.option("I'm done") do
-          puts "good bye"
-        end
-        handler.option('Keep going') do
-          prompt_persona
-        end
+      case CLI::UI::Prompt.ask("What next?", options: ["I'm done", "Keep going"])
+      in "I'm done"
+        puts "good bye"
+      in "Keep going"
+        prompt_persona
       end
     end
 
     def prompt_persona
       CLI::UI::Frame.open("{{*}} Generate an Account! {{*}}") do
-        CLI::UI::Prompt.ask('Which persona should we use?') do |handler|
-          DemoMode.personas.sort_by { |p| p.name.to_s }.each do |persona|
-            persona_label = persona.name.to_s.titleize
+        personas = DemoMode.personas.sort_by { |p| p.name.to_s }
 
-            handler.option(persona_label) do
-              persona.features.each do |feature|
-                puts "👉 #{feature}"
-              end
-
-              named_tags = SemanticLogger.named_tags if defined?(SemanticLogger)
-
-              variant = variant_for(persona, persona_label)
-
-              CLI::UI::Spinner.spin("generating account...") do |spinner|
-                SemanticLogger.push_named_tags(named_tags) if defined?(SemanticLogger)
-
-                session = DemoMode::Session.new(persona_name: persona.name, variant: variant)
-                session.save_and_generate_account!
-                spinner.update_title('done!')
-                created_sessions << session
-              end
-            end
+        persona_id = CLI::UI::Prompt.ask('Which persona should we use?') do |handler|
+          personas.each.with_index do |persona, i|
+            handler.option(persona_label(persona)) { i.to_s }
           end
         end
+
+        execute_persona(personas[persona_id.to_i])
       end
+
       display_personas
       ask_next_step
     end
 
-    def variant_for(persona, persona_label)
+    def execute_persona(persona)
+      persona.features.each do |feature|
+        puts "👉 #{feature}"
+      end
+
+      named_tags = SemanticLogger.named_tags if defined?(SemanticLogger)
+
+      variant = variant_for(persona)
+
+      CLI::UI::Spinner.spin("generating account...") do |spinner|
+        SemanticLogger.push_named_tags(named_tags) if defined?(SemanticLogger)
+
+        session = DemoMode::Session.new(persona_name: persona.name, variant: variant)
+        session.save_and_generate_account!
+        spinner.update_title('done!')
+        created_sessions << session
+      end
+    end
+
+    def variant_for(persona)
       if persona.variants.keys == ['default']
         :default
       else
         CLI::UI::Prompt.ask(
-          "Which variant should we use for #{persona_label}?",
-          options: persona.variants.keys,
-        )
+          "Which variant should we use for #{persona_label(persona)}?",
+          options: persona.variants.keys.map(&:to_s),
+        ).to_sym
       end
+    end
+
+    def persona_label(persona)
+      persona.name.to_s.titleize
     end
 
     def display_personas
