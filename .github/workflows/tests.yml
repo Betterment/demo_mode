@@ -35,6 +35,10 @@ jobs:
       with:
         ruby-version: ${{ matrix.ruby }}
         bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+    - name: Setup database
+      env:
+        BUNDLE_GEMFILE: ${{ matrix.gemfile }}
+      run: bundle exec rake db:test:prepare
     - name: Run tests
       env:
         BUNDLE_GEMFILE: ${{ matrix.gemfile }}
