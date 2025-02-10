@@ -14,6 +14,7 @@ module DemoMode
     configurable_value(:personas_path) { 'config/personas' }
     configurable_value(:session_timeout) { 30.minutes }
     configurable_boolean(:display_credentials)
+    configurations << :stylesheets
     configurations << :logo
     configurations << :loader
     configurations << :icon
@@ -25,6 +26,13 @@ module DemoMode
 
     def self.app_name
       Rails.application.class.module_parent.name
+    end
+
+    def stylesheets
+      @stylesheets ||= [
+        "/assets/demo_mode/vendor/normalize-v8.0.1.css",
+        "/assets/demo_mode/demo_mode.css?v=#{VERSION}",
+      ]
     end
 
     def logo(&block)

@@ -97,6 +97,9 @@ RSpec.describe DemoMode do
         icon { ':-)' }
         loader { image_tag('loading-for-real.gif', skip_pipeline: true) }
 
+        stylesheets.unshift '/before.css'
+        stylesheets.push '/after.css'
+
         persona :my_persona do
           icon :tophat
           features << 'foo'
@@ -122,6 +125,13 @@ RSpec.describe DemoMode do
           features << ''
         end
       end
+
+      expect(described_class.stylesheets).to eq([
+        '/before.css',
+        '/assets/demo_mode/vendor/normalize-v8.0.1.css',
+        "/assets/demo_mode/demo_mode.css?v=#{DemoMode::VERSION}",
+        '/after.css',
+      ])
 
       expect(render_value(described_class.logo)).to eq '<marquee>The Logo</marquee>'
       expect(render_value(described_class.loader)).to match %r{img src="/images/loading-for-real.gif"}

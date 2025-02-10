@@ -138,6 +138,15 @@ RSpec.describe DemoMode::SessionsController do # rubocop:disable RSpec/FilePath
       end
     end
 
+    describe 'GET /sessions/new' do
+      it 'renders head tags' do
+        DemoMode.stylesheets << '/custom-styles.css'
+
+        get '/ohno/sessions/new'
+        expect(response.body).to match(%r{<link .+ href="/custom-styles.css"})
+      end
+    end
+
     describe 'GET /sessions/new.json' do
       it 'returns a list of personas in json' do
         get '/ohno/sessions/new', params: {}, headers: request_headers
