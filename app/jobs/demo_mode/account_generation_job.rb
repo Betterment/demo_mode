@@ -5,10 +5,8 @@ module DemoMode
     def perform(session, **options)
       session.with_lock do
         persona = session.persona
-        if persona.blank?
-          session.update!(error: "Unknown persona: #{session.persona_name}")
-          raise "Unknown persona: #{session.persona_name}"
-        end
+        raise "Unknown persona: #{session.persona_name}" if persona.blank?
+
         begin
           signinable = persona.generate!(variant: session.variant, password: session.signinable_password, options: options)
         rescue StandardError => e
@@ -16,10 +14,7 @@ module DemoMode
         end
         session.update!(signinable: signinable)
       end
-      if session.signinable.blank?
-        session.update!(error: 'Failed to create signinable persona!')
-        raise "Failed to create signinable persona!"
-      end
+      raise "Failed to create signinable persona!" if session.signinable.blank?
     end
   end
 end

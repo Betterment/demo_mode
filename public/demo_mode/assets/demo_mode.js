@@ -15,6 +15,7 @@
     }
 
     func.next().value.then((resp) => {
+      console.log("test", resp);
       if (resp.error) {
         document.querySelector("#LoadingMessage").style.display = "none";
         const errorMessageElem = document.querySelector("#ErrorMessage");
