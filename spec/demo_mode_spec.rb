@@ -74,7 +74,7 @@ RSpec.describe DemoMode do
         end
       end
 
-      expect(render_value(described_class.logo)).to eq '<strong>Combustion</strong>' # default
+      expect(render_value(described_class.logo)).to eq '<strong>Dummy</strong>' # default
       expect(render_value(described_class.loader)).to match %r{img src="/assets/demo_mode/loader\.png\?v=#{DemoMode::VERSION}"}o
       expect(described_class.personas.count).to eq 1
       described_class.personas.first.tap do |persona|

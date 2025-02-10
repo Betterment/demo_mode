@@ -22,7 +22,7 @@ RSpec.describe DemoMode::Cli do
       'the_everyperson',
       '👤 :: user@example.org',
       '🔑 :: testing123',
-      '🌐 :: http://www.example.com/ohno/sessions/1',
+      '🌐 :: http://localhost:3000/ohno/sessions/1',
     )
 
     expect { described_class.start }.to output(expected_output).to_stdout

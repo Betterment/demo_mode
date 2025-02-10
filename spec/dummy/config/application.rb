@@ -1,6 +1,7 @@
 require 'bundler/setup'
 require 'rails'
 require 'action_controller/railtie'
+require 'action_mailer/railtie'
 require 'action_view/railtie'
 require 'active_job/railtie'
 require 'active_model/railtie'
@@ -28,5 +29,6 @@ module Dummy
     config.active_support.deprecation = :raise
     config.active_job.queue_adapter = :inline
     config.assets.precompile << 'path/to/test-icon.png'
+    config.action_mailer.default_url_options = { host: 'localhost:3000' }
   end
 end

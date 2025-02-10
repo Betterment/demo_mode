@@ -4,6 +4,7 @@ ENV["RAILS_ENV"] ||= 'test'
 require_relative 'dummy/config/environment'
 
 require 'uncruft'
+require 'factory_bot'
 require 'demo_mode/factory_bot_ext'
 require 'rspec/rails'
 require 'capybara/cuprite'
