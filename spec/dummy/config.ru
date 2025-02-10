@@ -1,11 +1,9 @@
 # frozen_string_literal: true
 
-require 'rubygems'
-require 'bundler'
+ENV['DEMO_MODE'] ||= '1'
 
-Bundler.require :default, :development
+require_relative 'config/environment'
 
-ENV['DEMO_MODE'] = '1'
 DemoMode.configure do
   current_user_method :current_dummy_user
   signinable_username_method :name
@@ -74,15 +72,5 @@ DemoMode.add_persona :redirects_to_not_found do
   sign_in_as { Widget.create! }
 end
 
-Combustion.path = 'spec/dummy'
-Combustion.initialize! :all do
-  config.active_job.queue_adapter = :async
-  config.action_dispatch.show_exceptions = if ActiveSupport.version >= Gem::Version.new('7.1')
-                                             :none
-                                           else
-                                             false
-                                           end
-end
-
-run Combustion::Application
-system 'open http://localhost:9292'
+run Dummy::Application
+system 'open http://localhost:3000'
