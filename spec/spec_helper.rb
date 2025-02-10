@@ -1,29 +1,10 @@
 # frozen_string_literal: true
 
 ENV["RAILS_ENV"] ||= 'test'
-
-require 'bundler'
-Bundler.require :default, :development
+require_relative 'dummy/config/environment'
 
 require 'uncruft'
 require 'demo_mode/factory_bot_ext'
-require 'webrick'
-
-Combustion.path = 'spec/dummy'
-Combustion.initialize! :all do
-  config.assets.precompile << 'path/to/test-icon.png'
-
-  config.autoloader = :zeitwerk
-  config.active_job.queue_adapter = :inline
-  config.active_support.to_time_preserves_timezone = :zone
-
-  config.action_dispatch.show_exceptions = if ActiveSupport.version >= Gem::Version.new('7.1')
-                                             :none
-                                           else
-                                             false
-                                           end
-end
-
 require 'rspec/rails'
 require 'capybara/cuprite'
 

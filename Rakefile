@@ -8,6 +8,9 @@ end
 
 Bundler::GemHelper.install_tasks
 
+APP_RAKEFILE = File.expand_path('spec/dummy/Rakefile', __dir__)
+load 'rails/tasks/engine.rake'
+
 require 'rubocop/rake_task'
 RuboCop::RakeTask.new
 

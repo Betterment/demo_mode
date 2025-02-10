@@ -1,3 +1,7 @@
+development:
+  adapter: sqlite3
+  database: db/demo_mode_development.sqlite
+
 test:
-  adapter:  sqlite3
-  database: db/combustion_test.sqlite
+  adapter: sqlite3
+  database: db/demo_mode_test.sqlite
