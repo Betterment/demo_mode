@@ -15,10 +15,10 @@ describe 'Demo Splash' do
 
     it 'redirects to the splash, allows selecting a persona, and generates the account' do
       visit '/'
-      expect(page).not_to have_text('Sign Up')
+      expect(page).to have_no_text('Sign Up')
       expect(page).to have_text('Demo Mode')
       expect(page).to have_text('The Everyperson')
-      expect(page).not_to have_text('Enter manually')
+      expect(page).to have_no_text('Enter manually')
 
       within '.dm-Persona--theEveryperson' do
         click_button 'Sign In'
@@ -34,10 +34,10 @@ describe 'Demo Splash' do
     context 'when selecting a variant on a callout persona' do
       it 'redirects to the splash, allows selecting a persona, and generates the account' do
         visit '/'
-        expect(page).not_to have_text('Sign Up')
+        expect(page).to have_no_text('Sign Up')
         expect(page).to have_text('Demo Mode')
         expect(page).to have_text('Zendaya')
-        expect(page).not_to have_text('Enter manually')
+        expect(page).to have_no_text('Enter manually')
 
         within '.dm-Persona--zendaya' do
           select('MJ', from: 'session_variant')
@@ -164,19 +164,19 @@ describe 'Demo Splash' do
 
         fill_in 'Search...', with: 'A Second Persona'
         expect(page).to have_text('A Second Persona')
-        expect(page).not_to have_text('The Everyperson')
+        expect(page).to have_no_text('The Everyperson')
 
         fill_in 'Search...', with: 'The Everyperson'
         expect(page).to have_text('The Everyperson')
-        expect(page).not_to have_text('A Second Persona')
+        expect(page).to have_no_text('A Second Persona')
 
         page.go_back
         expect(page).to have_text('A Second Persona')
-        expect(page).not_to have_text('The Everyperson')
+        expect(page).to have_no_text('The Everyperson')
 
         page.go_forward
         expect(page).to have_text('The Everyperson')
-        expect(page).not_to have_text('A Second Persona')
+        expect(page).to have_no_text('A Second Persona')
 
         within '.dm-Persona--theEveryperson' do
           click_button 'Sign In'
@@ -201,7 +201,7 @@ describe 'Demo Splash' do
 
       it 'runs the custom block in the controller context' do
         visit '/'
-        expect(page).not_to have_text('Sign Up')
+        expect(page).to have_no_text('Sign Up')
         expect(page).to have_text('Demo Mode')
         expect(page).to have_text('Redirects To Not Found')
 

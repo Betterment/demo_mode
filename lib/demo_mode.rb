@@ -18,7 +18,7 @@ module DemoMode
     delegate(*Config.configurations, to: :configuration)
 
     def enabled?
-      ActiveModel::Type::Boolean::FALSE_VALUES.exclude?(ENV.fetch('DEMO_MODE', false)).tap do |enabled|
+      ActiveModel::Type::Boolean::FALSE_VALUES.exclude?(ENV.fetch('DEMO_MODE', 'false')).tap do |enabled|
         webvalve_check! if enabled && defined?(WebValve)
       end
     end

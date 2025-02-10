@@ -19,7 +19,7 @@ module DemoMode::Clis
       CLI::UI::Prompt.const_get(:InteractiveOptions)
     end
 
-    def presented_options(recalculate: false) # rubocop:disable Metrics/AbcSize, Metrics/PerceivedComplexity
+    def presented_options(recalculate: false) # rubocop:disable Metrics/PerceivedComplexity
       return @presented_options unless recalculate
 
       @presented_options = @options.zip(1..Float::INFINITY)

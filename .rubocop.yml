@@ -24,3 +24,6 @@ Betterment/UnscopedFind:
 Bundler/OrderedGems:
   Exclude:
     - "gemfiles/*.gemfile"
+
+Capybara/ClickLinkOrButtonStyle:
+  Enabled: false

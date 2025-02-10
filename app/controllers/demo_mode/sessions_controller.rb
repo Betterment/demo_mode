@@ -28,7 +28,7 @@ module DemoMode
       @session.save_and_generate_account_later!(**options_params.to_unsafe_h.deep_symbolize_keys)
       session[:demo_session] = { 'id' => @session.id, 'last_request_at' => Time.zone.now }
       respond_to do |f|
-        f.html { redirect_to @session }
+        f.html { redirect_to @session, status: :see_other }
         f.json { render_signinable_json }
       end
     end
