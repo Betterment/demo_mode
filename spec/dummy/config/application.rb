@@ -5,6 +5,7 @@ require 'action_view/railtie'
 require 'active_job/railtie'
 require 'active_model/railtie'
 require 'active_record/railtie'
+require 'sprockets/railtie'
 
 Bundler.require(:default, Rails.env)
 
