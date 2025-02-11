@@ -26,7 +26,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'activejob', rails_constraints
   s.add_dependency 'activerecord', rails_constraints
   s.add_dependency 'activesupport', rails_constraints
-  s.add_dependency 'cli-ui', '~> 1.3.0'
+  s.add_dependency 'cli-ui', '~> 2.3'
   s.add_dependency 'railties', rails_constraints
 
   s.add_development_dependency 'actionmailer', rails_constraints
