@@ -15,7 +15,7 @@
     }
 
     func.next().value.then((resp) => {
-      if (resp.error) {
+      if (resp.failed) {
         document.querySelector("#LoadingMessage").classList.add("hidden");
         document.querySelector("#ErrorMessage").classList.remove("hidden");
       } else if (resp.processing) {
