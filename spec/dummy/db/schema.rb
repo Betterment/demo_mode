@@ -10,8 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_05_05_000000) do
-
+ActiveRecord::Schema[8.0].define(version: 2025_02_10_222933) do
   create_table "delayed_jobs", force: :cascade do |t|
     t.integer "attempts", default: 0, null: false
     t.datetime "created_at", null: false
@@ -35,6 +34,7 @@ ActiveRecord::Schema.define(version: 2021_05_05_000000) do
     t.datetime "updated_at", null: false
     t.string "variant", default: "default", null: false
     t.string "signinable_password", null: false
+    t.datetime "failed_at", precision: nil
     t.index ["signinable_type", "signinable_id"], name: "index_demo_mode_sessions_on_signinable_type_and_signinable_id"
   end
 
@@ -53,5 +53,4 @@ ActiveRecord::Schema.define(version: 2021_05_05_000000) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
-
 end

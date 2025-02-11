@@ -38,11 +38,11 @@ RSpec.describe DemoMode::AccountGenerationJob do
       DemoMode::Session.create!(persona_name: :the_everyperson, variant: :erroring)
     end
 
-    it 'the error gets saved to the session' do
+    it 'saves the failed_at timestamp to the session' do
       expect {
         described_class.perform_now(session)
       }.to raise_error(RuntimeError, 'Failed to create signinable persona!')
-        .and change { session.reload.error }.from(nil).to('Oops! Error error!')
+        .and change { session.reload.failed_at }.from(nil).to(be_present)
     end
   end
 end

@@ -6,7 +6,7 @@ module DemoMode
       session.with_lock do
         persona = session.persona
         if persona.blank?
-          session.update!(error: "Unknown persona: #{session.persona_name}")
+          session.update!(failed_at: Time.current)
           raise "Unknown persona: #{session.persona_name}"
         end
 

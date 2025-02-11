@@ -3,7 +3,6 @@
 module DemoMode
   class Session < ActiveRecord::Base
     attribute :variant, default: :default
-    attribute :failed_at, default: nil
 
     validates :persona_name, :variant, presence: true
     validates :persona, presence: { message: :required }, on: :create, if: :persona_name?
