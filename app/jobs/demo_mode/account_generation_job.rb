@@ -5,7 +5,10 @@ module DemoMode
     def perform(session, **options)
       session.with_lock do
         persona = session.persona
-        raise "Unknown persona: #{session.persona_name}" if persona.blank?
+        if persona.blank?
+          session.update!(error: "Unknown persona: #{session.persona_name}")
+          raise "Unknown persona: #{session.persona_name}"
+        end
 
         begin
           signinable = persona.generate!(variant: session.variant, password: session.signinable_password, options: options)
