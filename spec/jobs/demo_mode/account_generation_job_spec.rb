@@ -30,7 +30,19 @@ RSpec.describe DemoMode::AccountGenerationJob do
       expect {
         described_class.perform_now(session)
       }.to raise_error(RuntimeError, 'Unknown persona: garbage')
-      expect(session.error).to eq('Unknown persona: garbage')
+    end
+  end
+
+  context 'when there is an error generating the persona' do
+    let(:session) do
+      DemoMode::Session.create!(persona_name: :the_everyperson, variant: :erroring)
+    end
+
+    it 'the error gets saved to the session' do
+      expect {
+        described_class.perform_now(session)
+      }.to raise_error(RuntimeError, 'Failed to create signinable persona!')
+        .and change { session.reload.error }.from(nil).to('Oops! Error error!')
     end
   end
 end
