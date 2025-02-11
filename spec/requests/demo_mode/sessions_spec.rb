@@ -162,7 +162,7 @@ RSpec.describe DemoMode::SessionsController do # rubocop:disable RSpec/FilePath
             "persona_name" => "the_everyperson",
             "title" => "The Everyperson",
             "features" => ['Can sing'],
-            "variants" => [{ "name" => "default" }, { "name" => "alternate bruce" }],
+            "variants" => [{ "name" => "default" }, { "name" => "alternate bruce" }, { "name" => "erroring" }],
           },
           {
             "persona_name" => "zendaya",
@@ -186,6 +186,21 @@ RSpec.describe DemoMode::SessionsController do # rubocop:disable RSpec/FilePath
           expect(response_json['processing']).to be true
           expect(response_json['username']).to be_nil
           expect(response_json['password']).to be_nil
+        end
+      end
+
+      context 'when persona is erroring' do
+        it 'returns json with error' do
+          session = DemoMode::Session.create!(persona_name: DemoMode.personas.first.name)
+          session.reload.update!(signinable: nil, error: 'Oh no...')
+
+          get "/ohno/sessions/#{session.id}", params: {}, headers: request_headers
+
+          expect(response_json['id']).to eq session.id
+          expect(response_json['processing']).to be true
+          expect(response_json['username']).to be_nil
+          expect(response_json['password']).to be_nil
+          expect(response_json['error']).to eq 'Oh no...'
         end
       end
 
