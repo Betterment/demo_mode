@@ -316,3 +316,7 @@ td {
 .center {
     text-align: center;
 }
+
+#ErrorMessage {
+    display: none;
+}

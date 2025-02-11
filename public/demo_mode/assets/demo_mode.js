@@ -15,12 +15,9 @@
     }
 
     func.next().value.then((resp) => {
-      console.log("test", resp);
       if (resp.error) {
         document.querySelector("#LoadingMessage").style.display = "none";
-        const errorMessageElem = document.querySelector("#ErrorMessage");
-        errorMessageElem.style.display = "block";
-        errorMessageElem.textContent = "Error: " + resp.error;
+        document.querySelector("#ErrorMessage").style.display = "block";
       } else if (resp.processing) {
         setTimeout(
           () => pollURL(url, minInterval, success, func),
