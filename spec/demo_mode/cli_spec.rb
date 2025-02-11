@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
+require 'sorbet-runtime'
 require 'demo_mode/cli'
 
 RSpec.describe DemoMode::Cli do
