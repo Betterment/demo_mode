@@ -15,7 +15,7 @@ module DemoMode
           session.update!(signinable: signinable)
         rescue StandardError => e
           session.update!(failed_at: Time.current)
-          Rails.logger.error(e.message)
+          Rails.logger.error("#{e.message}\n#{e.backtrace.join("\n")}")
         end
       end
       raise "Failed to create signinable persona!" if session.signinable.blank?
