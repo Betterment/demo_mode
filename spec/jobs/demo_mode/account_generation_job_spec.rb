@@ -21,6 +21,10 @@ RSpec.describe DemoMode::AccountGenerationJob do
   end
 
   context 'when the persona must exist' do
+    before do
+      allow(Rails.logger).to receive(:error).and_call_original
+    end
+
     let(:session) do
       session = DemoMode::Session.new(persona_name: :garbage)
       session.save!(validate: false)
@@ -30,7 +34,10 @@ RSpec.describe DemoMode::AccountGenerationJob do
     it 'raises an exception' do
       expect {
         described_class.perform_now(session)
-      }.to raise_error(RuntimeError, 'Unknown persona: garbage')
+      }.to raise_error(RuntimeError, 'Failed to create signinable persona!')
+      expect(Rails.logger).to have_received(:error).with(instance_of(RuntimeError)) do |error|
+        expect(error.message).to match(/Unknown persona: garbage/)
+      end
     end
   end
 
