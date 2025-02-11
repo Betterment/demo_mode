@@ -16,8 +16,8 @@
 
     func.next().value.then((resp) => {
       if (resp.error) {
-        document.querySelector("#LoadingMessage").style.display = "none";
-        document.querySelector("#ErrorMessage").style.display = "block";
+        document.querySelector("#LoadingMessage").classList.add("hidden");
+        document.querySelector("#ErrorMessage").classList.remove("hidden");
       } else if (resp.processing) {
         setTimeout(
           () => pollURL(url, minInterval, success, func),

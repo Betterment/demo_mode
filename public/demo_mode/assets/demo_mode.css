@@ -317,6 +317,6 @@ td {
     text-align: center;
 }
 
-#ErrorMessage {
+.hidden {
     display: none;
 }

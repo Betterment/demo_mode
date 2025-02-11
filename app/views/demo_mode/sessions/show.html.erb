@@ -21,7 +21,7 @@
       <%= instance_eval(&DemoMode.loader) %>
       <h4><span id="DemoTypedText"></span></h4>
     </figure>
-    <div id="ErrorMessage">
+    <div id="ErrorMessage" class="hidden">
       <div>Unable to generate persona.</div>
       <%= link_to "Go back to persona selection", new_session_path, aria: { label: 'Homepage' } %>
     </div>
