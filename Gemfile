@@ -3,9 +3,6 @@
 source 'https://rubygems.org'
 git_source(:https_github) { |repo_name| "https://github.com/#{repo_name}" }
 
-# gem 'pry'
-# gem 'pry-rails'
-
 gemspec
 
 # These pins are necesary for Ruby 3.0
