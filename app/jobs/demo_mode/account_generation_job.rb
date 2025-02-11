@@ -5,17 +5,16 @@ module DemoMode
     def perform(session, **options)
       session.with_lock do
         persona = session.persona
-        if persona.blank?
-          session.update!(failed_at: Time.current)
-          raise "Unknown persona: #{session.persona_name}"
-        end
+        raise "Unknown persona: #{session.persona_name}" if persona.blank?
 
         begin
           signinable = persona.generate!(variant: session.variant, password: session.signinable_password, options: options)
-          session.update!(signinable: signinable)
+          if signinable.present?
+            session.update!(signinable: signinable, status: 'successful')
+          end
         rescue StandardError => e
-          session.update!(failed_at: Time.current)
-          Rails.logger.error("#{e.message}\n#{e.backtrace.join("\n")}")
+          session.update!(status: 'failed')
+          Rails.logger.error(e)
         end
       end
       raise "Failed to create signinable persona!" if session.signinable.blank?

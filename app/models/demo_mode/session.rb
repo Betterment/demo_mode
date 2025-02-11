@@ -6,6 +6,7 @@ module DemoMode
 
     validates :persona_name, :variant, presence: true
     validates :persona, presence: { message: :required }, on: :create, if: :persona_name?
+    validates :status, inclusion: { in: %w(processing successful failed) }
     belongs_to :signinable, polymorphic: true, optional: true
 
     before_create :set_password!
@@ -40,7 +41,11 @@ module DemoMode
     end
 
     def failed?
-      failed_at.present?
+      status == 'failed'
+    end
+
+    def processing?
+      status == 'processing'
     end
 
     private

@@ -34,7 +34,7 @@ ActiveRecord::Schema.define(version: 2025_02_10_222933) do
     t.datetime "updated_at", null: false
     t.string "variant", default: "default", null: false
     t.string "signinable_password", null: false
-    t.datetime "failed_at", precision: nil
+    t.string "status", default: "processing", null: false
     t.index ["signinable_type", "signinable_id"], name: "index_demo_mode_sessions_on_signinable_type_and_signinable_id"
   end
 
