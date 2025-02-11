@@ -64,8 +64,8 @@ module DemoMode
     end
 
     WORDS = %w(area book business case child company country day eye fact family government group home job life lot money month night number
-               office people phone place point problem program question right room school state story student study system thing time water
-               way week word work world year).freeze
+      office people phone place point problem program question right room school state story student study system thing time water
+      way week word work world year).freeze
 
     def password(&block)
       if block

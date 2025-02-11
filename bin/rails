@@ -1,0 +1,10 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+ENGINE_ROOT = File.expand_path('..', __dir__)
+ENGINE_PATH = File.expand_path('../lib/demo_mode/engine', __dir__)
+APP_PATH = File.expand_path('../spec/dummy/config/application', __dir__)
+
+require 'bundler/setup'
+require 'rails/all'
+require 'rails/engine/commands'

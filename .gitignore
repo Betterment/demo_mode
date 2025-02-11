@@ -3,9 +3,10 @@ log/*.log
 pkg/
 spec/examples.txt
 spec/dummy/log
-spec/dummy/db/combustion_test.*
 spec/dummy/config/deprecations.ignore
+spec/dummy/db/*.sqlite
+spec/dummy/db/*.sqlite-shm
+spec/dummy/db/*.sqlite-wal
 spec/dummy/tmp
 doc/
 .yardoc/
-*.sqlite

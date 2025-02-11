@@ -26,20 +26,18 @@ Gem::Specification.new do |s|
   s.add_dependency 'activejob', rails_constraints
   s.add_dependency 'activerecord', rails_constraints
   s.add_dependency 'activesupport', rails_constraints
-  s.add_dependency 'cli-ui'
+  s.add_dependency 'cli-ui', '~> 1.3.0'
   s.add_dependency 'railties', rails_constraints
 
   s.add_development_dependency 'actionmailer', rails_constraints
   s.add_development_dependency 'appraisal'
   s.add_development_dependency 'betterlint'
   s.add_development_dependency 'capybara'
-  s.add_development_dependency 'combustion'
   s.add_development_dependency 'cuprite'
   s.add_development_dependency 'factory_bot'
   s.add_development_dependency 'net-smtp'
   s.add_development_dependency 'rspec-rails'
   s.add_development_dependency 'sprockets-rails'
   s.add_development_dependency 'sqlite3'
-  s.add_development_dependency 'uncruft'
   s.add_development_dependency 'webrick'
 end

@@ -8,12 +8,18 @@ end
 
 Bundler::GemHelper.install_tasks
 
+APP_RAKEFILE = File.expand_path('spec/dummy/Rakefile', __dir__)
+load 'rails/tasks/engine.rake'
+
 require 'rubocop/rake_task'
 RuboCop::RakeTask.new
 
 require 'rspec/core'
 require 'rspec/core/rake_task'
 RSpec::Core::RakeTask.new(:spec)
+
+desc 'Create a persona'
+task create_user: 'app:persona:create'
 
 def default_task
   if ENV.fetch('APPRAISAL_INITIALIZED', nil) || ENV.fetch('CI', nil)

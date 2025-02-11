@@ -37,7 +37,7 @@ class DemoMode::Cli
       end
     end
 
-    def prompt_persona # rubocop:disable Metrics/AbcSize
+    def prompt_persona
       CLI::UI::Frame.open("{{*}} Generate an Account! {{*}}") do
         CLI::UI::Prompt.ask('Which persona should we use?') do |handler|
           DemoMode.personas.sort_by { |p| p.name.to_s }.each do |persona|

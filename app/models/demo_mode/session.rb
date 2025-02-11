@@ -11,10 +11,10 @@ module DemoMode
     before_create :set_password!
 
     delegate :begin_demo,
-             :custom_sign_in?,
-             :display_credentials?,
-             to: :persona,
-             allow_nil: true
+      :custom_sign_in?,
+      :display_credentials?,
+      to: :persona,
+      allow_nil: true
 
     def signinable_username
       signinable.public_send(DemoMode.signinable_username_method)
