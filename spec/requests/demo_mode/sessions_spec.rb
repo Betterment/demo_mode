@@ -147,7 +147,7 @@ RSpec.describe DemoMode::SessionsController do # rubocop:disable RSpec/FilePath
       end
 
       it 'renders a custom stylesheet provided as a callable' do
-        DemoMode.stylesheets << ->(_) { asset_path('/custom-styles.css') }
+        DemoMode.stylesheets << -> { asset_path('/custom-styles.css') }
 
         get '/ohno/sessions/new'
         expect(response.body).to match(%r{<link .+ href="/custom-styles.css"})

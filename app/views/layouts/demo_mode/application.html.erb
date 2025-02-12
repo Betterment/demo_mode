@@ -8,7 +8,7 @@
 
   <% DemoMode.stylesheets.each do |stylesheet| %>
     <% if stylesheet.respond_to?(:call) %>
-      <%= stylesheet_link_tag(instance_eval(&stylesheet), media: 'all') %>
+      <%= stylesheet_link_tag(instance_exec(&stylesheet), media: 'all') %>
     <% else %>
       <%= stylesheet_link_tag(stylesheet, media: 'all') %>
     <% end %>
