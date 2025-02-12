@@ -30,8 +30,8 @@ module DemoMode
 
     def stylesheets
       @stylesheets ||= [
-        "/assets/demo_mode/vendor/normalize-v8.0.1.css",
-        "/assets/demo_mode/demo_mode.css?v=#{VERSION}",
+        "/demo_mode/assets/vendor/normalize-v8.0.1.css",
+        "/demo_mode/assets/demo_mode.css?v=#{VERSION}",
       ]
     end
 
@@ -47,7 +47,7 @@ module DemoMode
       if block
         @loader = block
       else
-        @loader ||= ->(_) { image_tag("/assets/demo_mode/loader.png?v=#{VERSION}") }
+        @loader ||= ->(_) { image_tag("/demo_mode/assets/loader.png?v=#{VERSION}") }
       end
     end
 

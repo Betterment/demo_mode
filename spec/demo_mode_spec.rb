@@ -75,10 +75,10 @@ RSpec.describe DemoMode do
       end
 
       expect(render_value(described_class.logo)).to eq '<strong>Dummy</strong>' # default
-      expect(render_value(described_class.loader)).to match %r{img src="/assets/demo_mode/loader\.png\?v=#{DemoMode::VERSION}"}o
+      expect(render_value(described_class.loader)).to match %r{img src="/demo_mode/assets/loader\.png\?v=#{DemoMode::VERSION}"}o
       expect(described_class.personas.count).to eq 1
       described_class.personas.first.tap do |persona|
-        expect(render_value(persona.icon)).to match %r{img src="/assets/demo_mode/icon--user\.png\?v=#{DemoMode::VERSION}"}o # default
+        expect(render_value(persona.icon)).to match %r{img src="/demo_mode/assets/icon--user\.png\?v=#{DemoMode::VERSION}"}o # default
         expect(persona.features).to eq ['test']
         expect(generated_persona).to be false
         expect(persona.generate!).to eq 'something_important'
@@ -128,8 +128,8 @@ RSpec.describe DemoMode do
 
       expect(described_class.stylesheets).to eq([
         '/before.css',
-        '/assets/demo_mode/vendor/normalize-v8.0.1.css',
-        "/assets/demo_mode/demo_mode.css?v=#{DemoMode::VERSION}",
+        '/demo_mode/assets/vendor/normalize-v8.0.1.css',
+        "/demo_mode/assets/demo_mode.css?v=#{DemoMode::VERSION}",
         '/after.css',
       ])
 
@@ -137,7 +137,7 @@ RSpec.describe DemoMode do
       expect(render_value(described_class.loader)).to match %r{img src="/images/loading-for-real.gif"}
       expect(described_class.personas.count).to eq 3
       described_class.personas.first.tap do |persona|
-        expect(render_value(persona.icon)).to match %r{img src="/assets/demo_mode/icon--tophat\.png\?v=#{DemoMode::VERSION}"}o
+        expect(render_value(persona.icon)).to match %r{img src="/demo_mode/assets/icon--tophat\.png\?v=#{DemoMode::VERSION}"}o
         expect(persona.features).to eq(['foo'])
         expect(generated_persona_1).to be false
         expect(persona.generate!(password: 'cool_password')).to eq 'banana'
@@ -189,7 +189,7 @@ RSpec.describe DemoMode do
       described_class.personas.tap do |personas|
         expect(personas.count).to eq 1
         personas.first.tap do |persona|
-          expect(render_value(persona.icon)).to match %r{img src="/assets/demo_mode/icon--users\.png\?v=#{DemoMode::VERSION}"}o
+          expect(render_value(persona.icon)).to match %r{img src="/demo_mode/assets/icon--users\.png\?v=#{DemoMode::VERSION}"}o
           expect(persona.features).to eq ['foo']
           expect(persona.generate!).to eq 'banana'
         end
