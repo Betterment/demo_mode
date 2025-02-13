@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe DemoMode::AccountGenerationJob do
   before do
+    allow(Rails.logger).to receive(:error).and_call_original
     DemoMode.configure do
       personas_path 'config/system-test-personas'
     end
@@ -21,22 +22,18 @@ RSpec.describe DemoMode::AccountGenerationJob do
   end
 
   context 'when the persona must exist' do
-    before do
-      allow(Rails.logger).to receive(:error).and_call_original
-    end
-
     let(:session) do
       session = DemoMode::Session.new(persona_name: :garbage)
       session.save!(validate: false)
       session
     end
 
-    it 'raises an exception' do
+    it 'logs an error and sets the status to failed' do
       expect {
         described_class.perform_now(session)
-      }.to raise_error(RuntimeError, 'Failed to create signinable persona!')
+      }.to change { session.reload.status }.from('processing').to('failed')
       expect(Rails.logger).to have_received(:error).with(instance_of(RuntimeError)) do |error|
-        expect(error.message).to match(/Unknown persona: garbage/)
+        expect(error.message).to eq('Unknown persona: garbage')
       end
     end
   end
@@ -46,11 +43,13 @@ RSpec.describe DemoMode::AccountGenerationJob do
       DemoMode::Session.create!(persona_name: :the_everyperson, variant: :erroring)
     end
 
-    it 'saves the sets the status to failed on the session' do
+    it 'logs an error and sets the status to failed' do
       expect {
         described_class.perform_now(session)
-      }.to raise_error(RuntimeError, 'Failed to create signinable persona!')
-        .and change { session.reload.status }.from('processing').to('failed')
+      }.to change { session.reload.status }.from('processing').to('failed')
+      expect(Rails.logger).to have_received(:error).with(instance_of(RuntimeError)) do |error|
+        expect(error.message).to eq('Oops! Error error!')
+      end
     end
   end
 end

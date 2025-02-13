@@ -10,12 +10,13 @@ module DemoMode
         signinable = persona.generate!(variant: session.variant, password: session.signinable_password, options: options)
         if signinable.present?
           session.update!(signinable: signinable, status: 'successful')
+        else
+          raise "Failed to create signinable persona!"
         end
       rescue StandardError => e
         session.update!(status: 'failed')
         Rails.logger.error(e)
       end
-      raise "Failed to create signinable persona!" if session.signinable.blank?
     end
   end
 end
