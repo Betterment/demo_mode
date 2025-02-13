@@ -15,7 +15,7 @@ module DemoMode
         end
       end
     rescue StandardError => e
-      session.update!(status: 'failed') # Avoids validation issues
+      session.update!(status: 'failed')
       raise e
     end
   end
