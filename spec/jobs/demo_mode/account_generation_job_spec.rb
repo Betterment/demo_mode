@@ -31,10 +31,8 @@ RSpec.describe DemoMode::AccountGenerationJob do
     it 'logs an error and sets the status to failed' do
       expect {
         described_class.perform_now(session)
-      }.to change { session.reload.status }.from('processing').to('failed')
-      expect(Rails.logger).to have_received(:error).with(instance_of(RuntimeError)) do |error|
-        expect(error.message).to eq('Unknown persona: garbage')
-      end
+      }.to raise_error(RuntimeError, 'Unknown persona: garbage')
+        .and change { session.reload.status }.from('processing').to('failed')
     end
   end
 
@@ -46,10 +44,8 @@ RSpec.describe DemoMode::AccountGenerationJob do
     it 'logs an error and sets the status to failed' do
       expect {
         described_class.perform_now(session)
-      }.to change { session.reload.status }.from('processing').to('failed')
-      expect(Rails.logger).to have_received(:error).with(instance_of(RuntimeError)) do |error|
-        expect(error.message).to eq('Oops! Error error!')
-      end
+      }.to raise_error(RuntimeError, 'Oops! Error error!')
+        .and change { session.reload.status }.from('processing').to('failed')
     end
   end
 end

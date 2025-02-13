@@ -13,10 +13,10 @@ module DemoMode
         else
           raise "Failed to create signinable persona!"
         end
-      rescue StandardError => e
-        session.update!(status: 'failed')
-        Rails.logger.error(e)
       end
+    rescue StandardError => e
+      session.update!(status: 'failed') # Avoids validation issues
+      raise e
     end
   end
 end
