@@ -15,7 +15,6 @@
     }
 
     func.next().value.then((resp) => {
-      console.log(resp.status)
       if (resp.status === 'failed') {
         document.querySelector("#LoadingMessage").classList.add("hidden");
         document.querySelector("#ErrorMessage").classList.remove("hidden");
