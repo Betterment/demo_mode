@@ -4,7 +4,6 @@ require 'spec_helper'
 
 RSpec.describe DemoMode::AccountGenerationJob do
   before do
-    allow(Rails.logger).to receive(:error).and_call_original
     DemoMode.configure do
       personas_path 'config/system-test-personas'
     end
