@@ -3,6 +3,7 @@
 module DemoMode
   class Session < ActiveRecord::Base
     attribute :variant, default: :default
+    attribute :status, default: 'processing'
 
     validates :persona_name, :variant, presence: true
     validates :persona, presence: { message: :required }, on: :create, if: :persona_name?
@@ -38,10 +39,6 @@ module DemoMode
         save!
         AccountGenerationJob.perform_later(self, **options)
       end
-    end
-
-    def failed?
-      status == 'failed'
     end
 
     def processing?

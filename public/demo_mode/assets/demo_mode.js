@@ -15,10 +15,11 @@
     }
 
     func.next().value.then((resp) => {
-      if (resp.failed) {
+      console.log(resp.status)
+      if (resp.status === 'failed') {
         document.querySelector("#LoadingMessage").classList.add("hidden");
         document.querySelector("#ErrorMessage").classList.remove("hidden");
-      } else if (resp.processing) {
+      } else if (resp.status === 'processing') {
         setTimeout(
           () => pollURL(url, minInterval, success, func),
           Math.max(0, minInterval - (performance.now() - then))

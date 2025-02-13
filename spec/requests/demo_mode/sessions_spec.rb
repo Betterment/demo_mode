@@ -186,7 +186,7 @@ RSpec.describe DemoMode::SessionsController do # rubocop:disable RSpec/FilePath
           expect(response_json['processing']).to be true
           expect(response_json['username']).to be_nil
           expect(response_json['password']).to be_nil
-          expect(response_json['failed']).to be false
+          expect(response_json['status']).to eq 'processing'
         end
       end
 
@@ -201,7 +201,7 @@ RSpec.describe DemoMode::SessionsController do # rubocop:disable RSpec/FilePath
           expect(response_json['processing']).to be false
           expect(response_json['username']).to be_nil
           expect(response_json['password']).to be_nil
-          expect(response_json['failed']).to be true
+          expect(response_json['status']).to eq 'failed'
         end
       end
 
@@ -216,6 +216,7 @@ RSpec.describe DemoMode::SessionsController do # rubocop:disable RSpec/FilePath
           expect(response_json['processing']).to be false
           expect(response_json['username']).not_to be_nil
           expect(response_json['password']).not_to be_nil
+          expect(response_json['status']).to eq 'successful'
         end
       end
     end

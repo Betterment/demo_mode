@@ -50,11 +50,12 @@ module DemoMode
 
     def render_signinable_json
       if @session.signinable.blank?
-        render json: { id: @session.id, processing: @session.processing?, failed: @session.failed? }
+        render json: { id: @session.id, processing: @session.processing?, status: @session.status }
       else
         render json: {
           id: @session.id,
           processing: @session.processing?,
+          status: @session.status,
           username: @session.signinable_username,
           password: @session.signinable_password,
         }
