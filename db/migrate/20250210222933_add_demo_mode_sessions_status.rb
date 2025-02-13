@@ -6,7 +6,7 @@ class AddDemoModeSessionsStatus < ActiveRecord::Migration[5.1]
 
     reversible do |dir|
       dir.up do
-        DemoMode::Session.update_all(status: 'successful') # rubocop:disable Rails/SkipsModelValidations
+        execute "UPDATE demo_mode_sessions SET status = 'successful'"
       end
     end
   end
