@@ -3,11 +3,18 @@
 module DemoMode
   class Session < ActiveRecord::Base
     attribute :variant, default: :default
-    attribute :status, default: 'processing'
+
+    if ActiveRecord.gem_version >= Gem::Version.new('7.2')
+      enum :status, { processing: 'processing', successful: 'successful', failed: 'failed' }, default: 'processing'
+    else
+      attribute :status, default: :processing
+      enum status: { processing: 'processing', successful: 'successful', failed: 'failed' }
+    end
 
     validates :persona_name, :variant, presence: true
     validates :persona, presence: { message: :required }, on: :create, if: :persona_name?
     validates :status, inclusion: { in: %w(processing successful failed) }
+
     belongs_to :signinable, polymorphic: true, optional: true
 
     before_create :set_password!
@@ -39,10 +46,6 @@ module DemoMode
         save!
         AccountGenerationJob.perform_later(self, **options)
       end
-    end
-
-    def processing?
-      status == 'processing'
     end
 
     private
