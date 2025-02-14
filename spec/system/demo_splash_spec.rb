@@ -232,6 +232,32 @@ describe 'Demo Splash' do
         expect(page).to have_text('The Everyperson')
       end
     end
+
+    context 'when the persona raises an error' do
+      before do
+        ActiveJob::Base.queue_adapter = :async
+      end
+
+      after do
+        ActiveJob::Base.queue_adapter = :inline
+      end
+
+      it 'shows an error message' do
+        visit '/'
+        expect(page).to have_text('Demo Mode')
+        expect(page).to have_text('The Everyperson')
+
+        within '.dm-Persona--theEveryperson' do
+          select('erroring', from: 'session_variant')
+          click_button 'Sign In'
+        end
+
+        expect(page).to have_text('Unable to generate persona.')
+        click_link 'Go back to persona selection'
+
+        expect(page).to have_current_path('/ohno/sessions/new')
+      end
+    end
   end
 
   context 'when demo mode is not enabled' do

@@ -17,10 +17,14 @@
   </article>
 <% else %>
   <article class="middle center" data-polling-refresh-url='<%= session_path(@session, format: :json) %>'>
-    <figure>
+    <figure id="LoadingMessage" class="<%= 'hidden' if @session.failed? %>">
       <%= instance_eval(&DemoMode.loader) %>
       <h4><span id="DemoTypedText"></span></h4>
     </figure>
+    <div id="ErrorMessage" class="<%= 'hidden' unless @session.failed? %>">
+      <div>Unable to generate persona.</div>
+      <%= link_to "Go back to persona selection", new_session_path, aria: { label: 'Homepage' } %>
+    </div>
 
     <script type="text/javascript">
       new Typed('#DemoTypedText', {
