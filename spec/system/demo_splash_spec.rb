@@ -4,8 +4,6 @@ require 'spec_helper'
 
 describe 'Demo Splash' do
   context 'when demo mode is enabled', :demo_mode_enabled do
-    around { |example| with_production_error_handling { example.run } }
-
     before do
       DemoMode.configure do
         display_credentials false
@@ -236,6 +234,14 @@ describe 'Demo Splash' do
     end
 
     context 'when the persona raises an error' do
+      before do
+        ActiveJob::Base.queue_adapter = :async
+      end
+
+      after do
+        ActiveJob::Base.queue_adapter = :inline
+      end
+
       it 'shows an error message' do
         visit '/'
         expect(page).to have_text('Demo Mode')
@@ -249,7 +255,7 @@ describe 'Demo Splash' do
         expect(page).to have_text('Unable to generate persona.')
         click_link 'Go back to persona selection'
 
-        expect(page).to have_current_path('/')
+        expect(page).to have_current_path('/ohno/sessions/new')
       end
     end
   end
