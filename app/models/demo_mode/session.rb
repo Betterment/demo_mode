@@ -13,6 +13,7 @@ module DemoMode
 
     validates :persona_name, :variant, presence: true
     validates :persona, presence: { message: :required }, on: :create, if: :persona_name?
+    validate :successful_status_requires_signinable
 
     belongs_to :signinable, polymorphic: true, optional: true
 
@@ -51,6 +52,12 @@ module DemoMode
 
     def set_password!
       self.signinable_password ||= DemoMode.current_password
+    end
+
+    def successful_status_requires_signinable
+      if status == 'successful' && signinable.blank?
+        errors.add(:status, 'cannot be successful if signinable is not present')
+      end
     end
   end
 end
