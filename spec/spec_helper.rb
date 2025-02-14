@@ -7,6 +7,7 @@ require 'factory_bot'
 require 'demo_mode/factory_bot_ext'
 require 'rspec/rails'
 require 'capybara/cuprite'
+require 'support/system_spec_helper'
 
 Capybara.register_driver(:better_cuprite) do |app|
   browser_options = ENV.fetch('CI', nil) ? { 'no-sandbox': nil } : {}
@@ -39,6 +40,7 @@ RSpec.configure do |config|
   config.example_status_persistence_file_path = 'spec/examples.txt'
   config.include Capybara::DSL
   config.include ActiveSupport::Testing::TimeHelpers
+  config.include SystemSpecHelper, type: :system
   config.infer_spec_type_from_file_location!
 
   config.before(:each, type: :system) do

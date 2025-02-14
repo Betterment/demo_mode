@@ -4,6 +4,8 @@ require 'spec_helper'
 
 describe 'Demo Splash' do
   context 'when demo mode is enabled', :demo_mode_enabled do
+    around { |example| with_production_error_handling { example.run } }
+
     before do
       DemoMode.configure do
         display_credentials false
@@ -230,6 +232,24 @@ describe 'Demo Splash' do
 
         expect(page).to have_text('Demo Mode')
         expect(page).to have_text('The Everyperson')
+      end
+    end
+
+    context 'when the persona raises an error' do
+      it 'shows an error message' do
+        visit '/'
+        expect(page).to have_text('Demo Mode')
+        expect(page).to have_text('The Everyperson')
+
+        within '.dm-Persona--theEveryperson' do
+          select('erroring', from: 'session_variant')
+          click_button 'Sign In'
+        end
+
+        expect(page).to have_text('Unable to generate persona.')
+        click_link 'Go back to persona selection'
+
+        expect(page).to have_current_path('/')
       end
     end
   end

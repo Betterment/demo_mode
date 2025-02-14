@@ -4,8 +4,17 @@ module DemoMode
   class Session < ActiveRecord::Base
     attribute :variant, default: :default
 
+    if ActiveRecord.gem_version >= Gem::Version.new('7.2')
+      enum :status, { processing: 'processing', successful: 'successful', failed: 'failed' }, default: 'processing'
+    else
+      attribute :status, default: :processing
+      enum status: { processing: 'processing', successful: 'successful', failed: 'failed' }
+    end
+
     validates :persona_name, :variant, presence: true
     validates :persona, presence: { message: :required }, on: :create, if: :persona_name?
+    validate :successful_status_requires_signinable
+
     belongs_to :signinable, polymorphic: true, optional: true
 
     before_create :set_password!
@@ -43,6 +52,12 @@ module DemoMode
 
     def set_password!
       self.signinable_password ||= DemoMode.current_password
+    end
+
+    def successful_status_requires_signinable
+      if status == 'successful' && signinable.blank?
+        errors.add(:status, 'cannot be successful if signinable is not present')
+      end
     end
   end
 end
