@@ -234,12 +234,12 @@ describe 'Demo Splash' do
     end
 
     context 'when the persona raises an error' do
-      before do
+      around do |example|
+        queue_adapter_was = ActiveJob::Base.queue_adapter
         ActiveJob::Base.queue_adapter = :async
-      end
-
-      after do
-        ActiveJob::Base.queue_adapter = :inline
+        example.run
+      ensure
+        ActiveJob::Base.queue_adapter = queue_adapter_was
       end
 
       it 'shows an error message' do
