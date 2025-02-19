@@ -32,6 +32,12 @@ RSpec.describe DemoMode::Session do
     expect(subject.errors[:variant]).to match_array("can't be blank")
   end
 
+  it 'validates successful status requires signinable' do
+    subject.status = 'successful'
+    expect(subject).not_to be_valid
+    expect(subject.errors[:status]).to match_array('cannot be successful if signinable is not present')
+  end
+
   describe '#persona' do
     before do
       DemoMode.configure do

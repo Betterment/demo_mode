@@ -8,9 +8,11 @@ module DemoMode
         raise "Unknown persona: #{session.persona_name}" if persona.blank?
 
         signinable = persona.generate!(variant: session.variant, password: session.signinable_password, options: options)
-        session.update!(signinable: signinable)
+        session.update!(signinable: signinable, status: 'successful')
       end
-      raise "Failed to create signinable persona!" if session.signinable.blank?
+    rescue StandardError => e
+      session.update!(status: 'failed')
+      raise e
     end
   end
 end
