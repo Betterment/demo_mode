@@ -61,8 +61,8 @@ RSpec.describe DemoMode::Session do
           features << ""
           sign_in_as { DummyUser.create!(name: 'HAL') }
 
-          begin_demo do
-            raise "I'm afraid I can't do that, Dave."
+          begin_demo do |opt|
+            raise "I'm afraid I can't do that, Dave. #{opt}"
           end
         end
       end
@@ -70,7 +70,7 @@ RSpec.describe DemoMode::Session do
       it 'returns a proc that raises the expected message' do
         subject.persona_name = :hal_9000
         expect(subject.begin_demo).to be_present
-        expect { subject.begin_demo.call }
+        expect { subject.begin_demo.call(test: 'test') }
           .to raise_error "I'm afraid I can't do that, Dave."
       end
     end
