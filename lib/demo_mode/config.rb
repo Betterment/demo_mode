@@ -23,6 +23,7 @@ module DemoMode
     configurations << :personas
     configurations << :sign_up_path
     configurations << :sign_in_path
+    configurations << :metadata
 
     def self.app_name
       Rails.application.class.module_parent.name
@@ -90,6 +91,14 @@ module DemoMode
         @sign_in_path = block
       elsif @sign_in_path
         ctx.instance_eval(&@sign_in_path)
+      end
+    end
+
+    def metadata(ctx = nil, &block)
+      if block
+        @metadata = block
+      elsif @metadata
+        ctx.instance_eval(&@metadata)
       end
     end
 
