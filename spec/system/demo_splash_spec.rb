@@ -192,7 +192,7 @@ describe 'Demo Splash' do
           features << 'redirects to a 404'
 
           begin_demo do
-            redirect_to '/not_found_oh_no'
+            proc { redirect_to '/not_found_oh_no' }
           end
 
           sign_in_as { Widget.create! }

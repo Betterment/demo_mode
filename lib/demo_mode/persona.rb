@@ -31,9 +31,16 @@ module DemoMode
       if block
         @begin_demo = block
       else
-        @begin_demo || proc do
-          sign_in @session.signinable
-          redirect_to main_app.root_path
+        @begin_demo || proc do |option|
+          proc do
+            sign_in @session.signinable
+
+            if option.present? && option[:redirect_to].present?
+              redirect_to option[:redirect_to]
+            else
+              redirect_to main_app.root_path
+            end
+          end
         end
       end
     end
