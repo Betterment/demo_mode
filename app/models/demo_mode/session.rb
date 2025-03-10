@@ -22,6 +22,7 @@ module DemoMode
     delegate :begin_demo,
       :custom_sign_in?,
       :display_credentials?,
+      :metadata,
       to: :persona,
       allow_nil: true
 
@@ -30,22 +31,7 @@ module DemoMode
     end
 
     def signinable_metadata
-      metadata = {}
-      DemoMode.metadata.map do |data|
-        keys = nested_keys(data)
-
-        if keys.length > 1
-          metadata[keys.last] = keys.inject(signinable) do |obj, method_name|
-            if obj.try(method_name).present?
-              obj.public_send(method_name)
-            end
-          end
-        elsif signinable.try(data).present?
-          metadata[data] = signinable.public_send(data)
-        end
-      end
-
-      metadata
+      metadata.call(self)
     end
 
     # Heads up: finding a persona is not guaranteed (e.g. past sessions)
@@ -68,10 +54,6 @@ module DemoMode
     end
 
     private
-
-    def nested_keys(metadata)
-      metadata.to_s.split('#')
-    end
 
     def set_password!
       self.signinable_password ||= DemoMode.current_password

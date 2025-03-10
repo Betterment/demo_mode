@@ -135,6 +135,54 @@ RSpec.describe DemoMode::SessionsController do # rubocop:disable RSpec/FilePath
             expect(response_json['password']).to be_nil
           end
         end
+
+        context 'and generate account synchronously' do
+          it 'creates a session synchronously and returns default metadata' do
+            perform_enqueued_jobs do
+              post '/ohno/sessions', params: {
+                session: { persona_name: 'the_everyperson' },
+                options: { synchronous: true },
+              }.to_json, headers: request_headers
+            end
+
+            last_session = DemoMode::Session.last
+
+            expect(DummyUser.last.name).to eq 'Spruce Bringsteen'
+            expect(response_json['id']).to eq last_session.id
+            expect(response_json['processing']).to be false
+            expect(response_json['metadata']['persona_name']).to eq 'the_everyperson'
+          end
+
+          context 'with custom metadata callback' do
+            before do
+              DemoMode.add_persona :example_tester do
+                features << ""
+
+                sign_in_as do
+                  DummyUser.create!(name: 'Example tester')
+                end
+
+                metadata { |_| { name: 'sample metadata' } }
+              end
+            end
+
+            it 'creates a session synchronously and returns custom metadata' do
+              perform_enqueued_jobs do
+                post '/ohno/sessions', params: {
+                  session: { persona_name: 'example_tester' },
+                  options: { synchronous: true },
+                }.to_json, headers: request_headers
+              end
+
+              last_session = DemoMode::Session.last
+
+              expect(DummyUser.last.name).to eq 'Example tester'
+              expect(response_json['id']).to eq last_session.id
+              expect(response_json['processing']).to be false
+              expect(response_json['metadata']['name']).to eq 'sample metadata'
+            end
+          end
+        end
       end
     end
 

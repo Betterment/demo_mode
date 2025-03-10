@@ -25,7 +25,13 @@ module DemoMode
 
     def create
       @session = Session.new(create_params)
-      @session.save_and_generate_account_later!(**options_params.to_unsafe_h.deep_symbolize_keys)
+
+      if options_params[:synchronous]
+        @session.save_and_generate_account!(**options_params.to_unsafe_h.deep_symbolize_keys)
+      else
+        @session.save_and_generate_account_later!(**options_params.to_unsafe_h.deep_symbolize_keys)
+      end
+
       session[:demo_session] = { 'id' => @session.id, 'last_request_at' => Time.zone.now }
       respond_to do |f|
         f.html { redirect_to @session, status: :see_other }
@@ -58,6 +64,7 @@ module DemoMode
           status: @session.status,
           username: @session.signinable_username,
           password: @session.signinable_password,
+          metadata: @session.signinable_metadata,
         }
       end
     end

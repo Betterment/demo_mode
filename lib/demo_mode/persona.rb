@@ -38,6 +38,14 @@ module DemoMode
       end
     end
 
+    def metadata(&block)
+      if block
+        @metadata = block
+      else
+        @metadata ||= ->(session) { { persona_name: session.persona_name } }
+      end
+    end
+
     def sign_in_as(&signinable_generator)
       variant(:default) do
         sign_in_as(&signinable_generator)
