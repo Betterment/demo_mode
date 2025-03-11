@@ -42,7 +42,7 @@ module DemoMode
       if block
         @metadata = block
       else
-        @metadata ||= ->(session) { { persona_name: session.persona_name } }
+        @metadata ||= ->(_) { {} }
       end
     end
 

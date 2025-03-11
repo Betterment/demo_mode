@@ -31,7 +31,7 @@ module DemoMode
     end
 
     def signinable_metadata
-      metadata.call(self)
+      successful? ? metadata.call(self) : {}
     end
 
     # Heads up: finding a persona is not guaranteed (e.g. past sessions)
