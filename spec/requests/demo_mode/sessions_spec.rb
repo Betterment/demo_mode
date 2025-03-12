@@ -138,7 +138,7 @@ RSpec.describe DemoMode::SessionsController do # rubocop:disable RSpec/FilePath
         end
       end
 
-      context 'with inline adapter' do
+      context 'with test adapter' do
         around do |example|
           queue_adapter_was = ActiveJob::Base.queue_adapter
           ActiveJob::Base.queue_adapter = :test
@@ -156,8 +156,8 @@ RSpec.describe DemoMode::SessionsController do # rubocop:disable RSpec/FilePath
 
           last_session = DemoMode::Session.last
           expect(response_json['id']).to eq last_session.id
-          # expect(response_json['processing']).to be false
-          # expect(response_json['metadata']).to eq({})
+          expect(response_json['processing']).to be false
+          expect(response_json['metadata']).to eq({})
         end
 
         context 'with custom metadata callback' do
@@ -183,11 +183,10 @@ RSpec.describe DemoMode::SessionsController do # rubocop:disable RSpec/FilePath
             last_session = DemoMode::Session.last
 
             expect(response_json['id']).to eq last_session.id
-            # expect(response_json['processing']).to be false
-            # expect(response_json['metadata']['name']).to eq 'sample metadata'
+            expect(response_json['processing']).to be false
+            expect(response_json['metadata']['name']).to eq 'sample metadata'
           end
         end
-
       end
     end
 
