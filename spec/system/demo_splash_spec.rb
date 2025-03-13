@@ -4,6 +4,14 @@ require 'spec_helper'
 
 describe 'Demo Splash' do
   context 'when demo mode is enabled', :demo_mode_enabled do
+    around do |example|
+      queue_adapter_was = ActiveJob::Base.queue_adapter
+      ActiveJob::Base.queue_adapter = :inline
+      example.run
+    ensure
+      ActiveJob::Base.queue_adapter = queue_adapter_was
+    end
+
     before do
       DemoMode.configure do
         display_credentials false

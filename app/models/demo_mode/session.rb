@@ -22,11 +22,16 @@ module DemoMode
     delegate :begin_demo,
       :custom_sign_in?,
       :display_credentials?,
+      :metadata,
       to: :persona,
       allow_nil: true
 
     def signinable_username
       signinable.public_send(DemoMode.signinable_username_method)
+    end
+
+    def signinable_metadata
+      successful? ? metadata.call(self) : {}
     end
 
     # Heads up: finding a persona is not guaranteed (e.g. past sessions)

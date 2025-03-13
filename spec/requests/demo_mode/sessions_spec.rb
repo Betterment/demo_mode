@@ -54,6 +54,7 @@ RSpec.describe DemoMode::SessionsController do # rubocop:disable RSpec/FilePath
           expect(response_json['processing']).to be true
           expect(response_json['username']).to be_nil
           expect(response_json['password']).to be_nil
+          expect(response_json['metadata']).to be_nil
         end
       end
 
@@ -133,6 +134,57 @@ RSpec.describe DemoMode::SessionsController do # rubocop:disable RSpec/FilePath
             expect(response_json['processing']).to be true
             expect(response_json['username']).to be_nil
             expect(response_json['password']).to be_nil
+          end
+        end
+      end
+
+      context 'with test adapter' do
+        around do |example|
+          queue_adapter_was = ActiveJob::Base.queue_adapter
+          ActiveJob::Base.queue_adapter = :test
+          example.run
+        ensure
+          ActiveJob::Base.queue_adapter = queue_adapter_was
+        end
+
+        it 'creates a session synchronously and returns default metadata' do
+          perform_enqueued_jobs do
+            post '/ohno/sessions', params: {
+              session: { persona_name: 'the_everyperson' },
+            }.to_json, headers: request_headers
+          end
+
+          last_session = DemoMode::Session.last
+          expect(response_json['id']).to eq last_session.id
+          expect(response_json['processing']).to be false
+          expect(response_json['metadata']).to eq({})
+        end
+
+        context 'with custom metadata callback' do
+          before do
+            DemoMode.add_persona :example_tester do
+              features << ""
+
+              sign_in_as do
+                DummyUser.create!(name: 'Example tester')
+              end
+
+              metadata { |_| { name: 'sample metadata' } }
+            end
+          end
+
+          it 'creates a session synchronously and returns custom metadata' do
+            perform_enqueued_jobs do
+              post '/ohno/sessions', params: {
+                session: { persona_name: 'example_tester' },
+              }.to_json, headers: request_headers
+            end
+
+            last_session = DemoMode::Session.last
+
+            expect(response_json['id']).to eq last_session.id
+            expect(response_json['processing']).to be false
+            expect(response_json['metadata']['name']).to eq 'sample metadata'
           end
         end
       end
