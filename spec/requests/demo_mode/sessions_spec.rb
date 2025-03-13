@@ -203,6 +203,37 @@ RSpec.describe DemoMode::SessionsController do # rubocop:disable RSpec/FilePath
         end
       end
     end
+
+    describe 'GET /sessions/:id' do
+      context 'with custom redirect' do
+        before do
+          DemoMode.add_persona :hal_9000 do
+            features << ""
+            sign_in_as { DummyUser.create!(name: 'HAL') }
+
+            begin_demo do |option|
+              proc do
+                sign_in @session.signinable # rubocop:disable RSpec/InstanceVariable
+
+                if option.present? && option[:redirect_to].present?
+                  redirect_to option[:redirect_to]
+                end
+              end
+            end
+          end
+        end
+
+        it 'creates a session and redirects to custom path' do
+          session = DemoMode::Session.create!(persona_name: 'hal_9000')
+          DemoMode::AccountGenerationJob.perform_now(session)
+
+          get "/ohno/sessions/#{session.id}?redirect_to=%2Fsample%2Fpath"
+
+          expect(response).to redirect_to "/sample/path"
+          expect(controller.session.to_hash['session_id']).not_to be_nil
+        end
+      end
+    end
   end
 
   context 'when demo mode is not enabled' do
