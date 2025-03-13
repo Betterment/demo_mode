@@ -45,7 +45,7 @@ module DemoMode
     end
 
     def begin_demo!
-      instance_eval(&@session.begin_demo.call(**query_params.to_unsafe_h.deep_symbolize_keys))
+      instance_eval(&@session.begin_demo.call(redirect_to: redirect_params))
     end
 
     def render_signinable_json
@@ -80,6 +80,10 @@ module DemoMode
 
     def options_params
       params.fetch(:options, {}).permit!
+    end
+
+    def redirect_params
+      Helper::PathParser.parse(query_params[:redirect_to])
     end
 
     def query_params
