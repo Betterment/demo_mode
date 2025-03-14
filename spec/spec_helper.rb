@@ -53,6 +53,7 @@ RSpec.configure do |config|
 
   config.around(:each, :demo_mode_enabled) do |example|
     ENV['DEMO_MODE'] = '1'
+    ActiveJob::Base.queue_adapter = :test
     example.run
   ensure
     ENV.delete('DEMO_MODE')

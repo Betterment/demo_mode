@@ -138,10 +138,10 @@ RSpec.describe DemoMode::SessionsController do # rubocop:disable RSpec/FilePath
         end
       end
 
-      context 'with test adapter' do
+      context 'with inline adapter' do
         around do |example|
           queue_adapter_was = ActiveJob::Base.queue_adapter
-          ActiveJob::Base.queue_adapter = :test
+          ActiveJob::Base.queue_adapter = :inline
           example.run
         ensure
           ActiveJob::Base.queue_adapter = queue_adapter_was
