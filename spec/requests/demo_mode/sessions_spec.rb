@@ -103,9 +103,8 @@ RSpec.describe DemoMode::SessionsController do # rubocop:disable RSpec/FilePath
 
             expect(DummyUser.last.name).to eq 'Tester'
             expect(response_json['id']).to eq last_session.id
-            expect(response_json['processing']).to be true
-            expect(response_json['username']).to be_nil
-            expect(response_json['password']).to be_nil
+            expect(response_json['processing']).to be false
+            expect(response_json['username']).to eq "Tester"
           end
         end
 
@@ -131,22 +130,13 @@ RSpec.describe DemoMode::SessionsController do # rubocop:disable RSpec/FilePath
 
             expect(DummyUser.last.name).to eq 'New Example Tester'
             expect(response_json['id']).to eq last_session.id
-            expect(response_json['processing']).to be true
-            expect(response_json['username']).to be_nil
-            expect(response_json['password']).to be_nil
+            expect(response_json['processing']).to be false
+            expect(response_json['username']).to eq "New Example Tester"
           end
         end
       end
 
-      context 'with test adapter' do
-        around do |example|
-          queue_adapter_was = ActiveJob::Base.queue_adapter
-          ActiveJob::Base.queue_adapter = :test
-          example.run
-        ensure
-          ActiveJob::Base.queue_adapter = queue_adapter_was
-        end
-
+      context 'with inline adapter', with_queue_adapter: :inline do
         it 'creates a session synchronously and returns default metadata' do
           perform_enqueued_jobs do
             post '/ohno/sessions', params: {

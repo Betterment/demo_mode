@@ -3,15 +3,7 @@
 require 'spec_helper'
 
 describe 'Demo Splash' do
-  context 'when demo mode is enabled', :demo_mode_enabled do
-    around do |example|
-      queue_adapter_was = ActiveJob::Base.queue_adapter
-      ActiveJob::Base.queue_adapter = :inline
-      example.run
-    ensure
-      ActiveJob::Base.queue_adapter = queue_adapter_was
-    end
-
+  context 'when demo mode is enabled', :demo_mode_enabled, with_queue_adapter: :inline do
     before do
       DemoMode.configure do
         display_credentials false
@@ -241,15 +233,7 @@ describe 'Demo Splash' do
       end
     end
 
-    context 'when the persona raises an error' do
-      around do |example|
-        queue_adapter_was = ActiveJob::Base.queue_adapter
-        ActiveJob::Base.queue_adapter = :async
-        example.run
-      ensure
-        ActiveJob::Base.queue_adapter = queue_adapter_was
-      end
-
+    context 'when the persona raises an error', with_queue_adapter: :async do
       it 'shows an error message' do
         visit '/'
         expect(page).to have_text('Demo Mode')

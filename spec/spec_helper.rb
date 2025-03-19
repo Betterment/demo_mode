@@ -51,6 +51,16 @@ RSpec.configure do |config|
     load Rails.root.join('config/initializers/demo_mode.rb')
   end
 
+  config.around(:each, :with_queue_adapter) do |example|
+    queue_adapter_was = ActiveJob::Base.queue_adapter
+    new_adapter = example.metadata[:with_queue_adapter]
+
+    ActiveJob::Base.queue_adapter = new_adapter
+    example.run
+  ensure
+    ActiveJob::Base.queue_adapter = queue_adapter_was
+  end
+
   config.around(:each, :demo_mode_enabled) do |example|
     ENV['DEMO_MODE'] = '1'
     example.run
