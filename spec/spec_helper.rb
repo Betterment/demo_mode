@@ -45,6 +45,10 @@ RSpec.configure do |config|
     driven_by :better_cuprite
   end
 
+  config.before(:each) do
+    ActiveJob::Base.queue_adapter = :test
+  end
+
   # Reset configuration
   config.before(:each) do
     DemoMode.send(:remove_instance_variable, '@configuration')
@@ -53,7 +57,6 @@ RSpec.configure do |config|
 
   config.around(:each, :demo_mode_enabled) do |example|
     ENV['DEMO_MODE'] = '1'
-    ActiveJob::Base.queue_adapter = :test
     example.run
   ensure
     ENV.delete('DEMO_MODE')
