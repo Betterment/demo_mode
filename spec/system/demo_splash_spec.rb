@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 describe 'Demo Splash' do
-  context 'when demo mode is enabled', :demo_mode_enabled do
+  context 'when demo mode is enabled', :demo_mode_enabled, with_queue_adapter: :inline do
     before do
       DemoMode.configure do
         display_credentials false
@@ -11,7 +11,6 @@ describe 'Demo Splash' do
         sign_in_path { nil }
         personas_path 'config/system-test-personas'
       end
-      ActiveJob::Base.queue_adapter = :inline
     end
 
     it 'redirects to the splash, allows selecting a persona, and generates the account' do
@@ -234,11 +233,7 @@ describe 'Demo Splash' do
       end
     end
 
-    context 'when the persona raises an error' do
-      before do
-        ActiveJob::Base.queue_adapter = :async
-      end
-
+    context 'when the persona raises an error', with_queue_adapter: :async do
       it 'shows an error message' do
         visit '/'
         expect(page).to have_text('Demo Mode')

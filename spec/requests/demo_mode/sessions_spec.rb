@@ -136,11 +136,7 @@ RSpec.describe DemoMode::SessionsController do # rubocop:disable RSpec/FilePath
         end
       end
 
-      context 'with inline adapter' do
-        before do
-          ActiveJob::Base.queue_adapter = :inline
-        end
-
+      context 'with inline adapter', with_queue_adapter: :inline do
         it 'creates a session synchronously and returns default metadata' do
           perform_enqueued_jobs do
             post '/ohno/sessions', params: {

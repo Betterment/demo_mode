@@ -45,14 +45,20 @@ RSpec.configure do |config|
     driven_by :better_cuprite
   end
 
-  config.before(:each) do
-    ActiveJob::Base.queue_adapter = :test
-  end
-
   # Reset configuration
   config.before(:each) do
     DemoMode.send(:remove_instance_variable, '@configuration')
     load Rails.root.join('config/initializers/demo_mode.rb')
+  end
+
+  config.around(:each, :with_queue_adapter) do |example|
+    queue_adapter_was = ActiveJob::Base.queue_adapter
+    new_adapter = example.metadata[:with_queue_adapter]
+
+    ActiveJob::Base.queue_adapter = new_adapter
+    example.run
+  ensure
+    ActiveJob::Base.queue_adapter = queue_adapter_was
   end
 
   config.around(:each, :demo_mode_enabled) do |example|
