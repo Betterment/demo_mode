@@ -472,7 +472,16 @@ begin_demo do
 end
 ```
 
-### FactoryBot `sequence` extension
+### FactoryBot extensions
+
+Factory bot ships two patches that may be manually loaded after loading FactoryBot:
+
+```ruby
+require 'factory_bot'
+require 'demo_mode/factory_bot_ext'
+```
+
+#### `sequence`
 
 `DemoMode` comes with a patch designed to be a drop-in replacement for
 [factory_bot](https://github.com/thoughtbot/factory_bot)'s `sequence` feature,
@@ -487,11 +496,19 @@ records in the DB (rather than starting at "Something 1" each time). This
 feature is necessary wherever you rely on `UNIQUE` constraints in the database,
 or uniqueness validations on your models.
 
-This patch must be manually loaded after loading FactoryBot:
+#### `around_each` hook
+
+Use `FactoryBot.around_each` to wrap all factory execution, which can be used to
+skip expensive callbacks/logging:
 
 ```ruby
-require 'factory_bot'
-require 'demo_mode/factory_bot_ext'
+FactoryBot.around_each do |&blk|
+  was_enabled = MyLogger.enabled?
+  MyLogger.disable!
+  blk.call
+ensure
+  MyLogger.enable! if was_enabled
+end
 ```
 
 #### Considerations
