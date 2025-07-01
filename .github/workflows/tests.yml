@@ -24,12 +24,12 @@ jobs:
           - ruby: '3.0'
             gemfile: gemfiles/rails_8_0.gemfile
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@ee0669bd1cc54295c223e0bb666b733df41de1c5 # v2
     - name: Setup Chrome
-      uses: browser-actions/setup-chrome@latest
+      uses: browser-actions/setup-chrome@c785b87e244131f27c9f19c1a33e2ead956ab7ce # latest
       with:
         chrome-version: stable
-    - uses: ruby/setup-ruby@v1
+    - uses: ruby/setup-ruby@a4effe49ee8ee5b8b5091268c473a4628afb5651 # v1
       env:
         BUNDLE_GEMFILE: ${{ matrix.gemfile }}
       with:
