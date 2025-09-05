@@ -20,12 +20,7 @@ module Dummy
     config.cache_classes = Rails.env.test?
     config.consider_all_requests_local = true
 
-    config.action_dispatch.show_exceptions =
-      if ActionPack.gem_version >= Gem::Version.new('7.1')
-        :none
-      else
-        false
-      end
+    config.action_dispatch.show_exceptions = :none
 
     config.action_controller.allow_forgery_protection = Rails.env.development?
     config.active_support.deprecation = :raise

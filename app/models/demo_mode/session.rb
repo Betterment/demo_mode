@@ -4,12 +4,7 @@ module DemoMode
   class Session < ActiveRecord::Base
     attribute :variant, default: :default
 
-    if ActiveRecord.gem_version >= Gem::Version.new('7.2')
-      enum :status, { processing: 'processing', successful: 'successful', failed: 'failed' }, default: 'processing'
-    else
-      attribute :status, default: :processing
-      enum status: { processing: 'processing', successful: 'successful', failed: 'failed' }
-    end
+    enum :status, { processing: 'processing', successful: 'successful', failed: 'failed' }, default: 'processing'
 
     validates :persona_name, :variant, presence: true
     validates :persona, presence: { message: :required }, on: :create, if: :persona_name?

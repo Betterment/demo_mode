@@ -27,12 +27,12 @@ module DemoMode
       'demo_mode_'
     end
 
-    def configure(&block)
-      configuration.instance_eval(&block)
+    def configure(&)
+      configuration.instance_eval(&)
     end
 
-    def add_persona(name = default_name, &block)
-      configuration.persona(name, &block)
+    def add_persona(name = default_name, &)
+      configuration.persona(name, &)
     end
 
     def callout_personas

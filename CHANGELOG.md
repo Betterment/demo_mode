@@ -17,6 +17,12 @@ and this project aims to adhere to [Semantic Versioning](http://semver.org/spec/
 
 ### Fixed <!-- for any bug fixes. -->
 
+## [4.0.0] - 2025-09-05
+
+### Removed
+
+- Remove support for Rails < 7.2 and < Ruby 3.2 (EOL versions)
+
 ## [1.1.0] - 2023-05-12
 
 ### Removed

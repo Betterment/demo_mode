@@ -18,9 +18,9 @@ Gem::Specification.new do |s|
 
   s.files = Dir['{app,config,lib,db,public}/**/*', "LICENSE", "Rakefile", "README.md"]
 
-  s.required_ruby_version = ">= 3.0"
+  s.required_ruby_version = ">= 3.2"
 
-  rails_constraints = ['>= 6.1', '< 8.1']
+  rails_constraints = ['>= 7.2', '< 8.1']
 
   s.add_dependency 'actionpack', rails_constraints
   s.add_dependency 'activejob', rails_constraints

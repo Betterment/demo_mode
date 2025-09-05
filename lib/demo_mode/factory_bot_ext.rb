@@ -2,8 +2,8 @@
 
 module FactoryBot
   class DefinitionProxy
-    def clever_sequence(name, &block)
-      sequence = CleverSequence.new(name, &block)
+    def clever_sequence(name, &)
+      sequence = CleverSequence.new(name, &)
       add_attribute(name) { sequence.with_class(@instance&.class).next }
     end
 
