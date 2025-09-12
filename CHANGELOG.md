@@ -17,7 +17,7 @@ and this project aims to adhere to [Semantic Versioning](http://semver.org/spec/
 
 ### Fixed <!-- for any bug fixes. -->
 
-## [4.0.0] - 2025-09-05
+## [3.3.0] - 2025-09-05
 
 ### Removed
 
