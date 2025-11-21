@@ -20,7 +20,7 @@ Gem::Specification.new do |s|
 
   s.required_ruby_version = ">= 3.2"
 
-  rails_constraints = ['>= 7.2', '< 8.1']
+  rails_constraints = ['>= 7.2', '< 8.2']
 
   s.add_dependency 'actionpack', rails_constraints
   s.add_dependency 'activejob', rails_constraints
