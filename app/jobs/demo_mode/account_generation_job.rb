@@ -67,14 +67,8 @@ module DemoMode
     end
 
     def log_event(event, level, **payload)
-      case level
-      when :info
-        Rails.logger.info(message: event, **payload)
-      when :error
-        Rails.logger.error(message: event, **payload)
-      end
-    rescue StandardError => e
-      Rails.logger.error("DemoMode logging failed: #{e.class}: #{e.message}")
+      log_data = { event: event, **payload }
+      Rails.logger.public_send(level, log_data.to_json)
     end
   end
 end
