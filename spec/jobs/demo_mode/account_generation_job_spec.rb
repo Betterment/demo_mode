@@ -49,62 +49,60 @@ RSpec.describe DemoMode::AccountGenerationJob do
   end
 
   describe 'structured logging' do
-    let(:log_output) { StringIO.new }
-    let(:test_logger) { Logger.new(log_output) }
+    let(:logged_events) { [] }
 
     before do
-      allow(Rails).to receive(:logger).and_return(test_logger)
+      logged_events.clear
+      allow(Rails.logger).to receive(:info) { |data| logged_events << data }
+      allow(Rails.logger).to receive(:error) { |data| logged_events << data }
     end
 
-    def parsed_log_entries
-      log_output.string.lines.filter_map do |line|
-        json_match = line.match(/(\{.*\})/)
-        JSON.parse(json_match[1]) if json_match
-      end
+    def find_log_event(event_name)
+      logged_events.find { |e| e.is_a?(Hash) && e[:event] == event_name }
     end
 
     it 'logs started event with required fields' do
       described_class.perform_now(session)
 
-      started_log = parsed_log_entries.find { |e| e['event'] == 'demo_mode.account_generation.started' }
+      started_log = find_log_event('demo_mode.account_generation.started')
 
       expect(started_log).to include(
-        'session_id' => session.id,
-        'persona_name' => 'the_everyperson',
-        'variant' => 'default'
+        session_id: session.id,
+        persona_name: 'the_everyperson',
+        variant: 'default'
       )
-      expect(started_log['start_time']).to match(/\d{4}-\d{2}-\d{2}T/)
+      expect(started_log[:start_time]).to match(/\d{4}-\d{2}-\d{2}T/)
     end
 
     it 'logs completed event with timing and signinable data' do
       described_class.perform_now(session)
       session.reload
 
-      completed_log = parsed_log_entries.find { |e| e['event'] == 'demo_mode.account_generation.completed' }
+      completed_log = find_log_event('demo_mode.account_generation.completed')
 
       expect(completed_log).to include(
-        'session_id' => session.id,
-        'persona_name' => 'the_everyperson',
-        'variant' => 'default',
-        'signinable_id' => session.signinable_id,
-        'signinable_type' => session.signinable_type
+        session_id: session.id,
+        persona_name: 'the_everyperson',
+        variant: 'default',
+        signinable_id: session.signinable_id,
+        signinable_type: session.signinable_type
       )
-      expect(completed_log['duration_ms']).to be_a(Numeric)
-      expect(completed_log['start_time']).to be_present
-      expect(completed_log['end_time']).to be_present
-      expect(completed_log['sequences_used']).to be_an(Array)
+      expect(completed_log[:duration_ms]).to be_a(Numeric)
+      expect(completed_log[:start_time]).to be_present
+      expect(completed_log[:end_time]).to be_present
+      expect(completed_log[:sequences_used]).to be_an(Array)
     end
 
     it 'includes sequence tracking data with correct structure' do
       described_class.perform_now(session)
 
-      completed_log = parsed_log_entries.find { |e| e['event'] == 'demo_mode.account_generation.completed' }
-      sequences = completed_log['sequences_used']
+      completed_log = find_log_event('demo_mode.account_generation.completed')
+      sequences = completed_log[:sequences_used]
 
       sequences.each do |seq|
-        expect(seq).to have_key('class')
-        expect(seq).to have_key('attribute')
-        expect(seq).to have_key('value')
+        expect(seq).to have_key(:class)
+        expect(seq).to have_key(:attribute)
+        expect(seq).to have_key(:value)
       end
     end
 
@@ -118,15 +116,15 @@ RSpec.describe DemoMode::AccountGenerationJob do
           described_class.perform_now(session)
         }.to raise_error(RuntimeError)
 
-        failed_log = parsed_log_entries.find { |e| e['event'] == 'demo_mode.account_generation.failed' }
+        failed_log = find_log_event('demo_mode.account_generation.failed')
 
         expect(failed_log).to include(
-          'session_id' => session.id,
-          'persona_name' => 'the_everyperson',
-          'error_class' => 'RuntimeError',
-          'error_message' => 'Oops! Error error!'
+          session_id: session.id,
+          persona_name: 'the_everyperson',
+          error_class: 'RuntimeError',
+          error_message: 'Oops! Error error!'
         )
-        expect(failed_log['duration_ms']).to be_a(Numeric)
+        expect(failed_log[:duration_ms]).to be_a(Numeric)
       end
     end
 
@@ -142,11 +140,11 @@ RSpec.describe DemoMode::AccountGenerationJob do
           described_class.perform_now(session)
         }.to raise_error(RuntimeError, 'Unknown persona: nonexistent')
 
-        failed_log = parsed_log_entries.find { |e| e['event'] == 'demo_mode.account_generation.failed' }
+        failed_log = find_log_event('demo_mode.account_generation.failed')
 
         expect(failed_log).to include(
-          'error_class' => 'RuntimeError',
-          'error_message' => 'Unknown persona: nonexistent'
+          error_class: 'RuntimeError',
+          error_message: 'Unknown persona: nonexistent'
         )
       end
     end

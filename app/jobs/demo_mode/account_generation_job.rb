@@ -68,7 +68,7 @@ module DemoMode
 
     def log_event(event, level, **payload)
       log_data = { event: event, **payload }
-      Rails.logger.public_send(level, log_data.to_json)
+      Rails.logger.public_send(level, log_data)
     end
   end
 end
