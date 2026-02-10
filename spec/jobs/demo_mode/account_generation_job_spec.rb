@@ -53,12 +53,12 @@ RSpec.describe DemoMode::AccountGenerationJob do
 
     before do
       logged_events.clear
-      allow(Rails.logger).to receive(:info) { |data| logged_events << data }
-      allow(Rails.logger).to receive(:error) { |data| logged_events << data }
+      allow(Rails.logger).to receive(:info) { |**data| logged_events << data }
+      allow(Rails.logger).to receive(:error) { |**data| logged_events << data }
     end
 
     def find_log_event(event_name)
-      logged_events.find { |e| e.is_a?(Hash) && e[:event] == event_name }
+      logged_events.find { |e| e.is_a?(Hash) && e[:message] == event_name }
     end
 
     it 'logs started event with required fields' do
