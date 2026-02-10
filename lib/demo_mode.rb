@@ -3,6 +3,8 @@
 require 'rails'
 require 'demo_mode/version'
 require 'demo_mode/clever_sequence'
+require 'demo_mode/sequence_tracker'
+require 'demo_mode/clever_sequence_tracking'
 require 'demo_mode/config'
 require 'demo_mode/engine'
 require 'demo_mode/persona'
@@ -27,12 +29,12 @@ module DemoMode
       'demo_mode_'
     end
 
-    def configure(&)
-      configuration.instance_eval(&)
+    def configure(&block)
+      configuration.instance_eval(&block)
     end
 
-    def add_persona(name = default_name, &)
-      configuration.persona(name, &)
+    def add_persona(name = default_name, &block)
+      configuration.persona(name, &block)
     end
 
     def callout_personas
@@ -81,3 +83,6 @@ module DemoMode
     end
   end
 end
+
+# Hook into CleverSequence to track sequence usage during persona generation
+CleverSequence.singleton_class.prepend(DemoMode::CleverSequenceTracking)
