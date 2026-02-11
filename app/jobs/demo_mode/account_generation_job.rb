@@ -51,6 +51,7 @@ module DemoMode
         duration_ms: duration_ms,
         signinable_id: session.signinable_id,
         signinable_type: session.signinable_type,
+        sequences_used_count: sequences_used.size,
         sequences_used: sequences_used)
     end
 

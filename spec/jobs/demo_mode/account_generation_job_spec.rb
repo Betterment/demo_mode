@@ -92,6 +92,7 @@ RSpec.describe DemoMode::AccountGenerationJob do
       expect(completed_log['start_time']).to be_present
       expect(completed_log['end_time']).to be_present
       expect(completed_log['sequences_used']).to be_an(Array)
+      expect(completed_log['sequences_used_count']).to be_an(Integer)
     end
 
     it 'includes sequence tracking data with correct structure' do
