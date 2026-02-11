@@ -85,4 +85,7 @@ module DemoMode
 end
 
 # Hook into CleverSequence to track sequence usage during persona generation
-CleverSequence.singleton_class.prepend(DemoMode::CleverSequenceTracking)
+# Track class method calls: CleverSequence.next(klass, name)
+CleverSequence.singleton_class.prepend(DemoMode::CleverSequenceClassTracking)
+# Track instance method calls: sequence.next (used by FactoryBot via factory_bot_ext)
+CleverSequence.prepend(DemoMode::CleverSequenceInstanceTracking)
