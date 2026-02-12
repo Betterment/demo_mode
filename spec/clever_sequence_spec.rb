@@ -236,4 +236,10 @@ RSpec.describe CleverSequence do
       end
     end
   end
+
+  describe 'Configuration accessibility' do
+    it 'can access DemoMode.use_database_sequences? flag' do
+      expect(DemoMode.use_database_sequences?).to be(false)
+    end
+  end
 end
