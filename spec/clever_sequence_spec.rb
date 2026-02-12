@@ -44,8 +44,8 @@ RSpec.describe CleverSequence do
 
       # After reset, sequence will re-query the database
       # and find that value 1 exists
-      expect(klass).to receive(:find_by_integer_column).with(1).and_return(true)
-      expect(klass).to receive(:find_by_integer_column).with(2).and_return(nil)
+      allow(klass).to receive(:find_by_integer_column).with(1).and_return(true)
+      allow(klass).to receive(:find_by_integer_column).with(2).and_return(nil)
 
       expect(subject.next).to eq 2
     end
@@ -56,20 +56,20 @@ RSpec.describe CleverSequence do
     end
 
     it 'resets all registered sequences' do
-      seq1 = described_class.new(:integer_column).with_class(klass)
-      seq2 = described_class.new(:text_column) { |i| "text_#{i}" }.with_class(klass)
+      integer_seq = described_class.new(:integer_column).with_class(klass)
+      text_seq = described_class.new(:text_column) { |i| "text_#{i}" }.with_class(klass)
 
-      seq1.next
-      seq2.next
-      seq2.next
+      integer_seq.next
+      text_seq.next
+      text_seq.next
 
-      expect(seq1.last).to eq 1
-      expect(seq2.last).to eq 'text_2'
+      expect(integer_seq.last).to eq 1
+      expect(text_seq.last).to eq 'text_2'
 
       described_class.reset!
 
-      expect(seq1.instance_variable_defined?(:@last_value)).to be false
-      expect(seq2.instance_variable_defined?(:@last_value)).to be false
+      expect(integer_seq.instance_variable_defined?(:@last_value)).to be false
+      expect(text_seq.instance_variable_defined?(:@last_value)).to be false
     end
   end
 
@@ -337,7 +337,7 @@ RSpec.describe CleverSequence do
 
     context 'before any calls to next' do
       it 'returns the starting value' do
-        expect(klass).to receive(:find_by_integer_column).with(1).and_return(nil)
+        allow(klass).to receive(:find_by_integer_column).with(1).and_return(nil)
         expect(subject.last).to eq 0
       end
     end
