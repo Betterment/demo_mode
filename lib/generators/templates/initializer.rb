@@ -34,6 +34,10 @@ DemoMode.configure do
   # ====================================
   # personas_path 'config/personas'
 
+  # Enable PostgreSQL-backed sequences for CleverSequence (defaults to false):
+  # ===========================================================================
+  # use_database_sequences false
+
   # A callback that wraps persona-based account generation.
   # You must run `generator.call` and return the "signinable" object:
   # ==================================================

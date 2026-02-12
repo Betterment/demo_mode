@@ -1,5 +1,5 @@
-Demo Mode
-=========
+# Demo Mode
+
 [![Gem Version](https://badge.fury.io/rb/demo_mode.svg)](https://rubygems.org/gems/demo_mode)
 [![Tests](https://github.com/Betterment/demo_mode/actions/workflows/tests.yml/badge.svg)](https://github.com/Betterment/demo_mode/actions/workflows/tests.yml)
 
@@ -35,22 +35,23 @@ To learn more about how we use `demo_mode` at **Betterment**, check out :sparkle
 
 ## Table of Contents
 
-* [Getting Started](#getting-started)
-  * [Installation](#installation)
-  * [App-Specific Setup](#app-specific-setup)
-* [Defining Personas](#defining-personas)
-* [Customizing the Design](#customizing-the-design)
-* [Optional Features](#optional-features)
-  * [The "Sign Up" Link](#the-sign-up-link)
-  * [The "Display Credentials" feature](#the-display-credentials-feature)
-  * [Developer CLI](#developer-cli)
-  * [Callbacks](#callbacks)
-  * [Non-User Personas](#non-user-personas)
-  * [FactoryBot `sequence` extension](#factorybot-sequence-extension)
-* [Deploying a demo environment to the cloud](#deploying-a-demo-environment-to-the-cloud)
-  * [How to avoid breaking your new "demo" env](#how-to-avoid-breaking-your-new-demo-env)
-* [How to Contribute](#how-to-contribute)
-  * [Suggested Workflow](#suggested-workflow)
+- [Getting Started](#getting-started)
+  - [Installation](#installation)
+  - [App-Specific Setup](#app-specific-setup)
+- [Defining Personas](#defining-personas)
+- [Customizing the Design](#customizing-the-design)
+- [Optional Features](#optional-features)
+  - [The "Sign Up" Link](#the-sign-up-link)
+  - [The "Display Credentials" feature](#the-display-credentials-feature)
+  - [Developer CLI](#developer-cli)
+  - [Callbacks](#callbacks)
+  - [Non-User Personas](#non-user-personas)
+  - [FactoryBot `sequence` extension](#factorybot-sequence-extension)
+  - [Database-backed sequences](#database-backed-sequences)
+- [Deploying a demo environment to the cloud](#deploying-a-demo-environment-to-the-cloud)
+  - [How to avoid breaking your new "demo" env](#how-to-avoid-breaking-your-new-demo-env)
+- [How to Contribute](#how-to-contribute)
+  - [Suggested Workflow](#suggested-workflow)
 
 ## Getting Started
 
@@ -538,6 +539,26 @@ end
   conditionally disable any uniqueness validations (e.g.
   `validates ... unless DemoMode.enabled?`).
 
+### Database-backed sequences
+
+By default, `CleverSequence` (used by the FactoryBot `sequence` extension) uses an in-memory Ruby counter. For production demo environments running multiple processes or requiring persistence across restarts, you can enable PostgreSQL-backed sequences:
+
+```ruby
+DemoMode.configure do
+  use_database_sequences true
+end
+```
+
+This feature flag controls whether `CleverSequence` uses PostgreSQL native sequences or the existing Ruby-based counter, allowing for gradual rollout and easy rollback. By default, `use_database_sequences` is `false`.
+
+You can check the current setting with:
+
+```ruby
+DemoMode.use_database_sequences? # => false (default)
+```
+
+**Note:** This feature requires PostgreSQL and will be implemented in a future release.
+
 ## Deploying a demo environment to the cloud
 
 This gem truly shines when used to deploy a "demo" version of
@@ -669,7 +690,7 @@ creating a new issue to get early feedback on your proposed change.
 
 ### Suggested Workflow
 
-* Fork the project and create a new branch for your contribution.
-* Write your contribution (and any applicable test coverage).
-* Make sure all tests pass (`bundle exec rake`).
-* Submit a pull request.
+- Fork the project and create a new branch for your contribution.
+- Write your contribution (and any applicable test coverage).
+- Make sure all tests pass (`bundle exec rake`).
+- Submit a pull request.
