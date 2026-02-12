@@ -438,13 +438,16 @@ RSpec.describe CleverSequence do
         expect(finder.lower_bound).to eq 2
       end
 
-      it 'handles large starting record numbers' do
-        allow(klass).to receive(:find_by_integer_column).and_return(nil)
-        allow(klass).to receive(:find_by_integer_column).with(1).and_return(true)
-        allow(klass).to receive(:find_by_integer_column).with(2).and_return(true)
-        allow(klass).to receive(:find_by_integer_column).with(3).and_return(true)
+      it 'handles large existing record counts efficiently' do
+        # Simulate 1000 consecutive records existing
+        allow(klass).to receive(:find_by_integer_column) do |val|
+          val <= 1000
+        end
 
-        expect(finder.lower_bound).to eq 3
+        expect(finder.lower_bound).to eq 1000
+
+        # Binary search should find this in O(log n) queries, not 1000
+        expect(klass).to have_received(:find_by_integer_column).at_most(25).times
       end
     end
 
