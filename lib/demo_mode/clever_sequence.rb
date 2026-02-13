@@ -4,6 +4,16 @@ class CleverSequence
   DEFAULT_BLOCK = ->(i) { i }
 
   class << self
+    attr_writer :use_database_sequences, :enforce_sequences_exist
+
+    def use_database_sequences?
+      @use_database_sequences || false
+    end
+
+    def enforce_sequences_exist?
+      @enforce_sequences_exist || false
+    end
+
     def reset!
       sequences.each_value(&:reset!)
     end

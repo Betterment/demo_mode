@@ -545,7 +545,7 @@ By default, `CleverSequence` (used by the FactoryBot `sequence` extension) uses 
 
 ```ruby
 DemoMode.configure do
-  use_database_sequences true
+  CleverSequence.use_database_sequences = true
 end
 ```
 
@@ -554,10 +554,24 @@ This feature flag controls whether `CleverSequence` uses PostgreSQL native seque
 You can check the current setting with:
 
 ```ruby
-DemoMode.use_database_sequences? # => false (default)
+CleverSequence.use_database_sequences? # => false (default)
 ```
 
-**Note:** This feature requires PostgreSQL and will be implemented in a future release.
+You can also enforce that database sequences exist before they are used. When enabled, `CleverSequence` will raise an error if a sequence is requested but the corresponding PostgreSQL SEQUENCE does not exist yet (prompting the engineer to run a migration that creates the SEQUENCE). When disabled (the default), `CleverSequence` will fall back to calculating the next sequence value based on existing database data:
+
+```ruby
+DemoMode.configure do
+  CleverSequence.enforce_sequences_exist = true
+end
+```
+
+You can check this setting with:
+
+```ruby
+CleverSequence.enforce_sequences_exist? # => false (default)
+```
+
+**Note:** These features require PostgreSQL and will be implemented in a future release.
 
 ## Deploying a demo environment to the cloud
 
