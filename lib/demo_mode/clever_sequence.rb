@@ -8,8 +8,8 @@ class CleverSequence
   cattr_accessor(:enforce_sequences_exist) { false }
 
   class << self
-    alias_method :use_database_sequences?, :use_database_sequences
-    alias_method :enforce_sequences_exist?, :enforce_sequences_exist
+    alias use_database_sequences? use_database_sequences
+    alias enforce_sequences_exist? enforce_sequences_exist
 
     def reset!
       sequences.each_value(&:reset!)

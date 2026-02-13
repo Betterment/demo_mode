@@ -284,16 +284,18 @@ RSpec.describe CleverSequence do
     end
 
     it 'allows setting use_database_sequences within DemoMode.configure block' do
+      klass = described_class
       DemoMode.configure do
-        CleverSequence.use_database_sequences = true
+        klass.use_database_sequences = true
       end
 
       expect(described_class.use_database_sequences?).to be(true)
     end
 
     it 'allows setting enforce_sequences_exist within DemoMode.configure block' do
+      klass = described_class
       DemoMode.configure do
-        CleverSequence.enforce_sequences_exist = true
+        klass.enforce_sequences_exist = true
       end
 
       expect(described_class.enforce_sequences_exist?).to be(true)
