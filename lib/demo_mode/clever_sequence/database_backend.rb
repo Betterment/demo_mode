@@ -26,6 +26,13 @@ class CleverSequence
         result.first['nextval'].to_i
       rescue ActiveRecord::StatementInvalid => e
         if sequence_not_exists_error?(e)
+          # Clear the failed transaction so subsequent queries work
+          begin
+            ActiveRecord::Base.connection.rollback_db_transaction
+          rescue StandardError
+            # Ignore if no transaction to rollback
+          end
+
           return calculate_sequence_value(klass, attribute, block) + 1 unless throw_if_sequence_not_found
 
           raise SequenceNotFoundError.new(sequence_name: name, klass: klass, attribute: attribute)

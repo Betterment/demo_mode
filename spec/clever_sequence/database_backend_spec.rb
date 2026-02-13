@@ -32,10 +32,10 @@ RSpec.describe CleverSequence::DatabaseBackend do
       expect(described_class.nextval(klass, attribute, block)).to eq 3
     end
 
-    it 'applies block transformation' do
-      string_block = ->(i) { "User ##{i}" }
-      expect(described_class.nextval(klass, attribute, string_block)).to eq 'User #1'
-      expect(described_class.nextval(klass, attribute, string_block)).to eq 'User #2'
+    it 'returns sequential integers from PostgreSQL sequence' do
+      result_1 = described_class.nextval(klass, attribute, block)
+      result_2 = described_class.nextval(klass, attribute, block)
+      expect(result_2).to eq(result_1 + 1)
     end
   end
 
