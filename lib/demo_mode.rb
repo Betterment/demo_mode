@@ -17,10 +17,6 @@ module DemoMode
   class << self
     delegate(*Config.configurations, to: :configuration)
 
-    def use_database_sequences?
-      configuration.use_database_sequences?
-    end
-
     def enabled?
       ActiveModel::Type::Boolean::FALSE_VALUES.exclude?(ENV.fetch('DEMO_MODE', 'false')).tap do |enabled|
         webvalve_check! if enabled && defined?(WebValve)

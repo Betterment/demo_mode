@@ -14,7 +14,6 @@ module DemoMode
     configurable_value(:personas_path) { 'config/personas' }
     configurable_value(:session_timeout) { 30.minutes }
     configurable_boolean(:display_credentials)
-    configurable_boolean(:use_database_sequences, default: false)
     configurations << :stylesheets
     configurations << :logo
     configurations << :loader

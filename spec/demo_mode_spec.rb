@@ -215,31 +215,6 @@ RSpec.describe DemoMode do
     end
   end
 
-  describe '.use_database_sequences?' do
-    it 'returns false by default' do
-      expect(described_class.use_database_sequences?).to be(false)
-    end
-
-    context 'when enabled in configuration' do
-      before do
-        described_class.configure do
-          use_database_sequences true
-        end
-      end
-
-      after do
-        # Reset configuration to default
-        described_class.configure do
-          use_database_sequences false
-        end
-      end
-
-      it 'returns true' do
-        expect(described_class.use_database_sequences?).to be(true)
-      end
-    end
-  end
-
   describe '.session_url' do
     let(:session) { DemoMode::Session.new(id: 2) }
     let(:demo_mode_options) { {} }
