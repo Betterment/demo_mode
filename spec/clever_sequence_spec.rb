@@ -17,6 +17,12 @@ RSpec.describe CleverSequence do
     described_class.reset!
   end
 
+  describe 'Configuration accessibility' do
+    it 'can access DemoMode.use_database_sequences? flag' do
+      expect(DemoMode.use_database_sequences?).to be(false)
+    end
+  end
+
   describe 'DEFAULT_BLOCK' do
     it 'returns the input unchanged' do
       expect(CleverSequence::DEFAULT_BLOCK.call(1)).to eq 1
