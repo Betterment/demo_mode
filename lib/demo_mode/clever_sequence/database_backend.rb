@@ -4,7 +4,6 @@ class CleverSequence
   module DatabaseBackend
     SEQUENCE_PREFIX = 'clever_seq_'
 
-
     class SequenceNotFoundError < StandardError
       attr_reader :sequence_name, :klass, :attribute
 
@@ -50,7 +49,7 @@ class CleverSequence
       private
 
       def sequence_not_exists_error?(error)
-        error.cause.is_a?(PG::UndefinedTable) # todo: Nathan tell us if this is right
+        error.cause.is_a?(PG::UndefinedTable)
       end
 
       def calculate_sequence_value(klass, attribute, block)
