@@ -3,16 +3,13 @@
 class CleverSequence
   DEFAULT_BLOCK = ->(i) { i }
 
+  cattr_accessor(:sequences) { {} }
+  cattr_accessor(:use_database_sequences) { false }
+  cattr_accessor(:enforce_sequences_exist) { false }
+
   class << self
-    attr_writer :use_database_sequences, :enforce_sequences_exist
-
-    def use_database_sequences?
-      @use_database_sequences || false
-    end
-
-    def enforce_sequences_exist?
-      @enforce_sequences_exist || false
-    end
+    alias_method :use_database_sequences?, :use_database_sequences
+    alias_method :enforce_sequences_exist?, :enforce_sequences_exist
 
     def reset!
       sequences.each_value(&:reset!)
@@ -33,7 +30,6 @@ class CleverSequence
     end
   end
 
-  cattr_accessor(:sequences) { {} }
   attr_reader :klass, :attribute, :block
 
   def initialize(attribute, &block)
