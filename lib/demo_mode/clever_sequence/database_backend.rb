@@ -4,7 +4,6 @@ class CleverSequence
   module DatabaseBackend
     SEQUENCE_PREFIX = 'clever_seq_'
 
-    THROW_IF_SEQUENCE_NOT_FOUND = true
 
     class SequenceNotFoundError < StandardError
       attr_reader :sequence_name, :klass, :attribute
@@ -18,7 +17,7 @@ class CleverSequence
     end
 
     class << self
-      def nextval(klass, attribute, block)
+      def nextval(klass, attribute, block, throw_if_sequence_not_found: true)
         name = sequence_name(klass, attribute)
 
         result = ActiveRecord::Base.connection.execute(
@@ -27,7 +26,7 @@ class CleverSequence
         result.first['nextval'].to_i
       rescue ActiveRecord::StatementInvalid => e
         if sequence_not_exists_error?(e)
-          return calculate_sequence_value(klass, attribute, block) + 1 unless THROW_IF_SEQUENCE_NOT_FOUND
+          return calculate_sequence_value(klass, attribute, block) + 1 unless throw_if_sequence_not_found
 
           raise SequenceNotFoundError.new(sequence_name: name, klass: klass, attribute: attribute)
         else
