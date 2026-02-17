@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'concurrent/set'
-require_relative 'clever_sequence/database_backend'
+require_relative 'clever_sequence/postgres_backend'
 
 class CleverSequence
   DEFAULT_BLOCK = ->(i) { i }
