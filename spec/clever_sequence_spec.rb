@@ -17,6 +17,46 @@ RSpec.describe CleverSequence do
     described_class.reset!
   end
 
+  describe '.use_database_sequences?' do
+    after do
+      described_class.use_database_sequences = false
+    end
+
+    it 'returns false by default' do
+      expect(described_class.use_database_sequences?).to be(false)
+    end
+
+    context 'when enabled' do
+      before do
+        described_class.use_database_sequences = true
+      end
+
+      it 'returns true' do
+        expect(described_class.use_database_sequences?).to be(true)
+      end
+    end
+  end
+
+  describe '.enforce_sequences_exist?' do
+    after do
+      described_class.enforce_sequences_exist = false
+    end
+
+    it 'returns false by default' do
+      expect(described_class.enforce_sequences_exist?).to be(false)
+    end
+
+    context 'when enabled' do
+      before do
+        described_class.enforce_sequences_exist = true
+      end
+
+      it 'returns true' do
+        expect(described_class.enforce_sequences_exist?).to be(true)
+      end
+    end
+  end
+
   describe '.reset!' do
     let(:attribute) { :integer_column }
 
@@ -293,46 +333,6 @@ RSpec.describe CleverSequence do
       expect(described_class.next(Widget, :string_column)).to eq 3
       expect(described_class.next(Widget, :text_column)).to eq 'Foo #3'
       expect(described_class.next(Widget, :encrypted_column_crypt)).to eq 'Bar 13'
-    end
-
-    describe '.use_database_sequences?' do
-      after do
-        described_class.use_database_sequences = false
-      end
-
-      it 'returns false by default' do
-        expect(described_class.use_database_sequences?).to be(false)
-      end
-
-      context 'when enabled' do
-        before do
-          described_class.use_database_sequences = true
-        end
-
-        it 'returns true' do
-          expect(described_class.use_database_sequences?).to be(true)
-        end
-      end
-    end
-  end
-
-  describe '.enforce_sequences_exist?' do
-    after do
-      described_class.enforce_sequences_exist = false
-    end
-
-    it 'returns false by default' do
-      expect(described_class.enforce_sequences_exist?).to be(false)
-    end
-
-    context 'when enabled' do
-      before do
-        described_class.enforce_sequences_exist = true
-      end
-
-      it 'returns true' do
-        expect(described_class.enforce_sequences_exist?).to be(true)
-      end
     end
   end
 
