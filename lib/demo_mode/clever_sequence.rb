@@ -5,7 +5,14 @@ require_relative 'clever_sequence/lower_bound_finder'
 class CleverSequence
   DEFAULT_BLOCK = ->(i) { i }
 
+  cattr_accessor(:sequences) { {} }
+  cattr_accessor(:use_database_sequences) { false }
+  cattr_accessor(:enforce_sequences_exist) { false }
+
   class << self
+    alias use_database_sequences? use_database_sequences
+    alias enforce_sequences_exist? enforce_sequences_exist
+
     def reset!
       sequences.each_value(&:reset!)
     end
@@ -25,7 +32,6 @@ class CleverSequence
     end
   end
 
-  cattr_accessor(:sequences) { {} }
   attr_reader :klass, :attribute, :block
 
   def initialize(attribute, &block)
