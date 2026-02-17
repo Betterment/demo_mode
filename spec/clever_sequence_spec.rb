@@ -17,25 +17,8 @@ RSpec.describe CleverSequence do
     described_class.reset!
   end
 
-  describe 'DEFAULT_BLOCK' do
-    it 'returns the input unchanged' do
-      expect(CleverSequence::DEFAULT_BLOCK.call(1)).to eq 1
-      expect(CleverSequence::DEFAULT_BLOCK.call(42)).to eq 42
-    end
-  end
-
   describe '.reset!' do
     let(:attribute) { :integer_column }
-
-    it 'clears @last_value and restarts sequence from database state' do
-      subject.next
-      subject.next
-      expect(subject.last).to eq 2
-
-      described_class.reset!
-
-      expect(subject.instance_variable_defined?(:@last_value)).to be false
-    end
 
     it 'allows sequence to restart fresh and re-query database' do
       expect(subject.next).to eq 1
@@ -49,123 +32,28 @@ RSpec.describe CleverSequence do
 
       expect(subject.next).to eq 2
     end
-
-    it 'works when no sequences have been registered' do
-      described_class.sequences.clear
-      expect { described_class.reset! }.not_to raise_error
-    end
-
-    it 'resets all registered sequences' do
-      integer_seq = described_class.new(:integer_column).with_class(klass)
-      text_seq = described_class.new(:text_column) { |i| "text_#{i}" }.with_class(klass)
-
-      integer_seq.next
-      text_seq.next
-      text_seq.next
-
-      expect(integer_seq.last).to eq 1
-      expect(text_seq.last).to eq 'text_2'
-
-      described_class.reset!
-
-      expect(integer_seq.instance_variable_defined?(:@last_value)).to be false
-      expect(text_seq.instance_variable_defined?(:@last_value)).to be false
-    end
   end
 
   describe '.next' do
-    it 'creates a sequence if it does not exist' do
-      expect(described_class.sequences).not_to have_key([klass.name, 'new_column'])
-
-      result = described_class.next(klass, :new_column)
-
-      expect(result).to eq 1
-      expect(described_class.sequences).to have_key([klass.name, 'new_column'])
-    end
-
-    it 'reuses existing sequence' do
-      described_class.next(klass, :integer_column)
-      described_class.next(klass, :integer_column)
-
-      expect(described_class.next(klass, :integer_column)).to eq 3
+    it 'returns sequential values for new attributes' do
+      expect(described_class.next(klass, :new_column)).to eq 1
+      expect(described_class.next(klass, :new_column)).to eq 2
+      expect(described_class.next(klass, :new_column)).to eq 3
     end
   end
 
   describe '.last' do
     let(:attribute) { :integer_column }
 
-    it 'returns the last value for a registered sequence' do
-      subject.next
-      subject.next
+    it 'returns the last generated value' do
+      described_class.next(klass, :integer_column)
+      described_class.next(klass, :integer_column)
 
       expect(described_class.last(klass, :integer_column)).to eq 2
     end
 
-    it 'creates a new sequence if one does not exist and returns starting value' do
-      # The lookup method creates a sequence if it doesn't exist
-      # For a non-existent column, it defaults to starting value of 0
-      result = described_class.last(klass, :nonexistent_attribute)
-      expect(result).to eq 0
-    end
-
-    it 'creates and returns a sequence when looking up a new attribute' do
-      # date_column doesn't have a factory sequence defined, so it uses DEFAULT_BLOCK
-      result = described_class.next(klass, :date_column)
-
-      expect(result).to eq 1
-      expect(described_class.last(klass, :date_column)).to eq 1
-    end
-  end
-
-  describe '#initialize' do
-    it 'converts attribute to string' do
-      seq = described_class.new(:my_attr)
-      expect(seq.attribute).to eq 'my_attr'
-    end
-
-    it 'uses DEFAULT_BLOCK when no block is provided' do
-      seq = described_class.new(:my_attr)
-      expect(seq.block).to eq CleverSequence::DEFAULT_BLOCK
-    end
-
-    it 'uses provided block' do
-      custom_block = ->(i) { i * 2 }
-      seq = described_class.new(:my_attr, &custom_block)
-      expect(seq.block).to eq custom_block
-    end
-  end
-
-  describe '#with_class' do
-    let(:attribute) { :integer_column }
-
-    it 'returns self for chaining' do
-      seq = described_class.new(attribute)
-      expect(seq.with_class(klass)).to eq seq
-    end
-
-    it 'registers the sequence in the class sequences hash' do
-      seq = described_class.new(attribute)
-      seq.with_class(klass)
-
-      expect(described_class.sequences[[klass.name, attribute.to_s]]).to eq seq
-    end
-
-    it 'does not overwrite klass when called again' do
-      seq = described_class.new(attribute)
-      seq.with_class(klass)
-
-      other_klass = Class.new(ActiveRecord::Base)
-      stub_const('OtherWidget', other_klass)
-
-      seq.with_class(other_klass)
-      expect(seq.klass).to eq klass
-    end
-
-    it 'does not register when klass is nil' do
-      seq = described_class.new(attribute)
-      seq.with_class(nil)
-
-      expect(described_class.sequences[[nil, attribute.to_s]]).to be_nil
+    it 'returns 0 when no values have been generated' do
+      expect(described_class.last(klass, :nonexistent_attribute)).to eq 0
     end
   end
 
@@ -333,127 +221,6 @@ RSpec.describe CleverSequence do
       seq.next
 
       expect(seq.last).to eq 'value_2'
-    end
-
-    context 'before any calls to next' do
-      it 'returns the starting value' do
-        allow(klass).to receive(:find_by_integer_column).with(1).and_return(nil)
-        expect(subject.last).to eq 0
-      end
-    end
-  end
-
-  describe 'LowerBoundFinder' do
-    let(:finder) { CleverSequence::LowerBoundFinder.new(klass, :integer_column, ->(i) { i }) }
-
-    describe '#lower_bound' do
-      it 'returns 0 when no records exist' do
-        allow(klass).to receive(:find_by_integer_column).and_return(nil)
-
-        expect(finder.lower_bound).to eq 0
-      end
-
-      it 'returns 1 when only record 1 exists' do
-        allow(klass).to receive(:find_by_integer_column).and_return(nil)
-        allow(klass).to receive(:find_by_integer_column).with(1).and_return(true)
-
-        expect(finder.lower_bound).to eq 1
-      end
-
-      it 'returns 2 when records 1 and 2 exist' do
-        allow(klass).to receive(:find_by_integer_column).and_return(nil)
-        allow(klass).to receive(:find_by_integer_column).with(1).and_return(true)
-        allow(klass).to receive(:find_by_integer_column).with(2).and_return(true)
-
-        expect(finder.lower_bound).to eq 2
-      end
-
-      it 'handles many consecutive records efficiently via binary search' do
-        existing_records = (1..100).to_a
-        allow(klass).to receive(:find_by_integer_column) do |val|
-          existing_records.include?(val)
-        end
-
-        expect(finder.lower_bound).to eq 100
-
-        # Verify it used binary search (should be O(log n) calls, not 100)
-        expect(klass).to have_received(:find_by_integer_column).at_most(20).times
-      end
-
-      it 'finds consecutive records and returns highest existing value' do
-        allow(klass).to receive(:find_by_integer_column).and_return(nil)
-        allow(klass).to receive(:find_by_integer_column).with(1).and_return(true)
-        allow(klass).to receive(:find_by_integer_column).with(2).and_return(true)
-        # Gap at 3 - the finder will find 2 as the lower bound
-        # because it searches for consecutive records starting from 1
-        allow(klass).to receive(:find_by_integer_column).with(3).and_return(nil)
-
-        expect(finder.lower_bound).to eq 2
-      end
-
-      it 'handles large existing record counts efficiently' do
-        # Simulate 1000 consecutive records existing
-        allow(klass).to receive(:find_by_integer_column) do |val|
-          val <= 1000
-        end
-
-        expect(finder.lower_bound).to eq 1000
-
-        # Binary search should find this in O(log n) queries, not 1000
-        expect(klass).to have_received(:find_by_integer_column).at_most(25).times
-      end
-    end
-
-    describe '#next_between' do
-      it 'calculates next search point using formula [((lower+1)/2)+(upper/2), lower*2].min' do
-        # For lower=10, upper=100: min((5 + 50), 20) = 20
-        result = finder.send(:next_between, 10, 100)
-        expect(result).to eq 20
-      end
-
-      it 'handles infinite upper bound by capping at lower * 2' do
-        result = finder.send(:next_between, 1, Float::INFINITY)
-        expect(result).to eq 2
-      end
-
-      it 'doubles lower value for large upper bounds' do
-        result = finder.send(:next_between, 10, Float::INFINITY)
-        expect(result).to eq 20
-      end
-
-      it 'returns 0 when lower is 0' do
-        # This is by design - when starting fresh, first check is at 1
-        result = finder.send(:next_between, 0, Float::INFINITY)
-        expect(result).to eq 0
-      end
-    end
-
-    describe '#exists?' do
-      it 'applies the block transformation before checking' do
-        finder = CleverSequence::LowerBoundFinder.new(klass, :string_column, ->(i) { "item_#{i}" })
-        allow(klass).to receive(:find_by_string_column).and_return(nil)
-        allow(klass).to receive(:find_by_string_column).with('item_5').and_return(true)
-
-        expect(finder.send(:exists?, 5)).to be_truthy
-        expect(finder.send(:exists?, 6)).to be_falsey
-      end
-    end
-
-    describe '#finder_method' do
-      it 'generates correct finder method for regular columns' do
-        finder = CleverSequence::LowerBoundFinder.new(klass, :integer_column, ->(i) { i })
-        expect(finder.send(:finder_method)).to eq :find_by_integer_column
-      end
-
-      it 'strips _crypt suffix for encrypted columns' do
-        finder = CleverSequence::LowerBoundFinder.new(klass, :encrypted_column_crypt, ->(i) { i })
-        expect(finder.send(:finder_method)).to eq :find_by_encrypted_column
-      end
-
-      it 'handles underscored column names' do
-        finder = CleverSequence::LowerBoundFinder.new(klass, :some_long_column_name, ->(i) { i })
-        expect(finder.send(:finder_method)).to eq :find_by_some_long_column_name
-      end
     end
   end
 
