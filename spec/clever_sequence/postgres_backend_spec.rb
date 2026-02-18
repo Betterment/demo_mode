@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
+require 'demo_mode/clever_sequence/postgres_backend'
 
 RSpec.describe CleverSequence::PostgresBackend do
   let(:klass) { Widget }
@@ -72,11 +73,14 @@ RSpec.describe CleverSequence::PostgresBackend do
       described_class.instance_variable_set(:@sequence_cache, nil)
     end
 
-    context 'when throw_if_sequence_not_found is true' do
-      it 'throws a SequenceNotFoundError' do
+    context 'when enforce_sequences_exist is true' do
+      before { CleverSequence.enforce_sequences_exist = true }
+      after { CleverSequence.enforce_sequences_exist = false }
+
+      it 'raises a SequenceNotFoundError' do
         error = nil
         expect {
-          described_class.nextval(klass, nonexistent_attribute, block, throw_if_sequence_not_found: true)
+          described_class.nextval(klass, nonexistent_attribute, block)
         }.to raise_error(CleverSequence::PostgresBackend::SequenceNotFoundError) { |e| error = e }
 
         expect(error.sequence_name).to eq sequence_name
@@ -87,9 +91,11 @@ RSpec.describe CleverSequence::PostgresBackend do
       end
     end
 
-    context 'when throw_if_sequence_not_found is false' do
+    context 'when enforce_sequences_exist is false' do
+      before { CleverSequence.enforce_sequences_exist = false }
+
       it 'calculates a new sequence value' do
-        result = described_class.nextval(klass, nonexistent_attribute, block, throw_if_sequence_not_found: false)
+        result = described_class.nextval(klass, nonexistent_attribute, block)
         expect(result).to eq 1
       end
     end

@@ -20,7 +20,7 @@ class CleverSequence
     end
 
     class << self
-      def nextval(klass, attribute, block, throw_if_sequence_not_found: true)
+      def nextval(klass, attribute, block)
         name = sequence_name(klass, attribute)
 
         if sequence_exists?(name)
@@ -31,7 +31,13 @@ class CleverSequence
         else
           start_value = calculate_sequence_value(klass, attribute, block)
 
-          if throw_if_sequence_not_found
+          sequence_cache[name] = {
+            klass: klass,
+            attribute: attribute,
+            calculated_start_value: start_value + 1,
+          }
+
+          if CleverSequence.enforce_sequences_exist
             raise SequenceNotFoundError.new(
               sequence_name: name,
               klass: klass,
@@ -59,7 +65,7 @@ class CleverSequence
       private
 
       def sequence_exists?(sequence_name)
-        return true if sequence_cache[sequence_name] == true
+        return true if sequence_cache.key?(sequence_name)
 
         @sequence_cache[sequence_name] = ActiveRecord::Base.connection.execute(
           "SELECT 1 FROM information_schema.sequences WHERE sequence_name = '#{sequence_name}' LIMIT 1",
