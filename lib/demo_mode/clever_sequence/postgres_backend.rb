@@ -31,14 +31,6 @@ class CleverSequence
         else
           start_value = calculate_sequence_value(klass, attribute, block)
 
-          ActiveSupport::Notifications.instrument(
-            'clever_sequence.sequence_not_found',
-            sequence_name: name,
-            klass: klass,
-            attribute: attribute,
-            start_value: start_value,
-          )
-
           if throw_if_sequence_not_found
             raise SequenceNotFoundError.new(
               sequence_name: name,
@@ -60,11 +52,14 @@ class CleverSequence
         "#{SEQUENCE_PREFIX}#{table[0, limit]}_#{attr[0, limit]}"
       end
 
+      def sequence_cache
+        @sequence_cache ||= {}
+      end
+
       private
 
       def sequence_exists?(sequence_name)
-        @sequence_cache ||= {}
-        return true if @sequence_cache[sequence_name] == true
+        return true if sequence_cache[sequence_name] == true
 
         @sequence_cache[sequence_name] = ActiveRecord::Base.connection.execute(
           "SELECT 1 FROM information_schema.sequences WHERE sequence_name = '#{sequence_name}' LIMIT 1",

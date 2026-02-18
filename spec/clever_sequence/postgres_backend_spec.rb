@@ -85,31 +85,6 @@ RSpec.describe CleverSequence::PostgresBackend do
         expect(error.calculated_start_value).not_to be_nil
         expect(error.message).to include(sequence_name)
       end
-
-      it 'sends notification when sequence is not found' do
-        described_class.instance_variable_set(:@sequence_cache, nil)
-
-        events = []
-        subscriber = ActiveSupport::Notifications.subscribe('clever_sequence.sequence_not_found') do |*args|
-          event = ActiveSupport::Notifications::Event.new(*args)
-          events << event.payload
-        end
-
-        begin
-          expect {
-            described_class.nextval(klass, nonexistent_attribute, block, throw_if_sequence_not_found: true)
-          }.to raise_error(CleverSequence::PostgresBackend::SequenceNotFoundError)
-
-          expect(events.count).to eq 1
-          payload = events.first
-          expect(payload[:sequence_name]).to eq sequence_name
-          expect(payload[:klass]).to eq klass
-          expect(payload[:attribute]).to eq nonexistent_attribute
-          expect(payload[:start_value]).to be_a(Integer)
-        ensure
-          ActiveSupport::Notifications.unsubscribe(subscriber)
-        end
-      end
     end
 
     context 'when throw_if_sequence_not_found is false' do
