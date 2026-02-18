@@ -2,7 +2,7 @@
 
 class CleverSequence
   module PostgresBackend
-    SEQUENCE_PREFIX = 'clever_seq_'
+    SEQUENCE_PREFIX = 'cs_'
 
     class SequenceNotFoundError < StandardError
       attr_reader :sequence_name, :klass, :attribute, :calculated_start_value
@@ -23,7 +23,12 @@ class CleverSequence
       def nextval(klass, attribute, block, throw_if_sequence_not_found: true)
         name = sequence_name(klass, attribute)
 
-        unless sequence_exists?(name)
+        if sequence_exists?(name)
+          result = ActiveRecord::Base.connection.execute(
+            "SELECT nextval('#{name}')",
+          )
+          result.first['nextval'].to_i
+        else
           start_value = calculate_sequence_value(klass, attribute, block)
 
           ActiveSupport::Notifications.instrument(
@@ -42,43 +47,32 @@ class CleverSequence
               calculated_start_value: start_value + 1,
             )
           else
-            return start_value + 1
+            start_value + 1
           end
         end
-
-        # Sequence exists, use it
-        result = ActiveRecord::Base.connection.execute(
-          "SELECT nextval('#{name}')",
-        )
-        result.first['nextval'].to_i
       end
 
       def sequence_name(klass, attribute)
         table = klass.table_name.gsub(/[^a-z0-9_]/i, '_')
         attr = attribute.to_s.gsub(/[^a-z0-9_]/i, '_')
-        "#{SEQUENCE_PREFIX}#{table}_#{attr}"[0, 63] # PostgreSQL identifier limit
+        # Handle PostgreSQL identifier limit:
+        limit = (63 - SEQUENCE_PREFIX.length) / 2
+        "#{SEQUENCE_PREFIX}#{table[0, limit]}_#{attr[0, limit]}"
       end
 
       private
 
       def sequence_exists?(sequence_name)
         @sequence_cache ||= {}
-
         return true if @sequence_cache[sequence_name] == true
 
-        result = ActiveRecord::Base.connection.execute(
-          "SELECT 1 FROM information_schema.sequences WHERE sequence_name = '#{sequence_name}'",
-        )
-
-        exists = result.any?
-
-        @sequence_cache[sequence_name] = true if exists
-
-        exists
+        @sequence_cache[sequence_name] = ActiveRecord::Base.connection.execute(
+          "SELECT 1 FROM information_schema.sequences WHERE sequence_name = '#{sequence_name}' LIMIT 1",
+        ).any?
       end
 
       def calculate_sequence_value(klass, attribute, block)
-        column_name = klass.attribute_aliases[attribute.to_s] || attribute.to_s
+        column_name = klass.attribute_aliases.fetch(attribute.to_s, attribute.to_s)
         return 0 unless klass.column_names.include?(column_name)
 
         LowerBoundFinder.new(klass, column_name, block).lower_bound

@@ -123,20 +123,21 @@ RSpec.describe CleverSequence::PostgresBackend do
   describe '.sequence_name' do
     it 'generates correct format' do
       name = described_class.sequence_name(klass, :email)
-      expect(name).to eq 'clever_seq_widgets_email'
+      expect(name).to eq 'cs_widgets_email'
     end
 
     it 'sanitizes special characters' do
       allow(klass).to receive(:table_name).and_return('my-table$name')
       name = described_class.sequence_name(klass, :'my-attr$name')
-      expect(name).to eq 'clever_seq_my_table_name_my_attr_name'
+      expect(name).to eq 'cs_my_table_name_my_attr_name'
     end
 
-    it 'truncates to 63 characters' do
+    it 'truncates long table and attribute names' do
       allow(klass).to receive(:table_name).and_return('a' * 50)
       name = described_class.sequence_name(klass, 'b' * 50)
-      expect(name.length).to eq 63
-      expect(name).to start_with('clever_seq_')
+      expect(name.length).to eq 64
+      expect(name).to start_with('cs_')
+      expect(name).to match(/^cs_a{30}_b{30}$/)
     end
   end
 end

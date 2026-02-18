@@ -1,5 +1,5 @@
 default: &default
-  adapter: <%= ENV.fetch('DATABASE_ADAPTER', 'sqlite3') %>
+  adapter: <%= ENV.fetch('DATABASE_ADAPTER', 'pg') %>
 
 development:
   <<: *default
