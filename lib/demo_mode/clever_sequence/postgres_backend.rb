@@ -5,18 +5,22 @@ class CleverSequence
     SEQUENCE_PREFIX = 'cs_'
 
     class SequenceNotFoundError < StandardError
-      attr_reader :sequence_name, :klass, :attribute, :calculated_start_value
+      attr_reader :sequence_name, :klass, :attribute
 
-      def initialize(sequence_name:, klass:, attribute:, calculated_start_value:)
+      def initialize(sequence_name:, klass:, attribute:)
         @sequence_name = sequence_name
         @klass = klass
         @attribute = attribute
-        @calculated_start_value = calculated_start_value
+
         super(
-          "Sequence '#{sequence_name}' not found for #{klass.name}##{attribute}. " \
-          "Calculated start value: #{calculated_start_value}. " \
+          "Sequence '#{sequence_name}' not found for #{klass.name}##{attribute}. "
         )
       end
+    end
+
+    module SequenceResult
+      Exists = Data.define(:sequence_name)
+      Missing = Data.define(:sequence_name, :klass, :attribute, :calculated_start_value)
     end
 
     class << self
@@ -24,6 +28,8 @@ class CleverSequence
         name = sequence_name(klass, attribute)
 
         if sequence_exists?(name)
+          sequence_cache[name] = SequenceResult::Exists.new(name)
+
           result = ActiveRecord::Base.connection.execute(
             "SELECT nextval('#{name}')",
           )
@@ -31,18 +37,18 @@ class CleverSequence
         else
           start_value = calculate_sequence_value(klass, attribute, block)
 
-          sequence_cache[name] = {
+          sequence_cache[name] = SequenceResult::Missing.new(
+            sequence_name: name,
             klass: klass,
             attribute: attribute,
             calculated_start_value: start_value + 1,
-          }
+          )
 
           if CleverSequence.enforce_sequences_exist
             raise SequenceNotFoundError.new(
               sequence_name: name,
               klass: klass,
               attribute: attribute,
-              calculated_start_value: start_value + 1,
             )
           else
             start_value + 1
@@ -67,7 +73,7 @@ class CleverSequence
       def sequence_exists?(sequence_name)
         return true if sequence_cache.key?(sequence_name)
 
-        @sequence_cache[sequence_name] = ActiveRecord::Base.connection.execute(
+        ActiveRecord::Base.connection.execute(
           "SELECT 1 FROM information_schema.sequences WHERE sequence_name = '#{sequence_name}' LIMIT 1",
         ).any?
       end

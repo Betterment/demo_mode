@@ -58,6 +58,16 @@ RSpec.describe CleverSequence::PostgresBackend do
       nextval_queries = execute_calls.grep(/SELECT nextval/)
       expect(nextval_queries.count).to eq 2
     end
+
+    it 'caches a SequenceResult::Exists entry' do
+      described_class.instance_variable_set(:@sequence_cache, nil)
+
+      described_class.nextval(klass, attribute, block)
+
+      cached = described_class.sequence_cache[sequence_name]
+      expect(cached).to be_a(CleverSequence::PostgresBackend::SequenceResult::Exists)
+      expect(cached.sequence_name).to eq sequence_name
+    end
   end
 
   context 'when sequence does not exist' do
@@ -86,8 +96,20 @@ RSpec.describe CleverSequence::PostgresBackend do
         expect(error.sequence_name).to eq sequence_name
         expect(error.klass).to eq klass
         expect(error.attribute).to eq nonexistent_attribute
-        expect(error.calculated_start_value).not_to be_nil
         expect(error.message).to include(sequence_name)
+      end
+
+      it 'caches a SequenceResult::Missing entry even when raising' do
+        expect {
+          described_class.nextval(klass, nonexistent_attribute, block)
+        }.to raise_error(CleverSequence::PostgresBackend::SequenceNotFoundError)
+
+        cached = described_class.sequence_cache[sequence_name]
+        expect(cached).to be_a(CleverSequence::PostgresBackend::SequenceResult::Missing)
+        expect(cached.sequence_name).to eq sequence_name
+        expect(cached.klass).to eq klass
+        expect(cached.attribute).to eq nonexistent_attribute
+        expect(cached.calculated_start_value).to eq 1
       end
     end
 
@@ -97,6 +119,17 @@ RSpec.describe CleverSequence::PostgresBackend do
       it 'calculates a new sequence value' do
         result = described_class.nextval(klass, nonexistent_attribute, block)
         expect(result).to eq 1
+      end
+
+      it 'caches a SequenceResult::Missing entry with migration data' do
+        described_class.nextval(klass, nonexistent_attribute, block)
+
+        cached = described_class.sequence_cache[sequence_name]
+        expect(cached).to be_a(CleverSequence::PostgresBackend::SequenceResult::Missing)
+        expect(cached.sequence_name).to eq sequence_name
+        expect(cached.klass).to eq klass
+        expect(cached.attribute).to eq nonexistent_attribute
+        expect(cached.calculated_start_value).to eq 1
       end
     end
   end
