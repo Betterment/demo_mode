@@ -71,7 +71,14 @@ class CleverSequence
       private
 
       def sequence_exists?(sequence_name)
-        return true if sequence_cache.key?(sequence_name)
+        if sequence_cache.key?(sequence_name)
+          case sequence_cache[sequence_name]
+          when SequenceResult::Exists
+            return true
+          else
+            return false
+          end
+        end
 
         ActiveRecord::Base.connection.execute(
           "SELECT 1 FROM information_schema.sequences WHERE sequence_name = '#{sequence_name}' LIMIT 1",
