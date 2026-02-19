@@ -1,7 +1,10 @@
+default: &default
+  adapter: <%= ENV.fetch('DATABASE_ADAPTER', 'pg') %>
+
 development:
-  adapter: sqlite3
+  <<: *default
   database: db/demo_mode_development.sqlite
 
 test:
-  adapter: sqlite3
-  database: db/demo_mode_test.sqlite
+  <<: *default
+  url: <%= ENV.fetch('DATABASE_URL', 'postgresql://127.0.0.1/demo_mode_test') %>
