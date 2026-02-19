@@ -89,7 +89,9 @@ class CleverSequence
         column_name = klass.attribute_aliases.fetch(attribute.to_s, attribute.to_s)
         return 0 unless klass.column_names.include?(column_name)
 
-        LowerBoundFinder.new(klass, column_name, block).lower_bound
+        ActiveRecord::Base.with_transactional_lock("lower-bound-#{klass}-#{column_name}") do
+          LowerBoundFinder.new(klass, column_name, block).lower_bound
+        end
       end
     end
   end
