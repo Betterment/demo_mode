@@ -284,7 +284,6 @@ DEPENDENCIES
   appraisal
   betterlint
   capybara
-  concurrent-ruby (~> 1.3)
   cuprite
   demo_mode!
   factory_bot
