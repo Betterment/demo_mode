@@ -17,79 +17,87 @@ RSpec.describe CleverSequence do
     described_class.reset!
   end
 
-  describe 'Factory Bot Patch' do
-    before do
-      next if FactoryBot.factories.registered?(:widget)
-
-      FactoryBot.define do
-        factory :widget do
-          sequence(:integer_column)
-          sequence(:string_column)
-          sequence(:text_column) { |i| "Foo ##{i}" }
-          sequence(:encrypted_column_crypt) { |i| "Bar #{i + 10}" }
-        end
-      end
+  describe '.use_database_sequences?' do
+    after do
+      described_class.use_database_sequences = false
     end
 
-    it 'sets up the sequence for declared columns' do
-      create(:widget).tap do |widget|
-        expect(widget.integer_column).to eq 1
-        expect(widget.string_column).to eq '1'
-        expect(widget.text_column).to eq 'Foo #1'
-        expect(widget.encrypted_column_crypt).to eq 'Bar 11'
+    it 'returns false by default' do
+      expect(described_class.use_database_sequences?).to be(false)
+    end
+
+    context 'when enabled' do
+      before do
+        described_class.use_database_sequences = true
       end
-      create(:widget).tap do |widget|
-        expect(widget.integer_column).to eq 2
-        expect(widget.string_column).to eq '2'
-        expect(widget.text_column).to eq 'Foo #2'
-        expect(widget.encrypted_column_crypt).to eq 'Bar 12'
+
+      it 'returns true' do
+        expect(described_class.use_database_sequences?).to be(true)
       end
+    end
+  end
+
+  describe '.enforce_sequences_exist?' do
+    after do
+      described_class.enforce_sequences_exist = false
+    end
+
+    it 'returns false by default' do
+      expect(described_class.enforce_sequences_exist?).to be(false)
+    end
+
+    context 'when enabled' do
+      before do
+        described_class.enforce_sequences_exist = true
+      end
+
+      it 'returns true' do
+        expect(described_class.enforce_sequences_exist?).to be(true)
+      end
+    end
+  end
+
+  describe '.reset!' do
+    let(:attribute) { :integer_column }
+
+    it 'allows sequence to restart fresh and re-query database' do
+      expect(subject.next).to eq 1
+
       described_class.reset!
-      build(:widget).tap do |widget|
-        expect(widget.integer_column).to eq 3
-        expect(widget.string_column).to eq '3'
-        expect(widget.text_column).to eq 'Foo #3'
-        expect(widget.encrypted_column_crypt).to eq 'Bar 13'
-      end
 
-      expect(described_class.last(Widget, :integer_column)).to eq 3
-      expect(described_class.last(Widget, :string_column)).to eq 3
-      expect(described_class.last(Widget, :text_column)).to eq 'Foo #3'
-      expect(described_class.last(Widget, :encrypted_column_crypt)).to eq 'Bar 13'
+      # After reset, sequence will re-query the database
+      # and find that value 1 exists
+      allow(klass).to receive(:find_by_integer_column).with(1).and_return(true)
+      allow(klass).to receive(:find_by_integer_column).with(2).and_return(nil)
 
-      expect(described_class.next(Widget, :integer_column)).to eq 4
-      expect(described_class.next(Widget, :string_column)).to eq 4
-      expect(described_class.next(Widget, :text_column)).to eq 'Foo #4'
-      expect(described_class.next(Widget, :encrypted_column_crypt)).to eq 'Bar 14'
-    end
-
-    it 'works with attributes_for' do
-      attributes_for(:widget).tap do |attributes|
-        expect(attributes[:integer_column]).to eq 1
-        expect(attributes[:string_column]).to eq 1
-        expect(attributes[:text_column]).to eq 'Foo #1'
-        expect(attributes[:encrypted_column_crypt]).to eq 'Bar 11'
-      end
-      attributes_for(:widget).tap do |attributes|
-        expect(attributes[:integer_column]).to eq 2
-        expect(attributes[:string_column]).to eq 2
-        expect(attributes[:text_column]).to eq 'Foo #2'
-        expect(attributes[:encrypted_column_crypt]).to eq 'Bar 12'
-      end
-
-      expect(described_class.last(Widget, :integer_column)).to eq 2
-      expect(described_class.last(Widget, :string_column)).to eq 2
-      expect(described_class.last(Widget, :text_column)).to eq 'Foo #2'
-      expect(described_class.last(Widget, :encrypted_column_crypt)).to eq 'Bar 12'
-
-      expect(described_class.next(Widget, :integer_column)).to eq 3
-      expect(described_class.next(Widget, :string_column)).to eq 3
-      expect(described_class.next(Widget, :text_column)).to eq 'Foo #3'
-      expect(described_class.next(Widget, :encrypted_column_crypt)).to eq 'Bar 13'
+      expect(subject.next).to eq 2
     end
   end
 
   describe '.next' do
+    it 'returns sequential values for new attributes' do
+      expect(described_class.next(klass, :new_column)).to eq 1
+      expect(described_class.next(klass, :new_column)).to eq 2
+      expect(described_class.next(klass, :new_column)).to eq 3
+    end
+  end
+
+  describe '.last' do
+    let(:attribute) { :integer_column }
+
+    it 'returns the last generated value' do
+      described_class.next(klass, :integer_column)
+      described_class.next(klass, :integer_column)
+
+      expect(described_class.last(klass, :integer_column)).to eq 2
+    end
+
+    it 'returns 0 when no values have been generated' do
+      expect(described_class.last(klass, :nonexistent_attribute)).to eq 0
+    end
+  end
+
+  describe '#next' do
     context 'for an integer column' do
       let(:attribute) { :integer_column }
 
@@ -237,43 +245,94 @@ RSpec.describe CleverSequence do
     end
   end
 
-  describe '.use_database_sequences?' do
-    after do
-      described_class.use_database_sequences = false
+  describe '#last' do
+    let(:attribute) { :integer_column }
+
+    it 'returns the current value without incrementing' do
+      subject.next
+      expect(subject.last).to eq 1
+      expect(subject.last).to eq 1
+      expect(subject.last).to eq 1
     end
 
-    it 'returns false by default' do
-      expect(described_class.use_database_sequences?).to be(false)
-    end
+    it 'applies the block transformation' do
+      seq = described_class.new(:string_column) { |i| "value_#{i}" }.with_class(klass)
+      seq.next
+      seq.next
 
-    context 'when enabled' do
-      before do
-        described_class.use_database_sequences = true
-      end
-
-      it 'returns true' do
-        expect(described_class.use_database_sequences?).to be(true)
-      end
+      expect(seq.last).to eq 'value_2'
     end
   end
 
-  describe '.enforce_sequences_exist?' do
-    after do
-      described_class.enforce_sequences_exist = false
+  describe 'FactoryBot integration' do
+    before do
+      next if FactoryBot.factories.registered?(:widget)
+
+      FactoryBot.define do
+        factory :widget do
+          sequence(:integer_column)
+          sequence(:string_column)
+          sequence(:text_column) { |i| "Foo ##{i}" }
+          sequence(:encrypted_column_crypt) { |i| "Bar #{i + 10}" }
+        end
+      end
     end
 
-    it 'returns false by default' do
-      expect(described_class.enforce_sequences_exist?).to be(false)
+    it 'sets up the sequence for declared columns' do
+      create(:widget).tap do |widget|
+        expect(widget.integer_column).to eq 1
+        expect(widget.string_column).to eq '1'
+        expect(widget.text_column).to eq 'Foo #1'
+        expect(widget.encrypted_column_crypt).to eq 'Bar 11'
+      end
+      create(:widget).tap do |widget|
+        expect(widget.integer_column).to eq 2
+        expect(widget.string_column).to eq '2'
+        expect(widget.text_column).to eq 'Foo #2'
+        expect(widget.encrypted_column_crypt).to eq 'Bar 12'
+      end
+      described_class.reset!
+      build(:widget).tap do |widget|
+        expect(widget.integer_column).to eq 3
+        expect(widget.string_column).to eq '3'
+        expect(widget.text_column).to eq 'Foo #3'
+        expect(widget.encrypted_column_crypt).to eq 'Bar 13'
+      end
+
+      expect(described_class.last(Widget, :integer_column)).to eq 3
+      expect(described_class.last(Widget, :string_column)).to eq 3
+      expect(described_class.last(Widget, :text_column)).to eq 'Foo #3'
+      expect(described_class.last(Widget, :encrypted_column_crypt)).to eq 'Bar 13'
+
+      expect(described_class.next(Widget, :integer_column)).to eq 4
+      expect(described_class.next(Widget, :string_column)).to eq 4
+      expect(described_class.next(Widget, :text_column)).to eq 'Foo #4'
+      expect(described_class.next(Widget, :encrypted_column_crypt)).to eq 'Bar 14'
     end
 
-    context 'when enabled' do
-      before do
-        described_class.enforce_sequences_exist = true
+    it 'works with attributes_for' do
+      attributes_for(:widget).tap do |attributes|
+        expect(attributes[:integer_column]).to eq 1
+        expect(attributes[:string_column]).to eq 1
+        expect(attributes[:text_column]).to eq 'Foo #1'
+        expect(attributes[:encrypted_column_crypt]).to eq 'Bar 11'
+      end
+      attributes_for(:widget).tap do |attributes|
+        expect(attributes[:integer_column]).to eq 2
+        expect(attributes[:string_column]).to eq 2
+        expect(attributes[:text_column]).to eq 'Foo #2'
+        expect(attributes[:encrypted_column_crypt]).to eq 'Bar 12'
       end
 
-      it 'returns true' do
-        expect(described_class.enforce_sequences_exist?).to be(true)
-      end
+      expect(described_class.last(Widget, :integer_column)).to eq 2
+      expect(described_class.last(Widget, :string_column)).to eq 2
+      expect(described_class.last(Widget, :text_column)).to eq 'Foo #2'
+      expect(described_class.last(Widget, :encrypted_column_crypt)).to eq 'Bar 12'
+
+      expect(described_class.next(Widget, :integer_column)).to eq 3
+      expect(described_class.next(Widget, :string_column)).to eq 3
+      expect(described_class.next(Widget, :text_column)).to eq 'Foo #3'
+      expect(described_class.next(Widget, :encrypted_column_crypt)).to eq 'Bar 13'
     end
   end
 
