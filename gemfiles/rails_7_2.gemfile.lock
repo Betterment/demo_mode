@@ -144,6 +144,9 @@ GEM
     parser (3.3.7.1)
       ast (~> 2.4.1)
       racc
+    pg (1.6.3-arm64-darwin)
+    pg (1.6.3-x86_64-darwin)
+    pg (1.6.3-x86_64-linux)
     pp (0.6.2)
       prettyprint
     prettyprint (0.2.0)
@@ -288,6 +291,7 @@ DEPENDENCIES
   net-imap (~> 0.4.20)
   net-smtp
   nokogiri (~> 1.18.9)
+  pg
   railties (~> 7.2.0)
   rspec-rails
   securerandom (~> 0.3.2)

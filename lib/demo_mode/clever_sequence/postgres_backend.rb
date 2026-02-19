@@ -1,0 +1,96 @@
+# frozen_string_literal: true
+
+class CleverSequence
+  module PostgresBackend
+    SEQUENCE_PREFIX = 'cs_'
+
+    class SequenceNotFoundError < StandardError
+      attr_reader :sequence_name, :klass, :attribute
+
+      def initialize(sequence_name:, klass:, attribute:)
+        @sequence_name = sequence_name
+        @klass = klass
+        @attribute = attribute
+
+        super(
+          "Sequence '#{sequence_name}' not found for #{klass.name}##{attribute}. "
+        )
+      end
+    end
+
+    module SequenceResult
+      Exists = Data.define(:sequence_name)
+      Missing = Data.define(:sequence_name, :klass, :attribute, :calculated_start_value)
+    end
+
+    class << self
+      def nextval(klass, attribute, block)
+        name = sequence_name(klass, attribute)
+
+        if sequence_exists?(name)
+          sequence_cache[name] = SequenceResult::Exists.new(name)
+
+          result = ActiveRecord::Base.connection.execute(
+            "SELECT nextval('#{name}')",
+          )
+          result.first['nextval'].to_i
+        else
+          start_value = calculate_sequence_value(klass, attribute, block)
+
+          sequence_cache[name] = SequenceResult::Missing.new(
+            sequence_name: name,
+            klass: klass,
+            attribute: attribute,
+            calculated_start_value: start_value + 1,
+          )
+
+          if CleverSequence.enforce_sequences_exist
+            raise SequenceNotFoundError.new(
+              sequence_name: name,
+              klass: klass,
+              attribute: attribute,
+            )
+          else
+            start_value + 1
+          end
+        end
+      end
+
+      def sequence_name(klass, attribute)
+        table = klass.table_name.gsub(/[^a-z0-9_]/i, '_')
+        attr = attribute.to_s.gsub(/[^a-z0-9_]/i, '_')
+        # Handle PostgreSQL identifier limit:
+        limit = (63 - SEQUENCE_PREFIX.length) / 2
+        "#{SEQUENCE_PREFIX}#{table[0, limit]}_#{attr[0, limit]}"
+      end
+
+      def sequence_cache
+        @sequence_cache ||= {}
+      end
+
+      private
+
+      def sequence_exists?(sequence_name)
+        if sequence_cache.key?(sequence_name)
+          case sequence_cache[sequence_name]
+          when SequenceResult::Exists
+            return true
+          else
+            return false
+          end
+        end
+
+        ActiveRecord::Base.connection.execute(
+          "SELECT 1 FROM information_schema.sequences WHERE sequence_name = '#{sequence_name}' LIMIT 1",
+        ).any?
+      end
+
+      def calculate_sequence_value(klass, attribute, block)
+        column_name = klass.attribute_aliases.fetch(attribute.to_s, attribute.to_s)
+        return 0 unless klass.column_names.include?(column_name)
+
+        LowerBoundFinder.new(klass, column_name, block).lower_bound
+      end
+    end
+  end
+end

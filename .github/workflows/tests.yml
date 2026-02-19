@@ -6,31 +6,49 @@ jobs:
   test:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     strategy:
       fail-fast: false
       matrix:
-        ruby: ['3.2', '3.3']
+        ruby: ["3.2", "3.3"]
         gemfile:
           - gemfiles/rails_7_2.gemfile
           - gemfiles/rails_8_0.gemfile
           - gemfiles/rails_8_1.gemfile
+        database: ["sqlite3", "postgresql"]
     steps:
-    - uses: actions/checkout@ee0669bd1cc54295c223e0bb666b733df41de1c5 # v2
-    - name: Setup Chrome
-      uses: browser-actions/setup-chrome@c785b87e244131f27c9f19c1a33e2ead956ab7ce # latest
-      with:
-        chrome-version: stable
-    - uses: ruby/setup-ruby@a4effe49ee8ee5b8b5091268c473a4628afb5651 # v1
-      env:
-        BUNDLE_GEMFILE: ${{ matrix.gemfile }}
-      with:
-        ruby-version: ${{ matrix.ruby }}
-        bundler-cache: true # runs 'bundle install' and caches installed gems automatically
-    - name: Setup database
-      env:
-        BUNDLE_GEMFILE: ${{ matrix.gemfile }}
-      run: bundle exec rake db:test:prepare
-    - name: Run tests
-      env:
-        BUNDLE_GEMFILE: ${{ matrix.gemfile }}
-      run: bundle exec rake spec
+      - uses: actions/checkout@ee0669bd1cc54295c223e0bb666b733df41de1c5 # v2
+      - name: Setup Chrome
+        uses: browser-actions/setup-chrome@c785b87e244131f27c9f19c1a33e2ead956ab7ce # latest
+        with:
+          chrome-version: stable
+      - uses: ruby/setup-ruby@a4effe49ee8ee5b8b5091268c473a4628afb5651 # v1
+        env:
+          BUNDLE_GEMFILE: ${{ matrix.gemfile }}
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+      - name: Setup database
+        env:
+          BUNDLE_GEMFILE: ${{ matrix.gemfile }}
+          DATABASE_ADAPTER: ${{ matrix.database == 'postgresql' && 'pg' || 'sqlite3' }}
+          DATABASE_URL: ${{ matrix.database == 'postgresql' && 'postgresql://postgres@localhost:5432/demo_mode_test' || 'sqlite3:db/test.sqlite3' }}
+        run: bundle exec rake db:create db:test:prepare
+      - name: Run tests
+        env:
+          BUNDLE_GEMFILE: ${{ matrix.gemfile }}
+          DATABASE_ADAPTER: ${{ matrix.database == 'postgresql' && 'pg' || 'sqlite3' }}
+          DATABASE_URL: ${{ matrix.database == 'postgresql' && 'postgresql://postgres@localhost:5432/demo_mode_test' || 'sqlite3:db/test.sqlite3' }}
+        run: bundle exec rake spec
