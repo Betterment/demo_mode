@@ -687,6 +687,12 @@ you operate an "on call" process, engineers should be made aware
 that this demo environment _is_ a "production-like" environment
 and should expect "production-like" uptime guarantees.
 
+We also emit an `ActiveSupport::Notifications` event
+(`demo_mode.persona_generated`) every time a persona is generated, which can be
+useful for tracking usage over time and alerting to any unexpected spikes or
+drops in usage. The event payload includes the persona name, variant, execution
+duration, and exception details (if an error occurred during generation).
+
 Again, to learn more about how we use and operate our "demo"
 environments at **Betterment**, check out our ✨ [RailsConf 2022 talk entitled
 "RAILS_ENV=demo"](https://youtu.be/VibJu9IMohc)
