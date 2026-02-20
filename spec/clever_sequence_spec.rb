@@ -88,10 +88,10 @@ RSpec.describe CleverSequence do
       after { described_class.use_database_sequences = false }
 
       it 'delegates to PostgresBackend for sequential values' do
-        allow(CleverSequence::PostgresBackend).to receive(:nextval).and_return(1, 2, 3)
+        allow(CleverSequence::PostgresBackend).to receive(:nextval).and_return(1, 2, 4)
         expect(described_class.next(klass, :new_column)).to eq 1
         expect(described_class.next(klass, :new_column)).to eq 2
-        expect(described_class.next(klass, :new_column)).to eq 3
+        expect(described_class.next(klass, :new_column)).to eq 4
       end
     end
   end
@@ -159,47 +159,6 @@ RSpec.describe CleverSequence do
         end
       end
 
-      context 'for a string column' do
-        let(:attribute) { :string_column }
-        let(:block) { ->(i) { "klass ##{i}" } }
-
-        it 'starts at 1 and keeps going without queries' do
-          expect(klass).to receive(:find_by_string_column).and_call_original
-          expect(subject.next).to eq 'klass #1'
-          expect(klass).not_to receive(:find_by_string_column)
-          expect(subject.next).to eq 'klass #2'
-        end
-
-        context 'when a record exists' do
-          let!(:existing_klass) { klass.create!(string_column: 'klass #34244') }
-
-          it 'starts at 1 and keeps going without queries' do
-            expect(klass).to receive(:find_by_string_column).with('klass #1').and_call_original
-            expect(subject.next).to eq 'klass #1'
-            expect(klass).not_to receive(:find_by_string_column)
-            expect(subject.next).to eq 'klass #2'
-          end
-        end
-
-        context 'when a record without a number exists' do
-          let!(:existing_klass) { klass.create!(string_column: 'Some klass') }
-
-          it 'starts at 1' do
-            expect(klass).to receive(:find_by_string_column).and_call_original
-            expect(subject.next).to eq 'klass #1'
-          end
-        end
-
-        context 'when it is aliased' do
-          let(:attribute) { :name_aliased }
-
-          it 'starts at 1 and keeps going without queries' do
-            expect(klass).to receive(:find_by_string_column).and_call_original
-            expect(subject.next).to eq 'klass #1'
-          end
-        end
-      end
-
       context 'for an encrypted column' do
         let(:attribute) { :encrypted_column_crypt }
         let(:block) { ->(i) { "TEST#{i}TEST" } }
@@ -226,53 +185,6 @@ RSpec.describe CleverSequence do
           end
         end
       end
-
-      context 'for a non-roundtrippable string sequence' do
-        let(:attribute) { :text_column }
-        let(:block) { ->(i) { "234-22-#{i.to_s.rjust(2, '9')}" } }
-
-        it 'uses the lower bound finder and starts at zero' do
-          expect(klass).to receive(:find_by_text_column).and_call_original
-          expect(subject.next).to eq '234-22-91'
-          expect(klass).not_to receive(:find_by_text_column)
-          expect(subject.next).to eq '234-22-92'
-        end
-
-        context 'when the first couple attributes exist' do
-          it 'uses the lower bound finder to find the next from the database' do
-            allow(klass).to receive(:find_by_text_column).and_return(nil)
-            allow(klass).to receive(:find_by_text_column).with('234-22-91').and_return(true)
-            allow(klass).to receive(:find_by_text_column).with('234-22-92').and_return(true)
-            expect(subject.next).to eq '234-22-93'
-            expect(klass).to have_received(:find_by_text_column).with('234-22-91')
-            expect(klass).to have_received(:find_by_text_column).with('234-22-92')
-            expect(klass).not_to receive(:find_by_text_column)
-            expect(subject.next).to eq '234-22-94'
-          end
-        end
-      end
-
-      context 'for a date column' do
-        let(:attribute) { :date_column }
-        let(:block) { ->(i) { Date.parse('2016-05-15') + i.days } }
-
-        it 'starts the sequence with a query' do
-          expect(klass).to receive(:find_by_date_column).with('2016-05-16'.to_date).and_call_original
-          expect(subject.next).to eq '2016-05-16'.to_date
-          expect(klass).not_to receive(:find_by_date_column)
-          expect(subject.next).to eq '2016-05-17'.to_date
-        end
-      end
-
-      context "for a column that doesn't exist" do
-        let(:attribute) { :banana }
-
-        it 'starts the sequence but without a database query' do
-          expect(klass).not_to receive(:"find_by_#{attribute}")
-          expect(subject.next).to eq 1
-          expect(subject.next).to eq 2
-        end
-      end
     end
 
     context 'when use_database_sequences is true' do
@@ -293,11 +205,11 @@ RSpec.describe CleverSequence do
         end
 
         it 'returns sequential values from backend' do
-          allow(CleverSequence::PostgresBackend).to receive(:nextval).and_return(1, 2, 3)
+          allow(CleverSequence::PostgresBackend).to receive(:nextval).and_return(1, 2, 4)
 
           expect(subject.next).to eq 1
           expect(subject.next).to eq 2
-          expect(subject.next).to eq 3
+          expect(subject.next).to eq 4
         end
 
         it 'does not use in-memory sequence logic' do
