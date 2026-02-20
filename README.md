@@ -571,8 +571,6 @@ You can check this setting with:
 CleverSequence.enforce_sequences_exist? # => false (default)
 ```
 
-**Note:** These features require PostgreSQL and will be implemented in a future release.
-
 ## Deploying a demo environment to the cloud
 
 This gem truly shines when used to deploy a "demo" version of
