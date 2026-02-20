@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative 'clever_sequence/lower_bound_finder'
+require_relative 'clever_sequence/postgres_backend'
 
 class CleverSequence
   DEFAULT_BLOCK = ->(i) { i }
@@ -46,7 +47,11 @@ class CleverSequence
   end
 
   def next
-    @last_value = last_value + 1
+    @last_value = if CleverSequence.use_database_sequences?
+      PostgresBackend.nextval(klass, attribute, block)
+    else
+      last_value + 1
+    end
     last
   end
 
