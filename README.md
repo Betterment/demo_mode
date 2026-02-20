@@ -571,8 +571,6 @@ You can check this setting with:
 CleverSequence.enforce_sequences_exist? # => false (default)
 ```
 
-**Note:** These features require PostgreSQL and will be implemented in a future release.
-
 ## Deploying a demo environment to the cloud
 
 This gem truly shines when used to deploy a "demo" version of
@@ -686,6 +684,13 @@ alerts should still be wired up to ping your engineers, and if
 you operate an "on call" process, engineers should be made aware
 that this demo environment _is_ a "production-like" environment
 and should expect "production-like" uptime guarantees.
+
+We also emit an `ActiveSupport::Notifications` event
+(`demo_mode.persona_generated`) every time a persona is generated, which can be
+useful for tracking usage over time and alerting to any unexpected spikes,
+drops in usage, and changes to performance. The custom event payload includes the
+persona name and variant, in addition to standard attributes like execution
+duration and exception details (if an error occurred during generation).
 
 Again, to learn more about how we use and operate our "demo"
 environments at **Betterment**, check out our ✨ [RailsConf 2022 talk entitled

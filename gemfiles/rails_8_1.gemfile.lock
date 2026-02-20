@@ -1,7 +1,7 @@
 PATH
   remote: ..
   specs:
-    demo_mode (3.4.0)
+    demo_mode (3.5.0)
       actionpack (>= 7.2, < 8.2)
       activejob (>= 7.2, < 8.2)
       activerecord (>= 7.2, < 8.2)
@@ -278,6 +278,7 @@ GEM
     zeitwerk (2.6.18)
 
 PLATFORMS
+  arm64-darwin-23
   arm64-darwin-24
   arm64-darwin-25
   x86_64-linux

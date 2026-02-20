@@ -63,12 +63,14 @@ module DemoMode
     end
 
     def generate!(variant: :default, password: nil, options: {})
-      variant = variants[variant]
-      CleverSequence.reset! if defined?(CleverSequence)
-      DemoMode.current_password = password if password
-      DemoMode.around_persona_generation.call(variant.signinable_generator, **options)
-    ensure
-      DemoMode.current_password = nil
+      ActiveSupport::Notifications.instrument('demo_mode.persona.generate', name: name, variant: variant) do
+        variant = variants[variant]
+        CleverSequence.reset! if defined?(CleverSequence)
+        DemoMode.current_password = password if password
+        DemoMode.around_persona_generation.call(variant.signinable_generator, **options)
+      ensure
+        DemoMode.current_password = nil
+      end
     end
 
     def callout(callout = true) # rubocop:disable Style/OptionalBooleanParameter
