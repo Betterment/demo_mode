@@ -278,7 +278,7 @@ RSpec.describe CleverSequence::PostgresBackend do
 
       go = false
 
-      threads = thread_count.times.map do
+      threads = Array.new(thread_count) do
         Thread.new do
           Thread.pass until go
           described_class.nextval(klass, nonexistent_attribute, block)

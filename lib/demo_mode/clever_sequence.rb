@@ -26,9 +26,9 @@ class CleverSequence
       sequences.each_value(&:reset!)
     end
 
-    def with_sequence_adjustment(&block)
+    def with_sequence_adjustment(&)
       reset!
-      backend.with_sequence_adjustment(&block)
+      backend.with_sequence_adjustment(&)
     end
 
     def next(klass, name)

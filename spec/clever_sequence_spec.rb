@@ -119,7 +119,7 @@ RSpec.describe CleverSequence do
       expect(described_class).to receive(:reset!).ordered
       expect(described_class.backend).to receive(:with_sequence_adjustment).ordered.and_yield
 
-      described_class.with_sequence_adjustment { }
+      described_class.with_sequence_adjustment { nil }
     end
 
     it 'delegates to the active backend' do
