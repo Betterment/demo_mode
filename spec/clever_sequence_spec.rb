@@ -84,13 +84,11 @@ RSpec.describe CleverSequence do
     end
 
     it 'clears instance-level state so sequences re-derive from the backend' do
+      allow(described_class.backend).to receive(:nextval).and_return(1, 2)
+
       expect(subject.next).to eq 1
 
       described_class.reset!
-
-      # After reset, the backend will re-query the database and find value 1 exists
-      allow(klass).to receive(:find_by_integer_column).with(1).and_return(true)
-      allow(klass).to receive(:find_by_integer_column).with(2).and_return(nil)
 
       expect(subject.next).to eq 2
     end
