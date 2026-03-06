@@ -84,7 +84,7 @@ module DemoMode
     def should_retry_with_sequence_adjustment?(error)
       return false unless defined?(CleverSequence)
 
-      Rails.logger.warn("[DemoMode][thread:#{Thread.current.name || Thread.current.object_id}] Uniqueness violation during persona generation, retrying with sequence adjustment: #{error.message}")
+      Rails.logger.warn("[DemoMode] Uniqueness violation during persona generation, retrying with sequence adjustment: #{error.message}")
       true
     end
 
