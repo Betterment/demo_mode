@@ -63,14 +63,29 @@ module DemoMode
     end
 
     def generate!(variant: :default, password: nil, options: {})
+      retried = false
       ActiveSupport::Notifications.instrument('demo_mode.persona.generate', name: name, variant: variant) do
         variant = variants[variant]
         CleverSequence.reset! if defined?(CleverSequence)
         DemoMode.current_password = password if password
         DemoMode.around_persona_generation.call(variant.signinable_generator, **options)
+      rescue ActiveRecord::RecordNotUnique, ActiveRecord::RecordInvalid => e
+        raise if retried || !should_retry_with_sequence_adjustment?(e)
+
+        retried = true
+        CleverSequence.with_sequence_adjustment do
+          DemoMode.around_persona_generation.call(variant.signinable_generator, **options)
+        end
       ensure
         DemoMode.current_password = nil
       end
+    end
+
+    def should_retry_with_sequence_adjustment?(error)
+      return false unless defined?(CleverSequence)
+
+      Rails.logger.warn("[DemoMode][thread:#{Thread.current.name || Thread.current.object_id}] Uniqueness violation during persona generation, retrying with sequence adjustment: #{error.message}")
+      true
     end
 
     def callout(callout = true) # rubocop:disable Style/OptionalBooleanParameter

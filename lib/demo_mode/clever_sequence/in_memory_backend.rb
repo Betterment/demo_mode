@@ -22,6 +22,13 @@ class CleverSequence
         end
       end
 
+      def with_sequence_adjustment
+        # No-op for InMemoryBackend. After reset!, nextval already
+        # recalculates from the database via starting_value/LowerBoundFinder,
+        # which finds the correct lower bound past existing data.
+        yield
+      end
+
       def sequence_state
         @sequence_state ||= {}
       end

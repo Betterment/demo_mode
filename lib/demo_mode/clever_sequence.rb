@@ -24,6 +24,11 @@ class CleverSequence
       sequences.each_value(&:reset!)
     end
 
+    def with_sequence_adjustment(&block)
+      reset!
+      backend.with_sequence_adjustment(&block)
+    end
+
     def next(klass, name)
       lookup(klass, name)&.next
     end

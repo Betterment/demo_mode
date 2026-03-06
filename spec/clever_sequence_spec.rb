@@ -94,6 +94,22 @@ RSpec.describe CleverSequence do
     end
   end
 
+  describe '.with_sequence_adjustment' do
+    it 'resets sequences before delegating to the backend' do
+      expect(described_class).to receive(:reset!).ordered
+      expect(described_class.backend).to receive(:with_sequence_adjustment).ordered.and_yield
+
+      described_class.with_sequence_adjustment { }
+    end
+
+    it 'delegates to the active backend' do
+      expect(described_class.backend).to receive(:with_sequence_adjustment).and_yield
+      executed = false
+      described_class.with_sequence_adjustment { executed = true }
+      expect(executed).to be true
+    end
+  end
+
   describe '.next' do
     it 'delegates to the backend and returns sequential values' do
       allow(described_class.backend).to receive(:nextval).and_return(1, 2, 3)

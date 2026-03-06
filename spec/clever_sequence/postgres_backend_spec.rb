@@ -68,6 +68,104 @@ RSpec.describe CleverSequence::PostgresBackend do
       expect(cached).to be_a(CleverSequence::PostgresBackend::SequenceResult::Exists)
       expect(cached.sequence_name).to eq sequence_name
     end
+
+    context 'when existing data conflicts with sequence start value' do
+      before do
+        described_class.reset!
+        # Create widgets with integer_column values 1, 2, 3, 4, 5
+        (1..5).each { |i| Widget.create!(integer_column: i) }
+      end
+
+      after do
+        Widget.delete_all
+      end
+
+      context 'without sequence adjustment' do
+        it 'does not adjust sequence and returns conflicting values' do
+          # Without adjustment, sequence returns 1, 2, 3... which conflict
+          result = described_class.nextval(klass, attribute, block)
+          expect(result).to eq 1
+        end
+      end
+
+      context 'with sequence adjustment' do
+        it 'adjusts sequence to skip past existing values' do
+          described_class.with_sequence_adjustment do
+            # Sequence starts at 1, but values 1-5 already exist
+            # First nextval should return 6 (after adjustment)
+            result = described_class.nextval(klass, attribute, block)
+            expect(result).to eq 6
+          end
+        end
+
+        it 'returns sequential values after adjustment' do
+          described_class.with_sequence_adjustment do
+            result_1 = described_class.nextval(klass, attribute, block)
+            result_2 = described_class.nextval(klass, attribute, block)
+            result_3 = described_class.nextval(klass, attribute, block)
+
+            expect(result_1).to eq 6
+            expect(result_2).to eq 7
+            expect(result_3).to eq 8
+          end
+        end
+
+        it 'only adjusts sequence on first use' do
+          execute_calls = []
+          allow(ActiveRecord::Base.connection).to receive(:execute).and_wrap_original do |method, *args|
+            execute_calls << args[0]
+            method.call(*args)
+          end
+
+          described_class.with_sequence_adjustment do
+            described_class.nextval(klass, attribute, block)
+            described_class.nextval(klass, attribute, block)
+            described_class.nextval(klass, attribute, block)
+          end
+
+          setval_queries = execute_calls.grep(/setval/)
+          expect(setval_queries.count).to eq 1
+        end
+      end
+    end
+
+    context 'when sequence is already past existing data' do
+      before do
+        described_class.reset!
+        # Create widgets with low values
+        Widget.create!(integer_column: 1)
+        Widget.create!(integer_column: 2)
+        # Advance the sequence past existing data
+        ActiveRecord::Base.connection.execute(
+          "SELECT setval('#{sequence_name}', 100)",
+        )
+      end
+
+      after do
+        Widget.delete_all
+      end
+
+      it 'does not go backwards' do
+        described_class.with_sequence_adjustment do
+          # Sequence is at 100, existing data only goes to 2
+          # Should return 101, not 3
+          result = described_class.nextval(klass, attribute, block)
+          expect(result).to eq 101
+        end
+      end
+    end
+
+    context 'when no existing data' do
+      before do
+        described_class.reset!
+        Widget.delete_all
+      end
+
+      it 'returns values starting from 1' do
+        result = described_class.nextval(klass, attribute, block)
+        expect(result).to eq 1
+      end
+    end
   end
 
   context 'when sequence does not exist' do
@@ -152,6 +250,123 @@ RSpec.describe CleverSequence::PostgresBackend do
       described_class.sequence_cache['some_key'] = 'value'
       described_class.reset!
       expect(described_class.sequence_cache).to be_empty
+    end
+  end
+
+  describe '.clear_sequence_cache!' do
+    let(:sequence_name) { described_class.sequence_name(klass, attribute) }
+
+    before do
+      ActiveRecord::Base.connection.execute(
+        "CREATE SEQUENCE IF NOT EXISTS #{sequence_name} START WITH 1",
+      )
+      described_class.reset!
+    end
+
+    after do
+      ActiveRecord::Base.connection.execute(
+        "DROP SEQUENCE IF EXISTS #{sequence_name}",
+      )
+    end
+
+    it 'clears Exists entries from the sequence cache' do
+      # Populate the cache with an Exists entry
+      described_class.nextval(klass, attribute, block)
+      expect(described_class.sequence_cache).not_to be_empty
+
+      described_class.clear_sequence_cache!
+      expect(described_class.sequence_cache).to be_empty
+    end
+
+    it 'allows adjustment to run again after clearing' do
+      Widget.create!(integer_column: 1)
+
+      described_class.with_sequence_adjustment do
+        # First call adjusts the sequence (finds max consecutive value of 1)
+        result_1 = described_class.nextval(klass, attribute, block)
+        expect(result_1).to eq 2
+
+        # Add more consecutive data (2, 3, 4, 5)
+        (2..5).each { |i| Widget.create!(integer_column: i) }
+
+        # Without clearing, adjustment doesn't run again
+        result_2 = described_class.nextval(klass, attribute, block)
+        expect(result_2).to eq 3
+
+        # Clear cache and reset sequence to simulate retry
+        described_class.clear_sequence_cache!
+        ActiveRecord::Base.connection.execute("ALTER SEQUENCE #{sequence_name} RESTART WITH 1")
+
+        # Now adjustment runs again and finds max consecutive value of 5
+        result_3 = described_class.nextval(klass, attribute, block)
+        expect(result_3).to eq 6
+      end
+    ensure
+      Widget.delete_all
+    end
+  end
+
+  describe 'thread safety' do
+    let(:sequence_name) { described_class.sequence_name(klass, :nonexistent_column) }
+    let(:nonexistent_attribute) { :nonexistent_column }
+
+    before do
+      ActiveRecord::Base.connection.execute(
+        "DROP SEQUENCE IF EXISTS #{sequence_name}",
+      )
+      described_class.reset!
+      CleverSequence.enforce_sequences_exist = false
+    end
+
+    after do
+      CleverSequence.enforce_sequences_exist = false
+    end
+
+    it 'returns unique values when nextval is called concurrently from multiple threads' do
+      thread_count = 10
+
+      # Seed the cache with a Missing entry so all threads exercise the
+      # cached read-increment-write path without needing DB connections.
+      described_class.nextval(klass, nonexistent_attribute, block)
+
+      go = false
+
+      threads = thread_count.times.map do
+        Thread.new do
+          Thread.pass until go
+          described_class.nextval(klass, nonexistent_attribute, block)
+        end
+      end
+
+      go = true
+
+      values = threads.map(&:value)
+
+      expect(values).to all(be_an(Integer))
+      expect(values.uniq.size).to eq(thread_count),
+        "Expected #{thread_count} unique values but got duplicates: #{values.sort}"
+    end
+  end
+
+  describe '.with_sequence_adjustment' do
+    it 'enables adjustment within the block' do
+      enabled_inside = nil
+      described_class.with_sequence_adjustment do
+        enabled_inside = Thread.current[:clever_sequence_adjust_sequences_enabled]
+      end
+      expect(enabled_inside).to be true
+    end
+
+    it 'disables adjustment after the block' do
+      described_class.with_sequence_adjustment { nil }
+      expect(Thread.current[:clever_sequence_adjust_sequences_enabled]).to be false
+    end
+
+    it 'disables adjustment even if the block raises' do
+      expect {
+        described_class.with_sequence_adjustment { raise 'oops' }
+      }.to raise_error('oops')
+      expect(Thread.current[:clever_sequence_adjust_sequences_enabled]).to be false
     end
   end
 

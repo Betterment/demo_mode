@@ -87,6 +87,19 @@ RSpec.describe CleverSequence::InMemoryBackend do
     end
   end
 
+  describe '.with_sequence_adjustment' do
+    it 'yields without modification' do
+      executed = false
+      described_class.with_sequence_adjustment { executed = true }
+      expect(executed).to be true
+    end
+
+    it 'returns the block value' do
+      result = described_class.with_sequence_adjustment { 42 }
+      expect(result).to eq 42
+    end
+  end
+
   describe '.reset!' do
     it 'clears all sequence state so values re-derive from the database' do
       described_class.nextval(klass, :integer_column, block)
