@@ -24,6 +24,10 @@ class CleverSequence
     end
 
     class << self
+      def reset!
+        @sequence_cache = {}
+      end
+
       def nextval(klass, attribute, block)
         name = sequence_name(klass, attribute)
 
