@@ -123,16 +123,6 @@ class CleverSequence
         @sequence_cache ||= {}
       end
 
-      def clear_sequence_cache!
-        @sequence_monitor.synchronize do
-          # Preserve Missing entries since those are needed for sequence discovery
-          # Only clear Exists entries so sequences get re-checked and potentially adjusted
-          existing_keys = sequence_cache.select { |_, v| v.is_a?(SequenceResult::Exists) }.keys
-          Rails.logger.info("[DemoMode] Clearing sequence cache: removing #{existing_keys.size} Exists entries (#{existing_keys.join(', ')}), preserving #{sequence_cache.size - existing_keys.size} Missing entries")
-          @sequence_cache = sequence_cache.select { |_, v| v.is_a?(SequenceResult::Missing) }
-        end
-      end
-
       private
 
       def adjust_sequences_enabled?

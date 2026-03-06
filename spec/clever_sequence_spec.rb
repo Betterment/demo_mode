@@ -57,6 +57,26 @@ RSpec.describe CleverSequence do
     end
   end
 
+  describe '.retry_on_uniqueness_violation?' do
+    after do
+      described_class.retry_on_uniqueness_violation = true
+    end
+
+    it 'returns true by default' do
+      expect(described_class.retry_on_uniqueness_violation?).to be(true)
+    end
+
+    context 'when disabled' do
+      before do
+        described_class.retry_on_uniqueness_violation = false
+      end
+
+      it 'returns false' do
+        expect(described_class.retry_on_uniqueness_violation?).to be(false)
+      end
+    end
+  end
+
   describe '.backend' do
     after do
       described_class.use_database_sequences = false
@@ -271,6 +291,7 @@ RSpec.describe CleverSequence do
     after do
       described_class.use_database_sequences = false
       described_class.enforce_sequences_exist = false
+      described_class.retry_on_uniqueness_violation = true
     end
 
     it 'allows setting use_database_sequences within DemoMode.configure block' do
@@ -289,6 +310,15 @@ RSpec.describe CleverSequence do
       end
 
       expect(described_class.enforce_sequences_exist?).to be(true)
+    end
+
+    it 'allows setting retry_on_uniqueness_violation within DemoMode.configure block' do
+      klass = described_class
+      DemoMode.configure do
+        klass.retry_on_uniqueness_violation = false
+      end
+
+      expect(described_class.retry_on_uniqueness_violation?).to be(false)
     end
   end
 end

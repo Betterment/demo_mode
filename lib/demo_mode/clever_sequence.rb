@@ -10,10 +10,12 @@ class CleverSequence
   cattr_accessor(:sequences) { {} }
   cattr_accessor(:use_database_sequences) { false }
   cattr_accessor(:enforce_sequences_exist) { false }
+  cattr_accessor(:retry_on_uniqueness_violation) { true }
 
   class << self
     alias use_database_sequences? use_database_sequences
     alias enforce_sequences_exist? enforce_sequences_exist
+    alias retry_on_uniqueness_violation? retry_on_uniqueness_violation
 
     def backend
       use_database_sequences? ? PostgresBackend : InMemoryBackend

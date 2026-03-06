@@ -253,59 +253,6 @@ RSpec.describe CleverSequence::PostgresBackend do
     end
   end
 
-  describe '.clear_sequence_cache!' do
-    let(:sequence_name) { described_class.sequence_name(klass, attribute) }
-
-    before do
-      ActiveRecord::Base.connection.execute(
-        "CREATE SEQUENCE IF NOT EXISTS #{sequence_name} START WITH 1",
-      )
-      described_class.reset!
-    end
-
-    after do
-      ActiveRecord::Base.connection.execute(
-        "DROP SEQUENCE IF EXISTS #{sequence_name}",
-      )
-    end
-
-    it 'clears Exists entries from the sequence cache' do
-      # Populate the cache with an Exists entry
-      described_class.nextval(klass, attribute, block)
-      expect(described_class.sequence_cache).not_to be_empty
-
-      described_class.clear_sequence_cache!
-      expect(described_class.sequence_cache).to be_empty
-    end
-
-    it 'allows adjustment to run again after clearing' do
-      Widget.create!(integer_column: 1)
-
-      described_class.with_sequence_adjustment do
-        # First call adjusts the sequence (finds max consecutive value of 1)
-        result_1 = described_class.nextval(klass, attribute, block)
-        expect(result_1).to eq 2
-
-        # Add more consecutive data (2, 3, 4, 5)
-        (2..5).each { |i| Widget.create!(integer_column: i) }
-
-        # Without clearing, adjustment doesn't run again
-        result_2 = described_class.nextval(klass, attribute, block)
-        expect(result_2).to eq 3
-
-        # Clear cache and reset sequence to simulate retry
-        described_class.clear_sequence_cache!
-        ActiveRecord::Base.connection.execute("ALTER SEQUENCE #{sequence_name} RESTART WITH 1")
-
-        # Now adjustment runs again and finds max consecutive value of 5
-        result_3 = described_class.nextval(klass, attribute, block)
-        expect(result_3).to eq 6
-      end
-    ensure
-      Widget.delete_all
-    end
-  end
-
   describe 'thread safety' do
     let(:sequence_name) { described_class.sequence_name(klass, :nonexistent_column) }
     let(:nonexistent_attribute) { :nonexistent_column }
