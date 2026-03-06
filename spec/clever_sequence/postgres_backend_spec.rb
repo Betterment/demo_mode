@@ -40,7 +40,7 @@ RSpec.describe CleverSequence::PostgresBackend do
     end
 
     it 'caches sequence existence checks' do
-      described_class.instance_variable_set(:@sequence_cache, nil)
+      described_class.reset!
 
       execute_calls = []
       allow(ActiveRecord::Base.connection).to receive(:execute).and_wrap_original do |method, *args|
@@ -60,7 +60,7 @@ RSpec.describe CleverSequence::PostgresBackend do
     end
 
     it 'caches a SequenceResult::Exists entry' do
-      described_class.instance_variable_set(:@sequence_cache, nil)
+      described_class.reset!
 
       described_class.nextval(klass, attribute, block)
 
@@ -80,7 +80,7 @@ RSpec.describe CleverSequence::PostgresBackend do
         "DROP SEQUENCE IF EXISTS #{sequence_name}",
       )
 
-      described_class.instance_variable_set(:@sequence_cache, nil)
+      described_class.reset!
     end
 
     context 'when enforce_sequences_exist is true' do
@@ -131,6 +131,27 @@ RSpec.describe CleverSequence::PostgresBackend do
         expect(cached.attribute).to eq nonexistent_attribute
         expect(cached.calculated_start_value).to eq 1
       end
+    end
+  end
+
+  describe '.starting_value' do
+    it 'returns 0 when the column does not exist' do
+      expect(described_class.starting_value(klass, :nonexistent, block)).to eq 0
+    end
+
+    it 'uses LowerBoundFinder when the column exists' do
+      allow(klass).to receive(:find_by_integer_column).and_return(nil)
+      allow(klass).to receive(:find_by_integer_column).with(1).and_return(true)
+
+      expect(described_class.starting_value(klass, :integer_column, block)).to eq 1
+    end
+  end
+
+  describe '.reset!' do
+    it 'clears the sequence cache' do
+      described_class.sequence_cache['some_key'] = 'value'
+      described_class.reset!
+      expect(described_class.sequence_cache).to be_empty
     end
   end
 

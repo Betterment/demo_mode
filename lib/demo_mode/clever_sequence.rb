@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative 'clever_sequence/lower_bound_finder'
+require_relative 'clever_sequence/in_memory_backend'
 require_relative 'clever_sequence/postgres_backend'
 
 class CleverSequence
@@ -14,7 +15,12 @@ class CleverSequence
     alias use_database_sequences? use_database_sequences
     alias enforce_sequences_exist? enforce_sequences_exist
 
+    def backend
+      use_database_sequences? ? PostgresBackend : InMemoryBackend
+    end
+
     def reset!
+      backend.reset!
       sequences.each_value(&:reset!)
     end
 
@@ -47,11 +53,7 @@ class CleverSequence
   end
 
   def next
-    @last_value = if CleverSequence.use_database_sequences?
-      PostgresBackend.nextval(klass, attribute, block)
-    else
-      last_value + 1
-    end
+    @last_value = self.class.backend.nextval(klass, attribute, block)
     last
   end
 
@@ -66,22 +68,6 @@ class CleverSequence
   private
 
   def last_value
-    @last_value ||= starting_value
-  end
-
-  def starting_value
-    if column_exists?
-      LowerBoundFinder.new(klass, column_name, block).lower_bound
-    else
-      0
-    end
-  end
-
-  def column_name
-    klass.attribute_aliases[attribute] || attribute
-  end
-
-  def column_exists?
-    klass && klass.column_names.include?(column_name)
+    @last_value || self.class.backend.starting_value(klass, attribute, block)
   end
 end
