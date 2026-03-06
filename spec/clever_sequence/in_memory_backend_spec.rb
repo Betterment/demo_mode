@@ -69,6 +69,24 @@ RSpec.describe CleverSequence::InMemoryBackend do
     end
   end
 
+  describe '.starting_value' do
+    it 'returns 0 when the column does not exist' do
+      expect(described_class.starting_value(klass, :nonexistent, block)).to eq 0
+    end
+
+    it 'uses LowerBoundFinder when the column exists' do
+      allow(klass).to receive(:find_by_integer_column).and_return(nil)
+      allow(klass).to receive(:find_by_integer_column).with(1).and_return(true)
+
+      expect(described_class.starting_value(klass, :integer_column, block)).to eq 1
+    end
+
+    it 'resolves aliased attributes' do
+      allow(klass).to receive(:find_by_integer_column).with(1).and_call_original
+      expect(described_class.starting_value(klass, :integer_aliased, block)).to eq 0
+    end
+  end
+
   describe '.reset!' do
     it 'clears all sequence state so values re-derive from the database' do
       described_class.nextval(klass, :integer_column, block)

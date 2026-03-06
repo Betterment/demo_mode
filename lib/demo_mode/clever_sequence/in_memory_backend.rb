@@ -12,16 +12,6 @@ class CleverSequence
         @sequence_state = {}
       end
 
-      def sequence_state
-        @sequence_state ||= {}
-      end
-
-      private
-
-      def current_value(klass, attribute, block, key)
-        sequence_state[key] || starting_value(klass, attribute, block)
-      end
-
       def starting_value(klass, attribute, block)
         column_name = resolve_column_name(klass, attribute)
 
@@ -30,6 +20,16 @@ class CleverSequence
         else
           0
         end
+      end
+
+      def sequence_state
+        @sequence_state ||= {}
+      end
+
+      private
+
+      def current_value(klass, attribute, block, key)
+        sequence_state[key] || starting_value(klass, attribute, block)
       end
 
       def resolve_column_name(klass, attribute)

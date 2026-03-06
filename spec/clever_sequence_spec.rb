@@ -114,8 +114,9 @@ RSpec.describe CleverSequence do
       expect(described_class.last(klass, :integer_column)).to eq 11
     end
 
-    it 'returns 0 when no values have been generated' do
-      expect(described_class.last(klass, :nonexistent_attribute)).to eq 0
+    it 'returns the starting value from the backend when no values have been generated' do
+      allow(described_class.backend).to receive(:starting_value).and_return(5)
+      expect(described_class.last(klass, :nonexistent_attribute)).to eq 5
     end
   end
 

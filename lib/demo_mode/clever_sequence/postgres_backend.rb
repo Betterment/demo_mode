@@ -28,6 +28,10 @@ class CleverSequence
         @sequence_cache = {}
       end
 
+      def starting_value(klass, attribute, block)
+        calculate_sequence_value(klass, attribute, block)
+      end
+
       def nextval(klass, attribute, block)
         name = sequence_name(klass, attribute)
 

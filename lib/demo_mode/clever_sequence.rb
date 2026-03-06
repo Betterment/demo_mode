@@ -68,6 +68,6 @@ class CleverSequence
   private
 
   def last_value
-    @last_value || 0
+    @last_value || self.class.backend.starting_value(klass, attribute, block)
   end
 end
