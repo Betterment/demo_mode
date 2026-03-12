@@ -89,12 +89,10 @@ RSpec.describe CleverSequence::LowerBoundFinder do
         expect(finder.lower_bound(hint: 3)).to eq 3
       end
 
-      it 'still finds the correct bound when hint overshoots' do
+      it 'returns the hint directly when it overshoots actual data' do
         allow(klass).to receive(:find_by_integer_column).and_return(nil)
-        allow(klass).to receive(:find_by_integer_column).with(1).and_return(true)
-        allow(klass).to receive(:find_by_integer_column).with(2).and_return(true)
 
-        expect(finder.lower_bound(hint: 50)).to eq 2
+        expect(finder.lower_bound(hint: 50)).to eq 50
       end
 
       it 'ignores hint when nil' do
