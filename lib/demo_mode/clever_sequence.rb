@@ -7,7 +7,7 @@ require_relative 'clever_sequence/postgres_backend'
 class CleverSequence
   DEFAULT_BLOCK = ->(i) { i }
 
-  thread_cattr_accessor(:sequences) { {} }
+  cattr_accessor(:sequences) { {} }
   cattr_accessor(:use_database_sequences) { false }
   cattr_accessor(:enforce_sequences_exist) { false }
   cattr_accessor(:retry_on_uniqueness_violation) { true }
