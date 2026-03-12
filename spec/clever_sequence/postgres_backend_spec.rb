@@ -126,6 +126,51 @@ RSpec.describe CleverSequence::PostgresBackend do
           setval_queries = execute_calls.grep(/setval/)
           expect(setval_queries.count).to eq 1
         end
+
+        it 'passes hint to LowerBoundFinder when last_values are provided' do
+          last_values = { %w(Widget integer_column) => 4 }
+          hint_received = nil
+
+          allow(CleverSequence::LowerBoundFinder).to receive(:new).and_wrap_original do |method, *args|
+            method.call(*args).tap do |finder|
+              allow(finder).to receive(:lower_bound).and_wrap_original do |m, **kwargs|
+                hint_received = kwargs[:hint]
+                m.call(**kwargs)
+              end
+            end
+          end
+
+          described_class.with_sequence_adjustment(last_values:) do
+            described_class.nextval(klass, attribute, block)
+          end
+
+          expect(hint_received).to eq 4
+        end
+
+        it 'uses fewer queries with a good hint' do
+          # Create 100 records to make the difference between hinted and unhinted measurable
+          Widget.delete_all
+          (1..100).each { |i| Widget.create!(integer_column: i) }
+
+          # Reset the sequence to 1 so adjustment is needed
+          ActiveRecord::Base.connection.execute(
+            "SELECT setval('#{sequence_name}', 1, false)",
+          )
+
+          finder_calls = 0
+          allow(klass).to receive(:find_by_integer_column).and_wrap_original do |method, *args|
+            finder_calls += 1
+            method.call(*args)
+          end
+
+          described_class.with_sequence_adjustment(last_values: { %w(Widget integer_column) => 95 }) do
+            described_class.nextval(klass, attribute, block)
+          end
+
+          # With a hint of 95 (close to actual max of 100), the binary search
+          # should converge much faster than the ~14 queries needed from 1
+          expect(finder_calls).to be <= 10
+        end
       end
     end
 
@@ -269,21 +314,40 @@ RSpec.describe CleverSequence::PostgresBackend do
     it 'enables adjustment within the block' do
       enabled_inside = nil
       described_class.with_sequence_adjustment do
-        enabled_inside = Thread.current[:clever_sequence_adjust_sequences_enabled]
+        enabled_inside = Thread.current[CleverSequence::PostgresBackend::ADJUSTMENT_ENABLED_KEY]
       end
       expect(enabled_inside).to be true
     end
 
     it 'disables adjustment after the block' do
       described_class.with_sequence_adjustment { nil }
-      expect(Thread.current[:clever_sequence_adjust_sequences_enabled]).to be false
+      expect(Thread.current[CleverSequence::PostgresBackend::ADJUSTMENT_ENABLED_KEY]).to be_falsey
     end
 
     it 'disables adjustment even if the block raises' do
       expect {
         described_class.with_sequence_adjustment { raise 'oops' }
       }.to raise_error('oops')
-      expect(Thread.current[:clever_sequence_adjust_sequences_enabled]).to be false
+      expect(Thread.current[CleverSequence::PostgresBackend::ADJUSTMENT_ENABLED_KEY]).to be_falsey
+    end
+
+    it 'stores last_values in thread-local and cleans up after' do
+      last_values = { %w(Widget integer_column) => 42 }
+      stored_inside = nil
+
+      described_class.with_sequence_adjustment(last_values:) do
+        stored_inside = Thread.current[CleverSequence::PostgresBackend::LAST_VALUES_KEY]
+      end
+
+      expect(stored_inside).to eq(last_values)
+      expect(Thread.current[CleverSequence::PostgresBackend::LAST_VALUES_KEY]).to be_nil
+    end
+
+    it 'cleans up last_values even if the block raises' do
+      expect {
+        described_class.with_sequence_adjustment(last_values: { foo: 1 }) { raise 'oops' }
+      }.to raise_error('oops')
+      expect(Thread.current[CleverSequence::PostgresBackend::LAST_VALUES_KEY]).to be_nil
     end
   end
 

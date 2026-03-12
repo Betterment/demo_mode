@@ -114,7 +114,62 @@ RSpec.describe CleverSequence do
     end
   end
 
+  describe '#last_value_if_set' do
+    let(:attribute) { :integer_column }
+
+    it 'returns nil when no value has been generated' do
+      expect(subject.last_value_if_set).to be_nil
+    end
+
+    it 'returns the last value after generating' do
+      allow(described_class.backend).to receive(:nextval).and_return(42)
+      subject.next
+      expect(subject.last_value_if_set).to eq 42
+    end
+
+    it 'returns nil after reset!' do
+      allow(described_class.backend).to receive(:nextval).and_return(42)
+      subject.next
+      subject.reset!
+      expect(subject.last_value_if_set).to be_nil
+    end
+  end
+
+  describe '.snapshot_last_values' do
+    let(:attribute) { :integer_column }
+
+    it 'returns empty hash when no sequences have been used' do
+      expect(described_class.snapshot_last_values).to eq({})
+    end
+
+    it 'captures last values for sequences that have been used' do
+      allow(described_class.backend).to receive(:nextval).and_return(10)
+      subject.next
+
+      snapshot = described_class.snapshot_last_values
+      expect(snapshot[%w(Widget integer_column)]).to eq 10
+    end
+
+    it 'excludes sequences that have not generated values' do
+      # subject is registered but not used
+      subject
+      expect(described_class.snapshot_last_values).to eq({})
+    end
+  end
+
   describe '.with_sequence_adjustment' do
+    it 'snapshots last values before resetting and passes them to the backend' do
+      allow(described_class.backend).to receive(:nextval).and_return(10)
+      # Use a sequence so there's a value to snapshot
+      described_class.next(klass, :integer_column)
+
+      expect(described_class.backend).to receive(:with_sequence_adjustment)
+        .with(last_values: hash_including(%w(Widget integer_column) => 10))
+        .and_yield
+
+      described_class.with_sequence_adjustment { nil }
+    end
+
     it 'resets sequences before delegating to the backend' do
       expect(described_class).to receive(:reset!).ordered
       expect(described_class.backend).to receive(:with_sequence_adjustment).ordered.and_yield

@@ -69,6 +69,53 @@ RSpec.describe CleverSequence::LowerBoundFinder do
       # Binary search should find this in O(log n) queries, not 1000
       expect(klass).to have_received(:find_by_integer_column).at_most(25).times
     end
+
+    context 'with a hint' do
+      it 'starts the search from the hint value' do
+        existing_records = (1..1000).to_a
+        allow(klass).to receive(:find_by_integer_column) do |val|
+          existing_records.include?(val)
+        end
+
+        expect(finder.lower_bound(hint: 990)).to eq 1000
+
+        # With a hint of 990, the search should converge much faster
+        # than starting from 1 (which would take ~20 queries)
+        expect(klass).to have_received(:find_by_integer_column).at_most(15).times
+      end
+
+      it 'still finds the correct bound when hint is exact' do
+        allow(klass).to receive(:find_by_integer_column).and_return(nil)
+        allow(klass).to receive(:find_by_integer_column).with(1).and_return(true)
+        allow(klass).to receive(:find_by_integer_column).with(2).and_return(true)
+        allow(klass).to receive(:find_by_integer_column).with(3).and_return(true)
+
+        expect(finder.lower_bound(hint: 3)).to eq 3
+      end
+
+      it 'still finds the correct bound when hint overshoots' do
+        allow(klass).to receive(:find_by_integer_column).and_return(nil)
+        allow(klass).to receive(:find_by_integer_column).with(1).and_return(true)
+        allow(klass).to receive(:find_by_integer_column).with(2).and_return(true)
+
+        expect(finder.lower_bound(hint: 50)).to eq 2
+      end
+
+      it 'ignores hint when nil' do
+        allow(klass).to receive(:find_by_integer_column).and_return(nil)
+        allow(klass).to receive(:find_by_integer_column).with(1).and_return(true)
+
+        expect(finder.lower_bound(hint: nil)).to eq 1
+      end
+
+      it 'ignores hint when less than 1' do
+        allow(klass).to receive(:find_by_integer_column).and_return(nil)
+        allow(klass).to receive(:find_by_integer_column).with(1).and_return(true)
+
+        expect(finder.lower_bound(hint: 0)).to eq 1
+        expect(finder.lower_bound(hint: -5)).to eq 1
+      end
+    end
   end
 
   describe '#next_between' do

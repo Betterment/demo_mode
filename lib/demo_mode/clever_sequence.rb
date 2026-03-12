@@ -27,8 +27,16 @@ class CleverSequence
     end
 
     def with_sequence_adjustment(&)
+      last_values = snapshot_last_values
       reset!
-      backend.with_sequence_adjustment(&)
+      backend.with_sequence_adjustment(last_values:, &)
+    end
+
+    def snapshot_last_values
+      sequences.each_with_object({}) do |((klass_name, attribute), seq), hash|
+        value = seq.last_value_if_set
+        hash[[klass_name, attribute]] = value if value
+      end
     end
 
     def next(klass, name)
@@ -66,6 +74,10 @@ class CleverSequence
 
   def last
     block.call(last_value)
+  end
+
+  def last_value_if_set
+    @last_value if instance_variable_defined?(:@last_value)
   end
 
   def reset!

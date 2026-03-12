@@ -4,6 +4,8 @@ class CleverSequence
   module PostgresBackend
     SEQUENCE_PREFIX = 'cs_'
     SEQUENCE_CACHE_KEY = :clever_sequence_cache
+    LAST_VALUES_KEY = :clever_sequence_last_values
+    ADJUSTMENT_ENABLED_KEY = :clever_sequence_adjust_sequences_enabled
 
     class SequenceNotFoundError < StandardError
       attr_reader :sequence_name, :klass, :attribute
@@ -33,13 +35,16 @@ class CleverSequence
         calculate_sequence_value(klass, attribute, block)
       end
 
-      def with_sequence_adjustment
-        previous = Thread.current[:clever_sequence_adjust_sequences_enabled]
+      def with_sequence_adjustment(last_values: {})
+        previous = Thread.current[ADJUSTMENT_ENABLED_KEY]
+        previous_last_values = Thread.current[LAST_VALUES_KEY]
         Rails.logger.info("[DemoMode] Enabling sequence adjustment for retry")
-        Thread.current[:clever_sequence_adjust_sequences_enabled] = true
+        Thread.current[ADJUSTMENT_ENABLED_KEY] = true
+        Thread.current[LAST_VALUES_KEY] = last_values
         yield
       ensure
-        Thread.current[:clever_sequence_adjust_sequences_enabled] = previous
+        Thread.current[ADJUSTMENT_ENABLED_KEY] = previous
+        Thread.current[LAST_VALUES_KEY] = previous_last_values
         Rails.logger.info("[DemoMode] Disabled sequence adjustment")
       end
 
@@ -121,7 +126,7 @@ class CleverSequence
       end
 
       def adjust_sequences_enabled?
-        Thread.current[:clever_sequence_adjust_sequences_enabled]
+        Thread.current[ADJUSTMENT_ENABLED_KEY]
       end
 
       def sequence_exists?(sequence_name)
@@ -139,7 +144,7 @@ class CleverSequence
         exists
       end
 
-      def calculate_sequence_value(klass, attribute, block)
+      def calculate_sequence_value(klass, attribute, block, hint: nil)
         column_name = klass.attribute_aliases.fetch(attribute.to_s, attribute.to_s)
         unless klass.column_names.include?(column_name)
           log "[DemoMode] Column #{column_name} not found on #{klass.name}", level: :warn
@@ -147,15 +152,21 @@ class CleverSequence
         end
 
         value = ActiveRecord::Base.with_transactional_lock("lower-bound-#{klass}-#{column_name}") do
-          LowerBoundFinder.new(klass, column_name, block).lower_bound
+          LowerBoundFinder.new(klass, column_name, block).lower_bound(hint:)
         end
-        log "[DemoMode] Calculated sequence value for #{klass.name}##{attribute}: #{value}"
+        log "[DemoMode] Calculated sequence value for #{klass.name}##{attribute}: #{value} (hint: #{hint || 'none'})"
         value
+      end
+
+      def hint_for(klass, attribute)
+        last_values = Thread.current[LAST_VALUES_KEY]
+        last_values && last_values[[klass.name, attribute.to_s]]
       end
 
       def adjust_sequence_if_needed(sequence_name, klass, attribute, block)
         ActiveRecord::Base.with_transactional_lock("adjust-sequence-#{sequence_name}") do
-          max_value = calculate_sequence_value(klass, attribute, block)
+          hint = hint_for(klass, attribute)
+          max_value = calculate_sequence_value(klass, attribute, block, hint:)
           if max_value < 1
             log "[DemoMode] No adjustment needed for #{sequence_name}"
             return
