@@ -35,14 +35,14 @@ class CleverSequence
       def with_sequence_adjustment(last_values: {})
         previous = Thread.current[:clever_sequence_adjustment_enabled]
         previous_last_values = Thread.current[:clever_sequence_last_values]
-        Rails.logger.info("[DemoMode] Enabling sequence adjustment for retry")
+        log "[DemoMode] Enabling sequence adjustment for retry"
         Thread.current[:clever_sequence_adjustment_enabled] = true
         Thread.current[:clever_sequence_last_values] = last_values
         yield
       ensure
         Thread.current[:clever_sequence_adjustment_enabled] = previous
         Thread.current[:clever_sequence_last_values] = previous_last_values
-        Rails.logger.info("[DemoMode] Disabled sequence adjustment")
+        log "[DemoMode] Disabled sequence adjustment"
       end
 
       def nextval(klass, attribute, block)
@@ -71,7 +71,7 @@ class CleverSequence
 
       private
 
-      def log(message, level: :info)
+      def log(message, level: DemoMode.log_level)
         Rails.logger.public_send(level, message)
       end
 
