@@ -10,6 +10,7 @@ class CleverSequence
       # PG sequence, so a higher value is always safe and avoids a costly
       # binary search back down to data that won't be used anyway.
       return hint if start > 1 && !exists?(start)
+
       _lower_bound(start, 0, Float::INFINITY)
     end
 

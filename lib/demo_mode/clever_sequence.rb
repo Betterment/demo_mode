@@ -79,7 +79,5 @@ class CleverSequence
 
   private
 
-  def last_value
-    @last_value
-  end
+  attr_reader :last_value
 end
