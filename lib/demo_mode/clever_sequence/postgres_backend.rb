@@ -34,11 +34,12 @@ class CleverSequence
       end
 
       def with_sequence_adjustment
+        previous = Thread.current[:clever_sequence_adjust_sequences_enabled]
         Rails.logger.info("[DemoMode] Enabling sequence adjustment for retry")
         Thread.current[:clever_sequence_adjust_sequences_enabled] = true
         yield
       ensure
-        Thread.current[:clever_sequence_adjust_sequences_enabled] = false
+        Thread.current[:clever_sequence_adjust_sequences_enabled] = previous
         Rails.logger.info("[DemoMode] Disabled sequence adjustment")
       end
 
