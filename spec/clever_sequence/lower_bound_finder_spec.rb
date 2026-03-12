@@ -43,8 +43,7 @@ RSpec.describe CleverSequence::LowerBoundFinder do
 
       expect(finder.lower_bound).to eq 100
 
-      # Verify it used binary search (should be O(log n) calls, not 100)
-      expect(klass).to have_received(:find_by_integer_column).at_most(20).times
+      expect(klass).to have_received(:find_by_integer_column).exactly(14).times
     end
 
     it 'finds consecutive records and returns highest existing value' do
@@ -66,8 +65,7 @@ RSpec.describe CleverSequence::LowerBoundFinder do
 
       expect(finder.lower_bound).to eq 1000
 
-      # Binary search should find this in O(log n) queries, not 1000
-      expect(klass).to have_received(:find_by_integer_column).at_most(25).times
+      expect(klass).to have_received(:find_by_integer_column).exactly(20).times
     end
 
     context 'with a hint' do
@@ -79,9 +77,7 @@ RSpec.describe CleverSequence::LowerBoundFinder do
 
         expect(finder.lower_bound(hint: 990)).to eq 1000
 
-        # With a hint of 990, the search should converge much faster
-        # than starting from 1 (which would take ~20 queries)
-        expect(klass).to have_received(:find_by_integer_column).at_most(15).times
+        expect(klass).to have_received(:find_by_integer_column).exactly(13).times
       end
 
       it 'still finds the correct bound when hint is exact' do

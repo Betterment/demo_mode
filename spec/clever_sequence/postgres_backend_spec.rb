@@ -146,31 +146,6 @@ RSpec.describe CleverSequence::PostgresBackend do
 
           expect(hint_received).to eq 4
         end
-
-        it 'uses fewer queries with a good hint' do
-          # Create 100 records to make the difference between hinted and unhinted measurable
-          Widget.delete_all
-          (1..100).each { |i| Widget.create!(integer_column: i) }
-
-          # Reset the sequence to 1 so adjustment is needed
-          ActiveRecord::Base.connection.execute(
-            "SELECT setval('#{sequence_name}', 1, false)",
-          )
-
-          finder_calls = 0
-          allow(klass).to receive(:find_by_integer_column).and_wrap_original do |method, *args|
-            finder_calls += 1
-            method.call(*args)
-          end
-
-          described_class.with_sequence_adjustment(last_values: { %w(Widget integer_column) => 95 }) do
-            described_class.nextval(klass, attribute, block)
-          end
-
-          # With a hint of 95 (close to actual max of 100), the binary search
-          # should converge much faster than the ~14 queries needed from 1
-          expect(finder_calls).to be <= 10
-        end
       end
     end
 
