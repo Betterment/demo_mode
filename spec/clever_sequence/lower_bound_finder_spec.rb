@@ -43,8 +43,7 @@ RSpec.describe CleverSequence::LowerBoundFinder do
 
       expect(finder.lower_bound).to eq 100
 
-      # Verify it used binary search (should be O(log n) calls, not 100)
-      expect(klass).to have_received(:find_by_integer_column).at_most(20).times
+      expect(klass).to have_received(:find_by_integer_column).exactly(14).times
     end
 
     it 'finds consecutive records and returns highest existing value' do
@@ -66,8 +65,50 @@ RSpec.describe CleverSequence::LowerBoundFinder do
 
       expect(finder.lower_bound).to eq 1000
 
-      # Binary search should find this in O(log n) queries, not 1000
-      expect(klass).to have_received(:find_by_integer_column).at_most(25).times
+      expect(klass).to have_received(:find_by_integer_column).exactly(20).times
+    end
+
+    context 'with a hint' do
+      it 'starts the search from the hint value' do
+        existing_records = (1..1000).to_a
+        allow(klass).to receive(:find_by_integer_column) do |val|
+          existing_records.include?(val)
+        end
+
+        expect(finder.lower_bound(hint: 990)).to eq 1000
+
+        expect(klass).to have_received(:find_by_integer_column).exactly(13).times
+      end
+
+      it 'still finds the correct bound when hint is exact' do
+        allow(klass).to receive(:find_by_integer_column).and_return(nil)
+        allow(klass).to receive(:find_by_integer_column).with(1).and_return(true)
+        allow(klass).to receive(:find_by_integer_column).with(2).and_return(true)
+        allow(klass).to receive(:find_by_integer_column).with(3).and_return(true)
+
+        expect(finder.lower_bound(hint: 3)).to eq 3
+      end
+
+      it 'returns the hint directly when it overshoots actual data' do
+        allow(klass).to receive(:find_by_integer_column).and_return(nil)
+
+        expect(finder.lower_bound(hint: 50)).to eq 50
+      end
+
+      it 'ignores hint when nil' do
+        allow(klass).to receive(:find_by_integer_column).and_return(nil)
+        allow(klass).to receive(:find_by_integer_column).with(1).and_return(true)
+
+        expect(finder.lower_bound(hint: nil)).to eq 1
+      end
+
+      it 'ignores hint when less than 1' do
+        allow(klass).to receive(:find_by_integer_column).and_return(nil)
+        allow(klass).to receive(:find_by_integer_column).with(1).and_return(true)
+
+        expect(finder.lower_bound(hint: 0)).to eq 1
+        expect(finder.lower_bound(hint: -5)).to eq 1
+      end
     end
   end
 

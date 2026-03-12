@@ -13,6 +13,7 @@ module DemoMode
     configurable_value(:signinable_username_method) { :email }
     configurable_value(:personas_path) { 'config/personas' }
     configurable_value(:session_timeout) { 30.minutes }
+    configurable_value(:log_level) { :debug }
     configurable_boolean(:display_credentials)
     configurations << :stylesheets
     configurations << :logo

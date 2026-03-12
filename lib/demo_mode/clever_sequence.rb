@@ -10,10 +10,12 @@ class CleverSequence
   cattr_accessor(:sequences) { {} }
   cattr_accessor(:use_database_sequences) { false }
   cattr_accessor(:enforce_sequences_exist) { false }
+  cattr_accessor(:retry_on_uniqueness_violation) { true }
 
   class << self
     alias use_database_sequences? use_database_sequences
     alias enforce_sequences_exist? enforce_sequences_exist
+    alias retry_on_uniqueness_violation? retry_on_uniqueness_violation
 
     def backend
       use_database_sequences? ? PostgresBackend : InMemoryBackend
@@ -22,6 +24,16 @@ class CleverSequence
     def reset!
       backend.reset!
       sequences.each_value(&:reset!)
+    end
+
+    def with_sequence_adjustment(&)
+      last_values = snapshot_last_values
+      reset!
+      backend.with_sequence_adjustment(last_values:, &)
+    end
+
+    def snapshot_last_values
+      sequences.transform_values { |seq| seq.send(:last_value) }.compact
     end
 
     def next(klass, name)
@@ -58,16 +70,14 @@ class CleverSequence
   end
 
   def last
-    block.call(last_value)
+    block.call(@last_value || self.class.backend.starting_value(klass, attribute, block))
   end
 
   def reset!
-    remove_instance_variable(:@last_value) if instance_variable_defined?(:@last_value)
+    @last_value = nil
   end
 
   private
 
-  def last_value
-    @last_value || self.class.backend.starting_value(klass, attribute, block)
-  end
+  attr_reader :last_value
 end
