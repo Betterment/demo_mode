@@ -3,9 +3,6 @@
 class CleverSequence
   module PostgresBackend
     SEQUENCE_PREFIX = 'cs_'
-    SEQUENCE_CACHE_KEY = :clever_sequence_cache
-    LAST_VALUES_KEY = :clever_sequence_last_values
-    ADJUSTMENT_ENABLED_KEY = :clever_sequence_adjust_sequences_enabled
 
     class SequenceNotFoundError < StandardError
       attr_reader :sequence_name, :klass, :attribute
@@ -28,7 +25,7 @@ class CleverSequence
 
     class << self
       def reset!
-        Thread.current[SEQUENCE_CACHE_KEY] = {}
+        Thread.current[:clever_sequence_cache] = {}
       end
 
       def starting_value(klass, attribute, block)
@@ -36,15 +33,15 @@ class CleverSequence
       end
 
       def with_sequence_adjustment(last_values: {})
-        previous = Thread.current[ADJUSTMENT_ENABLED_KEY]
-        previous_last_values = Thread.current[LAST_VALUES_KEY]
+        previous = Thread.current[:clever_sequence_adjustment_enabled]
+        previous_last_values = Thread.current[:clever_sequence_last_values]
         Rails.logger.info("[DemoMode] Enabling sequence adjustment for retry")
-        Thread.current[ADJUSTMENT_ENABLED_KEY] = true
-        Thread.current[LAST_VALUES_KEY] = last_values
+        Thread.current[:clever_sequence_adjustment_enabled] = true
+        Thread.current[:clever_sequence_last_values] = last_values
         yield
       ensure
-        Thread.current[ADJUSTMENT_ENABLED_KEY] = previous
-        Thread.current[LAST_VALUES_KEY] = previous_last_values
+        Thread.current[:clever_sequence_adjustment_enabled] = previous
+        Thread.current[:clever_sequence_last_values] = previous_last_values
         Rails.logger.info("[DemoMode] Disabled sequence adjustment")
       end
 
@@ -69,7 +66,7 @@ class CleverSequence
       end
 
       def sequence_cache
-        Thread.current[SEQUENCE_CACHE_KEY] ||= {}
+        Thread.current[:clever_sequence_cache] ||= {}
       end
 
       private
@@ -126,7 +123,7 @@ class CleverSequence
       end
 
       def adjust_sequences_enabled?
-        Thread.current[ADJUSTMENT_ENABLED_KEY]
+        Thread.current[:clever_sequence_adjustment_enabled]
       end
 
       def sequence_exists?(sequence_name)
@@ -159,7 +156,7 @@ class CleverSequence
       end
 
       def hint_for(klass, attribute)
-        last_values = Thread.current[LAST_VALUES_KEY]
+        last_values = Thread.current[:clever_sequence_last_values]
         last_values && last_values[[klass.name, attribute.to_s]]
       end
 

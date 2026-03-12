@@ -289,21 +289,21 @@ RSpec.describe CleverSequence::PostgresBackend do
     it 'enables adjustment within the block' do
       enabled_inside = nil
       described_class.with_sequence_adjustment do
-        enabled_inside = Thread.current[CleverSequence::PostgresBackend::ADJUSTMENT_ENABLED_KEY]
+        enabled_inside = Thread.current[:clever_sequence_adjustment_enabled]
       end
       expect(enabled_inside).to be true
     end
 
     it 'disables adjustment after the block' do
       described_class.with_sequence_adjustment { nil }
-      expect(Thread.current[CleverSequence::PostgresBackend::ADJUSTMENT_ENABLED_KEY]).to be_falsey
+      expect(Thread.current[:clever_sequence_adjustment_enabled]).to be_falsey
     end
 
     it 'disables adjustment even if the block raises' do
       expect {
         described_class.with_sequence_adjustment { raise 'oops' }
       }.to raise_error('oops')
-      expect(Thread.current[CleverSequence::PostgresBackend::ADJUSTMENT_ENABLED_KEY]).to be_falsey
+      expect(Thread.current[:clever_sequence_adjustment_enabled]).to be_falsey
     end
 
     it 'stores last_values in thread-local and cleans up after' do
@@ -311,18 +311,18 @@ RSpec.describe CleverSequence::PostgresBackend do
       stored_inside = nil
 
       described_class.with_sequence_adjustment(last_values:) do
-        stored_inside = Thread.current[CleverSequence::PostgresBackend::LAST_VALUES_KEY]
+        stored_inside = Thread.current[:clever_sequence_last_values]
       end
 
       expect(stored_inside).to eq(last_values)
-      expect(Thread.current[CleverSequence::PostgresBackend::LAST_VALUES_KEY]).to be_nil
+      expect(Thread.current[:clever_sequence_last_values]).to be_nil
     end
 
     it 'cleans up last_values even if the block raises' do
       expect {
         described_class.with_sequence_adjustment(last_values: { foo: 1 }) { raise 'oops' }
       }.to raise_error('oops')
-      expect(Thread.current[CleverSequence::PostgresBackend::LAST_VALUES_KEY]).to be_nil
+      expect(Thread.current[:clever_sequence_last_values]).to be_nil
     end
   end
 
