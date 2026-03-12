@@ -33,10 +33,7 @@ class CleverSequence
     end
 
     def snapshot_last_values
-      sequences.each_with_object({}) do |((klass_name, attribute), seq), hash|
-        value = seq.last_value_if_set
-        hash[[klass_name, attribute]] = value if value
-      end
+      sequences.transform_values(&:last_value_if_set).compact
     end
 
     def next(klass, name)
