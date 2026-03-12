@@ -114,24 +114,24 @@ RSpec.describe CleverSequence do
     end
   end
 
-  describe '#last_value_if_set' do
+  describe '#last_value' do
     let(:attribute) { :integer_column }
 
     it 'returns nil when no value has been generated' do
-      expect(subject.last_value_if_set).to be_nil
+      expect(subject.send(:last_value)).to be_nil
     end
 
     it 'returns the last value after generating' do
       allow(described_class.backend).to receive(:nextval).and_return(42)
       subject.next
-      expect(subject.last_value_if_set).to eq 42
+      expect(subject.send(:last_value)).to eq 42
     end
 
     it 'returns nil after reset!' do
       allow(described_class.backend).to receive(:nextval).and_return(42)
       subject.next
       subject.reset!
-      expect(subject.last_value_if_set).to be_nil
+      expect(subject.send(:last_value)).to be_nil
     end
   end
 

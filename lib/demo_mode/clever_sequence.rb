@@ -33,7 +33,7 @@ class CleverSequence
     end
 
     def snapshot_last_values
-      sequences.transform_values(&:last_value_if_set).compact
+      sequences.transform_values { |seq| seq.send(:last_value) }.compact
     end
 
     def next(klass, name)
@@ -70,20 +70,16 @@ class CleverSequence
   end
 
   def last
-    block.call(last_value)
-  end
-
-  def last_value_if_set
-    @last_value if instance_variable_defined?(:@last_value)
+    block.call(@last_value || self.class.backend.starting_value(klass, attribute, block))
   end
 
   def reset!
-    remove_instance_variable(:@last_value) if instance_variable_defined?(:@last_value)
+    @last_value = nil
   end
 
   private
 
   def last_value
-    @last_value || self.class.backend.starting_value(klass, attribute, block)
+    @last_value
   end
 end
