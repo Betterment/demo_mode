@@ -1,10 +1,9 @@
 # frozen_string_literal: true
 
-require 'monitor'
-
 class CleverSequence
   module PostgresBackend
     SEQUENCE_PREFIX = 'cs_'
+    SEQUENCE_CACHE_KEY = :clever_sequence_cache
 
     class SequenceNotFoundError < StandardError
       attr_reader :sequence_name, :klass, :attribute
@@ -25,13 +24,9 @@ class CleverSequence
       Missing = Data.define(:sequence_name, :klass, :attribute, :calculated_start_value)
     end
 
-    # Initialized eagerly at load time (single-threaded), so no race on creation.
-    # Monitor is reentrant, allowing nextval -> sequence_exists? nesting.
-    @sequence_monitor = Monitor.new
-
     class << self
       def reset!
-        @sequence_cache = {}
+        Thread.current[SEQUENCE_CACHE_KEY] = {}
       end
 
       def starting_value(klass, attribute, block)
@@ -48,15 +43,13 @@ class CleverSequence
       end
 
       def nextval(klass, attribute, block)
-        @sequence_monitor.synchronize do
-          name = sequence_name(klass, attribute)
-          log "[DemoMode] nextval called for #{klass.name}##{attribute} (sequence: #{name})"
+        name = sequence_name(klass, attribute)
+        log "[DemoMode] nextval called for #{klass.name}##{attribute} (sequence: #{name})"
 
-          if sequence_exists?(name)
-            nextval_from_sequence(name, klass, attribute, block)
-          else
-            nextval_without_sequence(name, klass, attribute, block)
-          end
+        if sequence_exists?(name)
+          nextval_from_sequence(name, klass, attribute, block)
+        else
+          nextval_without_sequence(name, klass, attribute, block)
         end
       end
 
@@ -70,7 +63,7 @@ class CleverSequence
       end
 
       def sequence_cache
-        @sequence_cache ||= {}
+        Thread.current[SEQUENCE_CACHE_KEY] ||= {}
       end
 
       private
@@ -160,22 +153,24 @@ class CleverSequence
       end
 
       def adjust_sequence_if_needed(sequence_name, klass, attribute, block)
-        max_value = calculate_sequence_value(klass, attribute, block)
-        if max_value < 1
-          log "[DemoMode] No adjustment needed for #{sequence_name}"
-          return
-        end
+        ActiveRecord::Base.with_transactional_lock("adjust-sequence-#{sequence_name}") do
+          max_value = calculate_sequence_value(klass, attribute, block)
+          if max_value < 1
+            log "[DemoMode] No adjustment needed for #{sequence_name}"
+            return
+          end
 
-        log "[DemoMode] Adjusting #{sequence_name} to at least #{max_value}"
-        # setval sets the sequence's last_value. With the default 3rd argument (true),
-        # the next nextval() will return last_value + 1.
-        # We only want to advance (never go backwards), so we use GREATEST.
-        result = ActiveRecord::Base.connection.execute(<<~SQL.squish)
-          SELECT setval('#{sequence_name}',
-            GREATEST(#{max_value}, (SELECT last_value FROM #{sequence_name})))
-        SQL
-        new_last_value = result.first['setval'].to_i
-        log "[DemoMode] #{sequence_name} adjusted to #{new_last_value}"
+          log "[DemoMode] Adjusting #{sequence_name} to at least #{max_value}"
+          # setval sets the sequence's last_value. With the default 3rd argument (true),
+          # the next nextval() will return last_value + 1.
+          # We only want to advance (never go backwards), so we use GREATEST.
+          result = ActiveRecord::Base.connection.execute(<<~SQL.squish)
+            SELECT setval('#{sequence_name}',
+              GREATEST(#{max_value}, (SELECT last_value FROM #{sequence_name})))
+          SQL
+          new_last_value = result.first['setval'].to_i
+          log "[DemoMode] #{sequence_name} adjusted to #{new_last_value}"
+        end
       end
     end
   end
