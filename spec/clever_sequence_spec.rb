@@ -265,7 +265,7 @@ RSpec.describe CleverSequence do
       end
 
       it 'produces unique values under concurrent access' do
-        threads = 20.times.map { Thread.new { subject.next } }
+        threads = Array.new(20) { Thread.new { subject.next } }
         values = threads.map(&:value)
         expect(values.uniq.length).to eq 20
       end
