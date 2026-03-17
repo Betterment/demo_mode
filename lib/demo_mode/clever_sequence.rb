@@ -56,6 +56,7 @@ class CleverSequence
   def initialize(attribute, &block)
     @attribute = attribute.to_s
     @block = block || DEFAULT_BLOCK
+    @nil_klass_mutex = Mutex.new
   end
 
   def with_class(klass)
@@ -65,12 +66,16 @@ class CleverSequence
   end
 
   def next
-    @last_value = self.class.backend.nextval(klass, attribute, block)
+    @last_value = if klass
+      self.class.backend.nextval(klass, attribute, block)
+    else
+      @nil_klass_mutex.synchronize { (@last_value || 0) + 1 }
+    end
     last
   end
 
   def last
-    block.call(@last_value || self.class.backend.starting_value(klass, attribute, block))
+    block.call(@last_value || (klass ? self.class.backend.starting_value(klass, attribute, block) : 0))
   end
 
   def reset!

@@ -247,6 +247,29 @@ RSpec.describe CleverSequence do
         expect(subject.next).to eq '2016-05-17'.to_date
       end
     end
+
+    context 'when klass is not set (e.g. FactoryBot attributes_for)' do
+      subject { described_class.new(:integer_column) }
+
+      it 'increments using a simple instance-level counter without hitting the backend' do
+        expect(described_class.backend).not_to receive(:nextval)
+        expect(subject.next).to eq 1
+        expect(subject.next).to eq 2
+        expect(subject.next).to eq 3
+      end
+
+      it 'applies the block transformation' do
+        seq = described_class.new(:text_column) { |i| "Foo ##{i}" }
+        expect(seq.next).to eq 'Foo #1'
+        expect(seq.next).to eq 'Foo #2'
+      end
+
+      it 'produces unique values under concurrent access' do
+        threads = 20.times.map { Thread.new { subject.next } }
+        values = threads.map(&:value)
+        expect(values.uniq.length).to eq 20
+      end
+    end
   end
 
   describe '#last' do
@@ -267,6 +290,21 @@ RSpec.describe CleverSequence do
       seq.next
 
       expect(seq.last).to eq 'value_8'
+    end
+
+    context 'when klass is not set (e.g. FactoryBot attributes_for)' do
+      subject { described_class.new(:integer_column) }
+
+      it 'returns 0 before any value is generated' do
+        expect(described_class.backend).not_to receive(:starting_value)
+        expect(subject.last).to eq 0
+      end
+
+      it 'returns the last incremented value' do
+        subject.next
+        subject.next
+        expect(subject.last).to eq 2
+      end
     end
   end
 
