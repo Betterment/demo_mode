@@ -130,7 +130,7 @@ RSpec.describe CleverSequence::LowerBoundFinder do
     context 'on non-PostgreSQL adapters' do
       before { allow(ActiveRecord::Base.connection).to receive(:adapter_name).and_return('SQLite') }
 
-      it 'does not use with_transactional_lock' do
+      it 'skips locking and runs without a lock' do
         expect(ActiveRecord::Base).not_to receive(:with_transactional_lock)
         expect(finder.lower_bound).to eq 0
       end

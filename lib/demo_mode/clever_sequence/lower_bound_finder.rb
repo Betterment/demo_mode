@@ -2,9 +2,6 @@
 
 class CleverSequence
   class LowerBoundFinder
-    MUTEXES = Hash.new { |h, k| h[k] = Mutex.new }
-    private_constant :MUTEXES
-
     attr_reader :klass, :column_name, :block
 
     def initialize(klass, column_name, block)
@@ -33,7 +30,7 @@ class CleverSequence
       if ActiveRecord::Base.connection.adapter_name.casecmp?('postgresql')
         ActiveRecord::Base.with_transactional_lock("lower-bound-#{klass}-#{column_name}", &)
       else
-        MUTEXES["lower-bound-#{klass}-#{column_name}"].synchronize(&)
+        yield
       end
     end
 
