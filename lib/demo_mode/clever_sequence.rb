@@ -56,7 +56,6 @@ class CleverSequence
   def initialize(attribute, &block)
     @attribute = attribute.to_s
     @block = block || DEFAULT_BLOCK
-    @last_value_mutex = Mutex.new
   end
 
   def with_class(klass)
@@ -66,26 +65,35 @@ class CleverSequence
   end
 
   def next
-    @last_value_mutex.synchronize do
-      @last_value = if klass
-        self.class.backend.nextval(klass, attribute, block)
-      else
-        (@last_value || 0) + 1
-      end
+    value = if klass
+      self.class.backend.nextval(klass, attribute, block)
+    else
+      (last_value || 0) + 1
     end
+    set_last_value(value)
     last
   end
 
   def last
-    value = @last_value_mutex.synchronize { @last_value }
-    block.call(value || (klass ? self.class.backend.starting_value(klass, attribute, block) : 0))
+    block.call(last_value || (klass ? self.class.backend.starting_value(klass, attribute, block) : 0))
   end
 
   def reset!
-    @last_value_mutex.synchronize { @last_value = nil }
+    clear_last_value
   end
 
   private
 
-  attr_reader :last_value
+  def last_value
+    Thread.current[:clever_sequence_last_value]&.[](object_id)
+  end
+
+  def set_last_value(value)
+    Thread.current[:clever_sequence_last_value] ||= {}
+    Thread.current[:clever_sequence_last_value][object_id] = value
+  end
+
+  def clear_last_value
+    Thread.current[:clever_sequence_last_value]&.delete(object_id)
+  end
 end
