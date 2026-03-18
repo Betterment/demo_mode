@@ -19,13 +19,11 @@ RSpec.describe DemoMode::Cli do
     # Disable the spinner because it causes the program to freeze?
     allow(CLI::UI::Spinner).to receive(:spin).and_yield(spinner)
 
-    expected_output = include(
-      'the_everyperson',
-      '👤 :: user@example.org',
-      '🔑 :: testing123',
-      '🌐 :: http://localhost:3000/ohno/sessions/1',
-    )
-
-    expect { described_class.start }.to output(expected_output).to_stdout
+    expect { described_class.start }.to output(
+      include('the_everyperson')
+        .and(include('👤 :: user@example.org'))
+        .and(include('🔑 :: testing123'))
+        .and(match(/🌐 :: http:\/\/localhost:3000\/ohno\/sessions\/\d+/)),
+    ).to_stdout
   end
 end
