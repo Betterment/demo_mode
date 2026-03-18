@@ -113,34 +113,27 @@ RSpec.describe CleverSequence::LowerBoundFinder do
   end
 
   describe 'locking' do
-    it 'acquires a transactional lock keyed to klass and column_name' do
-      allow(klass).to receive(:find_by_integer_column).and_return(nil)
+    before { allow(klass).to receive(:find_by_integer_column).and_return(nil) }
 
-      expect(ActiveRecord::Base).to receive(:with_transactional_lock)
-        .with("lower-bound-#{klass}-integer_column")
-        .and_yield
+    context 'on PostgreSQL' do
+      before { allow(ActiveRecord::Base.connection).to receive(:adapter_name).and_return('PostgreSQL') }
 
-      finder.lower_bound
+      it 'acquires a transactional lock keyed to klass and column_name' do
+        expect(ActiveRecord::Base).to receive(:with_transactional_lock)
+          .with("lower-bound-#{klass}-integer_column")
+          .and_yield
+
+        finder.lower_bound
+      end
     end
 
-    it 'performs the binary search inside the lock' do
-      lock_active = false
-      search_ran_inside_lock = false
+    context 'on non-PostgreSQL adapters' do
+      before { allow(ActiveRecord::Base.connection).to receive(:adapter_name).and_return('SQLite') }
 
-      allow(ActiveRecord::Base).to receive(:with_transactional_lock) do |_key, &blk|
-        lock_active = true
-        blk.call
-      ensure
-        lock_active = false
+      it 'does not use with_transactional_lock' do
+        expect(ActiveRecord::Base).not_to receive(:with_transactional_lock)
+        expect(finder.lower_bound).to eq 0
       end
-
-      allow(klass).to receive(:find_by_integer_column) do
-        search_ran_inside_lock = true if lock_active
-        nil
-      end
-
-      finder.lower_bound
-      expect(search_ran_inside_lock).to be true
     end
   end
 

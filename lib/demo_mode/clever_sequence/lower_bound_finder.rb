@@ -1,9 +1,20 @@
 # frozen_string_literal: true
 
 class CleverSequence
-  LowerBoundFinder = Struct.new(:klass, :column_name, :block) do
+  class LowerBoundFinder
+    MUTEXES = Hash.new { |h, k| h[k] = Mutex.new }
+    private_constant :MUTEXES
+
+    attr_reader :klass, :column_name, :block
+
+    def initialize(klass, column_name, block)
+      @klass = klass
+      @column_name = column_name
+      @block = block
+    end
+
     def lower_bound(hint: nil)
-      ActiveRecord::Base.with_transactional_lock("lower-bound-#{klass}-#{column_name}") do
+      with_lock do
         start = hint && hint >= 1 ? hint : 1
         # If the hint overshoots the actual data, return it directly.
         # The hint is a previously-known high-water mark, so it's a valid
@@ -17,6 +28,14 @@ class CleverSequence
     end
 
     private
+
+    def with_lock(&)
+      if ActiveRecord::Base.connection.adapter_name.casecmp?('postgresql')
+        ActiveRecord::Base.with_transactional_lock("lower-bound-#{klass}-#{column_name}", &)
+      else
+        MUTEXES["lower-bound-#{klass}-#{column_name}"].synchronize(&)
+      end
+    end
 
     def _lower_bound(current, lower, upper)
       if exists?(current)
