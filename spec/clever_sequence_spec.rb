@@ -263,7 +263,6 @@ RSpec.describe CleverSequence do
         expect(seq.next).to eq 'Foo #1'
         expect(seq.next).to eq 'Foo #2'
       end
-
     end
   end
 

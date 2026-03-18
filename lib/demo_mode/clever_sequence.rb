@@ -70,7 +70,7 @@ class CleverSequence
     else
       (last_value || 0) + 1
     end
-    set_last_value(value)
+    self.last_value = value
     last
   end
 
@@ -85,15 +85,18 @@ class CleverSequence
   private
 
   def last_value
-    Thread.current[:clever_sequence_last_value]&.[](object_id)
+    thread_local_last_values[self]
   end
 
-  def set_last_value(value)
-    Thread.current[:clever_sequence_last_value] ||= {}
-    Thread.current[:clever_sequence_last_value][object_id] = value
+  def last_value=(value)
+    thread_local_last_values[self] = value
   end
 
   def clear_last_value
-    Thread.current[:clever_sequence_last_value]&.delete(object_id)
+    thread_local_last_values.delete(self)
+  end
+
+  def thread_local_last_values
+    Thread.current[:clever_sequence_last_value] ||= {}.compare_by_identity
   end
 end
