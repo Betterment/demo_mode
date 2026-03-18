@@ -23,7 +23,7 @@ RSpec.describe DemoMode::Cli do
       include('the_everyperson')
         .and(include('👤 :: user@example.org'))
         .and(include('🔑 :: testing123'))
-        .and(match(/🌐 :: http:\/\/localhost:3000\/ohno\/sessions\/\d+/)),
+        .and(match(%r{🌐 :: http://localhost:3000/ohno/sessions/\d+})),
     ).to_stdout
   end
 end
