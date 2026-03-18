@@ -3,15 +3,17 @@
 class CleverSequence
   LowerBoundFinder = Struct.new(:klass, :column_name, :block) do
     def lower_bound(hint: nil)
-      start = hint && hint >= 1 ? hint : 1
-      # If the hint overshoots the actual data, return it directly.
-      # The hint is a previously-known high-water mark, so it's a valid
-      # lower bound. Callers pass the result through GREATEST against the
-      # PG sequence, so a higher value is always safe and avoids a costly
-      # binary search back down to data that won't be used anyway.
-      return hint if start > 1 && !exists?(start)
+      ActiveRecord::Base.with_transactional_lock("lower-bound-#{klass}-#{column_name}") do
+        start = hint && hint >= 1 ? hint : 1
+        # If the hint overshoots the actual data, return it directly.
+        # The hint is a previously-known high-water mark, so it's a valid
+        # lower bound. Callers pass the result through GREATEST against the
+        # PG sequence, so a higher value is always safe and avoids a costly
+        # binary search back down to data that won't be used anyway.
+        next hint if start > 1 && !exists?(start)
 
-      _lower_bound(start, 0, Float::INFINITY)
+        _lower_bound(start, 0, Float::INFINITY)
+      end
     end
 
     private

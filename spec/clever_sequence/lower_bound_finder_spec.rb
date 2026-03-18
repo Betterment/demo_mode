@@ -112,6 +112,38 @@ RSpec.describe CleverSequence::LowerBoundFinder do
     end
   end
 
+  describe 'locking' do
+    it 'acquires a transactional lock keyed to klass and column_name' do
+      allow(klass).to receive(:find_by_integer_column).and_return(nil)
+
+      expect(ActiveRecord::Base).to receive(:with_transactional_lock)
+        .with("lower-bound-#{klass}-integer_column")
+        .and_yield
+
+      finder.lower_bound
+    end
+
+    it 'performs the binary search inside the lock' do
+      lock_active = false
+      search_ran_inside_lock = false
+
+      allow(ActiveRecord::Base).to receive(:with_transactional_lock) do |_key, &blk|
+        lock_active = true
+        blk.call
+      ensure
+        lock_active = false
+      end
+
+      allow(klass).to receive(:find_by_integer_column) do
+        search_ran_inside_lock = true if lock_active
+        nil
+      end
+
+      finder.lower_bound
+      expect(search_ran_inside_lock).to be true
+    end
+  end
+
   describe '#next_between' do
     it 'calculates next search point using formula [((lower+1)/2)+(upper/2), lower*2].min' do
       # For lower=10, upper=100: min((5 + 50), 20) = 20

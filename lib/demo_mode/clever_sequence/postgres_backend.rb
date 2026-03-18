@@ -148,9 +148,7 @@ class CleverSequence
           return 0
         end
 
-        value = ActiveRecord::Base.with_transactional_lock("lower-bound-#{klass}-#{column_name}") do
-          LowerBoundFinder.new(klass, column_name, block).lower_bound(hint:)
-        end
+        value = LowerBoundFinder.new(klass, column_name, block).lower_bound(hint:)
         log "[DemoMode] Calculated sequence value for #{klass.name}##{attribute}: #{value} (hint: #{hint || 'none'})"
         value
       end
