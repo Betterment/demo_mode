@@ -85,18 +85,28 @@ class CleverSequence
   private
 
   def last_value
-    thread_local_last_values[self]
+    if klass
+      Thread.current[:clever_sequence_last_value]&.dig(klass.name, attribute)
+    else
+      @last_value
+    end
   end
 
   def last_value=(value)
-    thread_local_last_values[self] = value
+    if klass
+      Thread.current[:clever_sequence_last_value] ||= {}
+      Thread.current[:clever_sequence_last_value][klass.name] ||= {}
+      Thread.current[:clever_sequence_last_value][klass.name][attribute] = value
+    else
+      @last_value = value
+    end
   end
 
   def clear_last_value
-    thread_local_last_values.delete(self)
-  end
-
-  def thread_local_last_values
-    Thread.current[:clever_sequence_last_value] ||= {}.compare_by_identity
+    if klass
+      Thread.current[:clever_sequence_last_value]&.[](klass.name)&.delete(attribute)
+    else
+      @last_value = nil
+    end
   end
 end
