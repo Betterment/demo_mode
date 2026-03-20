@@ -57,6 +57,26 @@ RSpec.describe CleverSequence do
     end
   end
 
+  describe '.retry_on_uniqueness_violation?' do
+    after do
+      described_class.retry_on_uniqueness_violation = true
+    end
+
+    it 'returns true by default' do
+      expect(described_class.retry_on_uniqueness_violation?).to be(true)
+    end
+
+    context 'when disabled' do
+      before do
+        described_class.retry_on_uniqueness_violation = false
+      end
+
+      it 'returns false' do
+        expect(described_class.retry_on_uniqueness_violation?).to be(false)
+      end
+    end
+  end
+
   describe '.backend' do
     after do
       described_class.use_database_sequences = false
@@ -91,6 +111,77 @@ RSpec.describe CleverSequence do
       described_class.reset!
 
       expect(subject.next).to eq 2
+    end
+  end
+
+  describe '#last_value' do
+    let(:attribute) { :integer_column }
+
+    it 'returns nil when no value has been generated' do
+      expect(subject.send(:last_value)).to be_nil
+    end
+
+    it 'returns the last value after generating' do
+      allow(described_class.backend).to receive(:nextval).and_return(42)
+      subject.next
+      expect(subject.send(:last_value)).to eq 42
+    end
+
+    it 'returns nil after reset!' do
+      allow(described_class.backend).to receive(:nextval).and_return(42)
+      subject.next
+      subject.reset!
+      expect(subject.send(:last_value)).to be_nil
+    end
+  end
+
+  describe '.snapshot_last_values' do
+    let(:attribute) { :integer_column }
+
+    it 'returns empty hash when no sequences have been used' do
+      expect(described_class.snapshot_last_values).to eq({})
+    end
+
+    it 'captures last values for sequences that have been used' do
+      allow(described_class.backend).to receive(:nextval).and_return(10)
+      subject.next
+
+      snapshot = described_class.snapshot_last_values
+      expect(snapshot[%w(Widget integer_column)]).to eq 10
+    end
+
+    it 'excludes sequences that have not generated values' do
+      # subject is registered but not used
+      subject
+      expect(described_class.snapshot_last_values).to eq({})
+    end
+  end
+
+  describe '.with_sequence_adjustment' do
+    it 'snapshots last values before resetting and passes them to the backend' do
+      allow(described_class.backend).to receive(:nextval).and_return(10)
+      # Use a sequence so there's a value to snapshot
+      described_class.next(klass, :integer_column)
+
+      expect(described_class.backend).to receive(:with_sequence_adjustment)
+        .with(last_values: hash_including(%w(Widget integer_column) => 10))
+        .and_yield
+
+      described_class.with_sequence_adjustment { nil }
+    end
+
+    it 'resets sequences before delegating to the backend' do
+      expect(described_class).to receive(:reset!).ordered
+      expect(described_class.backend).to receive(:with_sequence_adjustment).ordered.and_yield
+
+      described_class.with_sequence_adjustment { nil }
+    end
+
+    it 'delegates to the active backend' do
+      expect(described_class.backend).to receive(:with_sequence_adjustment).and_yield
+      executed = false
+      described_class.with_sequence_adjustment { executed = true }
+      expect(executed).to be true
     end
   end
 
@@ -156,6 +247,23 @@ RSpec.describe CleverSequence do
         expect(subject.next).to eq '2016-05-17'.to_date
       end
     end
+
+    context 'when klass is not set (e.g. FactoryBot attributes_for)' do
+      subject { described_class.new(:integer_column) }
+
+      it 'increments using a simple instance-level counter without hitting the backend' do
+        expect(described_class.backend).not_to receive(:nextval)
+        expect(subject.next).to eq 1
+        expect(subject.next).to eq 2
+        expect(subject.next).to eq 3
+      end
+
+      it 'applies the block transformation' do
+        seq = described_class.new(:text_column) { |i| "Foo ##{i}" }
+        expect(seq.next).to eq 'Foo #1'
+        expect(seq.next).to eq 'Foo #2'
+      end
+    end
   end
 
   describe '#last' do
@@ -176,6 +284,21 @@ RSpec.describe CleverSequence do
       seq.next
 
       expect(seq.last).to eq 'value_8'
+    end
+
+    context 'when klass is not set (e.g. FactoryBot attributes_for)' do
+      subject { described_class.new(:integer_column) }
+
+      it 'returns 0 before any value is generated' do
+        expect(described_class.backend).not_to receive(:starting_value)
+        expect(subject.last).to eq 0
+      end
+
+      it 'returns the last incremented value' do
+        subject.next
+        subject.next
+        expect(subject.last).to eq 2
+      end
     end
   end
 
@@ -255,6 +378,7 @@ RSpec.describe CleverSequence do
     after do
       described_class.use_database_sequences = false
       described_class.enforce_sequences_exist = false
+      described_class.retry_on_uniqueness_violation = true
     end
 
     it 'allows setting use_database_sequences within DemoMode.configure block' do
@@ -273,6 +397,15 @@ RSpec.describe CleverSequence do
       end
 
       expect(described_class.enforce_sequences_exist?).to be(true)
+    end
+
+    it 'allows setting retry_on_uniqueness_violation within DemoMode.configure block' do
+      klass = described_class
+      DemoMode.configure do
+        klass.retry_on_uniqueness_violation = false
+      end
+
+      expect(described_class.retry_on_uniqueness_violation?).to be(false)
     end
   end
 end

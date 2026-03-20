@@ -1,7 +1,7 @@
 PATH
   remote: ..
   specs:
-    demo_mode (3.5.0)
+    demo_mode (3.6.0)
       actionpack (>= 7.2, < 8.2)
       activejob (>= 7.2, < 8.2)
       activerecord (>= 7.2, < 8.2)
@@ -137,11 +137,11 @@ GEM
       timeout
     net-smtp (0.5.1)
       net-protocol
-    nokogiri (1.18.10-arm64-darwin)
+    nokogiri (1.19.1-arm64-darwin)
       racc (~> 1.4)
-    nokogiri (1.18.10-x86_64-darwin)
+    nokogiri (1.19.1-x86_64-darwin)
       racc (~> 1.4)
-    nokogiri (1.18.10-x86_64-linux-gnu)
+    nokogiri (1.19.1-x86_64-linux-gnu)
       racc (~> 1.4)
     parallel (1.27.0)
     parser (3.3.10.0)
@@ -301,7 +301,7 @@ DEPENDENCIES
   factory_bot
   net-imap (~> 0.4.20)
   net-smtp
-  nokogiri (~> 1.18.9)
+  nokogiri (~> 1.19.1)
   pg
   railties (~> 8.0.0)
   rspec-rails

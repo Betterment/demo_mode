@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    demo_mode (3.5.0)
+    demo_mode (3.6.0)
       actionpack (>= 7.2, < 8.2)
       activejob (>= 7.2, < 8.2)
       activerecord (>= 7.2, < 8.2)
@@ -258,7 +258,7 @@ GEM
     unicode-display_width (3.1.4)
       unicode-emoji (~> 4.0, >= 4.0.4)
     unicode-emoji (4.0.4)
-    uri (1.0.4)
+    uri (1.1.1)
     useragent (0.16.11)
     webrick (1.9.1)
     websocket-driver (0.7.7)

@@ -10,10 +10,12 @@ class CleverSequence
   cattr_accessor(:sequences) { {} }
   cattr_accessor(:use_database_sequences) { false }
   cattr_accessor(:enforce_sequences_exist) { false }
+  cattr_accessor(:retry_on_uniqueness_violation) { true }
 
   class << self
     alias use_database_sequences? use_database_sequences
     alias enforce_sequences_exist? enforce_sequences_exist
+    alias retry_on_uniqueness_violation? retry_on_uniqueness_violation
 
     def backend
       use_database_sequences? ? PostgresBackend : InMemoryBackend
@@ -22,6 +24,16 @@ class CleverSequence
     def reset!
       backend.reset!
       sequences.each_value(&:reset!)
+    end
+
+    def with_sequence_adjustment(&)
+      last_values = snapshot_last_values
+      reset!
+      backend.with_sequence_adjustment(last_values:, &)
+    end
+
+    def snapshot_last_values
+      sequences.transform_values { |seq| seq.send(:last_value) }.compact
     end
 
     def next(klass, name)
@@ -53,21 +65,48 @@ class CleverSequence
   end
 
   def next
-    @last_value = self.class.backend.nextval(klass, attribute, block)
+    value = if klass
+      self.class.backend.nextval(klass, attribute, block)
+    else
+      (last_value || 0) + 1
+    end
+    self.last_value = value
     last
   end
 
   def last
-    block.call(last_value)
+    block.call(last_value || (klass ? self.class.backend.starting_value(klass, attribute, block) : 0))
   end
 
   def reset!
-    remove_instance_variable(:@last_value) if instance_variable_defined?(:@last_value)
+    clear_last_value
   end
 
   private
 
   def last_value
-    @last_value || self.class.backend.starting_value(klass, attribute, block)
+    if klass
+      Thread.current[:clever_sequence_last_value]&.dig(klass.name, attribute)
+    else
+      @last_value
+    end
+  end
+
+  def last_value=(value)
+    if klass
+      Thread.current[:clever_sequence_last_value] ||= {}
+      Thread.current[:clever_sequence_last_value][klass.name] ||= {}
+      Thread.current[:clever_sequence_last_value][klass.name][attribute] = value
+    else
+      @last_value = value
+    end
+  end
+
+  def clear_last_value
+    if klass
+      Thread.current[:clever_sequence_last_value]&.[](klass.name)&.delete(attribute)
+    else
+      @last_value = nil
+    end
   end
 end
