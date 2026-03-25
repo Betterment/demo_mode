@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
+require 'zlib'
 
 RSpec.describe CleverSequence::LowerBoundFinder do
   let(:klass) { Widget }
@@ -118,10 +119,10 @@ RSpec.describe CleverSequence::LowerBoundFinder do
     context 'on PostgreSQL' do
       before { allow(ActiveRecord::Base.connection).to receive(:adapter_name).and_return('PostgreSQL') }
 
-      it 'acquires a transactional lock keyed to klass and column_name' do
-        expect(ActiveRecord::Base).to receive(:with_transactional_lock)
-          .with("lower-bound-#{klass}-integer_column")
-          .and_yield
+      it 'acquires and releases a session-level advisory lock keyed to klass and column_name' do
+        key = Zlib.crc32("lower-bound-#{klass}-integer_column")
+        expect(ActiveRecord::Base.connection).to receive(:execute).with("SELECT pg_advisory_lock(#{key})")
+        expect(ActiveRecord::Base.connection).to receive(:execute).with("SELECT pg_advisory_unlock(#{key})")
 
         finder.lower_bound
       end

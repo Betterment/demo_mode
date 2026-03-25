@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'zlib'
+
 class CleverSequence
   class LowerBoundFinder
     attr_reader :klass, :column_name, :block
@@ -26,9 +28,16 @@ class CleverSequence
 
     private
 
-    def with_lock(&)
+    def with_lock
       if ActiveRecord::Base.connection.adapter_name.casecmp?('postgresql')
-        ActiveRecord::Base.with_transactional_lock("lower-bound-#{klass}-#{column_name}", &)
+        conn = ActiveRecord::Base.connection
+        key = Zlib.crc32("lower-bound-#{klass}-#{column_name}")
+        conn.execute("SELECT pg_advisory_lock(#{key})")
+        begin
+          yield
+        ensure
+          conn.execute("SELECT pg_advisory_unlock(#{key})")
+        end
       else
         yield
       end

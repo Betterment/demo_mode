@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'zlib'
+
 class CleverSequence
   module PostgresBackend
     SEQUENCE_PREFIX = 'cs_'
@@ -159,7 +161,10 @@ class CleverSequence
       end
 
       def adjust_sequence_if_needed(sequence_name, klass, attribute, block)
-        ActiveRecord::Base.with_transactional_lock("adjust-sequence-#{sequence_name}") do
+        key = Zlib.crc32("adjust-sequence-#{sequence_name}")
+        conn = ActiveRecord::Base.connection
+        conn.execute("SELECT pg_advisory_lock(#{key})")
+        begin
           hint = hint_for(klass, attribute)
           max_value = calculate_sequence_value(klass, attribute, block, hint:)
           if max_value < 1
@@ -171,12 +176,14 @@ class CleverSequence
           # setval sets the sequence's last_value. With the default 3rd argument (true),
           # the next nextval() will return last_value + 1.
           # We only want to advance (never go backwards), so we use GREATEST.
-          result = ActiveRecord::Base.connection.execute(<<~SQL.squish)
+          result = conn.execute(<<~SQL.squish)
             SELECT setval('#{sequence_name}',
               GREATEST(#{max_value}, (SELECT last_value FROM #{sequence_name})))
           SQL
           new_last_value = result.first['setval'].to_i
           log "[DemoMode] #{sequence_name} adjusted to #{new_last_value}"
+        ensure
+          conn.execute("SELECT pg_advisory_unlock(#{key})")
         end
       end
     end
