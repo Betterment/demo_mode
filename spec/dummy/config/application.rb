@@ -25,7 +25,6 @@ module Dummy
     config.action_controller.allow_forgery_protection = Rails.env.development?
     config.active_support.deprecation = :raise
     config.active_job.queue_adapter = :test
-    config.active_record.dump_schema_after_migration = false
     config.assets.precompile << 'path/to/test-icon.png'
     config.action_mailer.default_url_options = { host: 'localhost:3000' }
   end
