@@ -4,7 +4,15 @@ module DemoMode
   class Session < ActiveRecord::Base
     attribute :variant, default: :default
 
+    attr_accessor :pool_session
+
     enum :status, { processing: 'processing', successful: 'successful', failed: 'failed' }, default: 'processing'
+
+    scope :unclaimed, -> { where(claimed_at: nil) }
+    scope :claimed,   -> { where.not(claimed_at: nil) }
+    scope :available_for, ->(persona_name, variant) {
+      successful.unclaimed.where(persona_name: persona_name, variant: variant)
+    }
 
     validates :persona_name, :variant, presence: true
     validates :persona, presence: { message: :required }, on: :create, if: :persona_name?
@@ -13,6 +21,7 @@ module DemoMode
     belongs_to :signinable, polymorphic: true, optional: true
 
     before_create :set_password!
+    before_create :claim_if_not_pooled!
 
     delegate :begin_demo,
       :custom_sign_in?,
@@ -52,6 +61,10 @@ module DemoMode
 
     def set_password!
       self.signinable_password ||= DemoMode.current_password
+    end
+
+    def claim_if_not_pooled!
+      self.claimed_at ||= Time.zone.now unless pool_session
     end
 
     def successful_status_requires_signinable

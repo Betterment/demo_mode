@@ -56,6 +56,84 @@ RSpec.describe DemoMode::Session do
     end
   end
 
+  describe 'pool behavior' do
+    it 'sets claimed_at on create for non-pool sessions' do
+      subject.persona_name = :the_everyperson
+      subject.save!(validate: false)
+      expect(subject.claimed_at).to be_present
+    end
+
+    it 'leaves claimed_at nil on create for pool sessions' do
+      subject.persona_name = :the_everyperson
+      subject.pool_session = true
+      subject.save!(validate: false)
+      expect(subject.claimed_at).to be_nil
+    end
+  end
+
+  describe '.unclaimed' do
+    it 'returns sessions with no claimed_at' do
+      unclaimed = described_class.new(persona_name: :the_everyperson, pool_session: true)
+      unclaimed.save!(validate: false)
+      claimed = described_class.new(persona_name: :the_everyperson)
+      claimed.save!(validate: false)
+
+      expect(described_class.unclaimed).to include(unclaimed)
+      expect(described_class.unclaimed).not_to include(claimed)
+    end
+  end
+
+  describe '.claimed' do
+    it 'returns sessions with a claimed_at value' do
+      unclaimed = described_class.new(persona_name: :the_everyperson, pool_session: true)
+      unclaimed.save!(validate: false)
+      claimed = described_class.new(persona_name: :the_everyperson)
+      claimed.save!(validate: false)
+
+      expect(described_class.claimed).to include(claimed)
+      expect(described_class.claimed).not_to include(unclaimed)
+    end
+  end
+
+  describe '.available_for' do
+    before do
+      DemoMode.configure do
+        personas_path 'config/system-test-personas'
+      end
+    end
+
+    it 'returns successful unclaimed sessions matching persona and variant' do
+      session = described_class.new(persona_name: :the_everyperson, variant: 'default', pool_session: true)
+      session.status = 'successful'
+      session.save!(validate: false)
+
+      expect(described_class.available_for(:the_everyperson, 'default')).to include(session)
+    end
+
+    it 'excludes processing sessions' do
+      session = described_class.new(persona_name: :the_everyperson, variant: 'default', pool_session: true)
+      session.save!(validate: false)
+
+      expect(described_class.available_for(:the_everyperson, 'default')).not_to include(session)
+    end
+
+    it 'excludes claimed sessions' do
+      session = described_class.new(persona_name: :the_everyperson, variant: 'default')
+      session.status = 'successful'
+      session.save!(validate: false)
+
+      expect(described_class.available_for(:the_everyperson, 'default')).not_to include(session)
+    end
+
+    it 'excludes sessions with a different persona or variant' do
+      session = described_class.new(persona_name: :the_everyperson, variant: 'other', pool_session: true)
+      session.status = 'successful'
+      session.save!(validate: false)
+
+      expect(described_class.available_for(:the_everyperson, 'default')).not_to include(session)
+    end
+  end
+
   describe '#begin_demo' do
     it 'returns nil' do
       expect(subject.begin_demo).to be_nil
