@@ -11,7 +11,7 @@ module DemoMode
     steady_state :status do
       state 'processing', default: true
       state 'available', from: 'processing'
-      state 'in_use', from: %w[processing available]
+      state 'in_use', from: %w(processing available)
       state 'failed', from: 'processing'
     end
 
