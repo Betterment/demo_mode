@@ -53,7 +53,7 @@ module DemoMode
     end
 
     def claim!
-      update!(claimed_at: Time.zone.now, status: 'in_use')
+      lock!.update!(claimed_at: Time.zone.now, status: 'in_use')
     end
 
     def save_and_generate_account!(**options)
