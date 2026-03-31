@@ -32,10 +32,10 @@ RSpec.describe DemoMode::Session do
     expect(subject.errors[:variant]).to match_array("can't be blank")
   end
 
-  it 'validates successful status requires signinable' do
-    subject.status = 'successful'
+  it 'validates available status requires signinable' do
+    subject.status = 'available'
     expect(subject).not_to be_valid
-    expect(subject.errors[:status]).to match_array('cannot be successful if signinable is not present')
+    expect(subject.errors[:status]).to include('cannot be available or in_use if signinable is not present')
   end
 
   describe '#persona' do
@@ -102,9 +102,9 @@ RSpec.describe DemoMode::Session do
       end
     end
 
-    it 'returns successful unclaimed sessions matching persona and variant' do
+    it 'returns available unclaimed sessions matching persona and variant' do
       session = described_class.new(persona_name: :the_everyperson, variant: 'default', pool_session: true)
-      session.status = 'successful'
+      session.status = 'available'
       session.save!(validate: false)
 
       expect(described_class.available_for(:the_everyperson, 'default')).to include(session)
@@ -119,7 +119,7 @@ RSpec.describe DemoMode::Session do
 
     it 'excludes claimed sessions' do
       session = described_class.new(persona_name: :the_everyperson, variant: 'default')
-      session.status = 'successful'
+      session.status = 'available'
       session.save!(validate: false)
 
       expect(described_class.available_for(:the_everyperson, 'default')).not_to include(session)
@@ -127,7 +127,7 @@ RSpec.describe DemoMode::Session do
 
     it 'excludes sessions with a different persona or variant' do
       session = described_class.new(persona_name: :the_everyperson, variant: 'other', pool_session: true)
-      session.status = 'successful'
+      session.status = 'available'
       session.save!(validate: false)
 
       expect(described_class.available_for(:the_everyperson, 'default')).not_to include(session)

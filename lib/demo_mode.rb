@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'rails'
+require 'steady_state'
 require 'demo_mode/version'
 require 'demo_mode/clever_sequence'
 require 'demo_mode/config'
