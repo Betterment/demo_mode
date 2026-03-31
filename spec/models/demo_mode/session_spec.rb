@@ -134,6 +134,29 @@ RSpec.describe DemoMode::Session do
     end
   end
 
+  describe '#claim!' do
+    let(:session) do
+      s = described_class.new(persona_name: :the_everyperson, pool_session: true)
+      s.signinable = DummyUser.create!(name: 'test')
+      s.status = 'available'
+      s.save!(validate: false)
+      s
+    end
+
+    it 'transitions status to in_use' do
+      expect { session.claim! }.to change { session.reload.status }.from('available').to('in_use')
+    end
+
+    it 'sets claimed_at' do
+      expect { session.claim! }.to change { session.reload.claimed_at }.from(nil)
+    end
+
+    it 'raises when the session is already in_use' do
+      session.claim!
+      expect { session.claim! }.to raise_error(ActiveRecord::RecordInvalid)
+    end
+  end
+
   describe '#begin_demo' do
     it 'returns nil' do
       expect(subject.begin_demo).to be_nil
