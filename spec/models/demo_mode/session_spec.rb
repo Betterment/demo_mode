@@ -183,6 +183,50 @@ RSpec.describe DemoMode::Session do
     end
   end
 
+  describe '.pool_count' do
+    before do
+      DemoMode.configure do
+        personas_path 'config/system-test-personas'
+      end
+    end
+
+    it 'returns the count of available unclaimed sessions for the given persona and variant' do
+      2.times do
+        s = described_class.new(persona_name: :the_everyperson, variant: 'default', pool_session: true)
+        s.signinable = DummyUser.create!(name: 'test')
+        s.status = 'available'
+        s.save!(validate: false)
+      end
+
+      expect(described_class.pool_count(:the_everyperson, 'default')).to eq(2)
+    end
+
+    it 'excludes sessions with a different persona or variant' do
+      s = described_class.new(persona_name: :the_everyperson, variant: 'other', pool_session: true)
+      s.signinable = DummyUser.create!(name: 'test')
+      s.status = 'available'
+      s.save!(validate: false)
+
+      expect(described_class.pool_count(:the_everyperson, 'default')).to eq(0)
+    end
+
+    it 'excludes claimed sessions' do
+      s = described_class.new(persona_name: :the_everyperson, variant: 'default')
+      s.signinable = DummyUser.create!(name: 'test')
+      s.status = 'available'
+      s.save!(validate: false)
+
+      expect(described_class.pool_count(:the_everyperson, 'default')).to eq(0)
+    end
+
+    it 'excludes non-available sessions' do
+      s = described_class.new(persona_name: :the_everyperson, variant: 'default', pool_session: true)
+      s.save!(validate: false)
+
+      expect(described_class.pool_count(:the_everyperson, 'default')).to eq(0)
+    end
+  end
+
   describe '#claim!' do
     let(:session) do
       s = described_class.new(persona_name: :the_everyperson, pool_session: true)

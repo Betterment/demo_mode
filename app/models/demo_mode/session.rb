@@ -21,6 +21,10 @@ module DemoMode
       available.unclaimed.where(persona_name: persona_name, variant: variant)
     }
 
+    def self.pool_count(persona_name, variant)
+      available_for(persona_name, variant).count
+    end
+
     validates :persona_name, :variant, presence: true
     validates :persona, presence: { message: :required }, on: :create, if: :persona_name?
     validates :claimed_at, absence: true, if: :available?
