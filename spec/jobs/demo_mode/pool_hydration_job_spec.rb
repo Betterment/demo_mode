@@ -10,7 +10,7 @@ RSpec.describe DemoMode::PoolHydrationJob do
     end
   end
 
-  describe '#perform', :with_queue_adapter => :test do
+  describe '#perform', with_queue_adapter: :test do
     it 'enqueues generation jobs for all persona/variant combinations' do
       expect { described_class.perform_now }.to have_enqueued_job(DemoMode::AccountGenerationJob).exactly(10).times
     end
