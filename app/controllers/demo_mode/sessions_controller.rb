@@ -25,7 +25,9 @@ module DemoMode
 
     def create
       @session = Session.new(create_params)
-      @session.save_and_generate_account_later!(**options_params.to_unsafe_h.deep_symbolize_keys)
+      unless try_claim_from_pool
+        @session.save_and_generate_account_later!(**options_params.to_unsafe_h.deep_symbolize_keys)
+      end
       @session.reload
       session[:demo_session] = { 'id' => @session.id, 'last_request_at' => Time.zone.now }
       respond_to do |f|
@@ -75,6 +77,17 @@ module DemoMode
           }
         end,
       )
+    end
+
+    def try_claim_from_pool
+      Session.transaction do
+        pooled = Session.available_for(@session.persona_name, @session.variant).lock.first
+        return false if pooled.nil?
+
+        pooled.claim!
+        @session = pooled.reload
+        true
+      end
     end
 
     def create_params
