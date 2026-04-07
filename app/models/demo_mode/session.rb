@@ -55,10 +55,9 @@ module DemoMode
     def self.claim_for(**opts)
       transaction do
         prototype = new(**opts)
-        available_for(prototype.persona_name, prototype.variant)
-          .lock
-          .first_or_initialize(persona_name: prototype.persona_name, variant: prototype.variant)
-          .tap(&:claim!)
+        session = available_for(prototype.persona_name, prototype.variant).lock.first
+        session ||= new(persona_name: prototype.persona_name, variant: prototype.variant)
+        session.tap(&:claim!)
       end
     end
 

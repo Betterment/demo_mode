@@ -243,6 +243,12 @@ RSpec.describe DemoMode::Session do
     end
 
     context 'with a new record' do
+      before do
+        DemoMode.configure do
+          personas_path 'config/system-test-personas'
+        end
+      end
+
       let(:session) { described_class.new(persona_name: :the_everyperson) }
 
       it 'persists the record' do
