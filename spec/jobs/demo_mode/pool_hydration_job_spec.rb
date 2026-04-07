@@ -11,33 +11,77 @@ RSpec.describe DemoMode::PoolHydrationJob do
   end
 
   describe '#perform', with_queue_adapter: :test do
-    it 'enqueues generation jobs for all persona/variant combinations' do
-      expect { described_class.perform_now }.to have_enqueued_job(DemoMode::AccountGenerationJob).exactly(10).times
-    end
+    context 'when no persona_name/variant is given (orchestrator mode)' do
+      it 'enqueues a leaf job for each persona/variant combination' do
+        expect { described_class.perform_now }.to have_enqueued_job(described_class).exactly(5).times
+      end
 
-    it 'enqueues only for the specified persona/variant when given' do
-      expect {
-        described_class.perform_now(persona_name: :the_everyperson, variant: 'default')
-      }.to have_enqueued_job(DemoMode::AccountGenerationJob).exactly(2).times
-    end
-
-    it 'enqueues no jobs when pool is already at minimum' do
-      2.times do
+      it 'skips persona/variant combinations already at target' do
         s = DemoMode::Session.new(persona_name: :the_everyperson, variant: 'default', pool_session: true)
         s.signinable = DummyUser.create!(name: 'test')
         s.status = 'available'
         s.save!(validate: false)
+        2.times do
+          s = DemoMode::Session.new(persona_name: :zendaya, variant: 'default', pool_session: true)
+          s.signinable = DummyUser.create!(name: 'test')
+          s.status = 'available'
+          s.save!(validate: false)
+        end
+
+        expect { described_class.perform_now }.to have_enqueued_job(described_class).exactly(4).times
       end
 
-      expect {
-        described_class.perform_now(persona_name: :the_everyperson, variant: 'default')
-      }.not_to have_enqueued_job(DemoMode::AccountGenerationJob)
+      it 'passes a custom count through to leaf jobs' do
+        expect {
+          described_class.perform_now(count: 5)
+        }.to have_enqueued_job(described_class).with(hash_including(count: 5)).exactly(5).times
+      end
     end
 
-    it 'uses the custom count over minimum_pool_size' do
-      expect {
-        described_class.perform_now(persona_name: :the_everyperson, variant: 'default', count: 3)
-      }.to have_enqueued_job(DemoMode::AccountGenerationJob).exactly(3).times
+    context 'when persona_name and variant are given (leaf mode)' do
+      it 'creates one session and enqueues a follow-up job when still under target' do
+        expect {
+          described_class.perform_now(persona_name: :the_everyperson, variant: 'default')
+        }.to have_enqueued_job(described_class)
+          .with(persona_name: :the_everyperson, variant: 'default', count: nil)
+
+        expect(DemoMode::Session.available_for(:the_everyperson, 'default').count).to eq(1)
+      end
+
+      it 'creates one session and does not enqueue a follow-up when target is reached' do
+        s = DemoMode::Session.new(persona_name: :the_everyperson, variant: 'default', pool_session: true)
+        s.signinable = DummyUser.create!(name: 'test')
+        s.status = 'available'
+        s.save!(validate: false)
+
+        expect {
+          described_class.perform_now(persona_name: :the_everyperson, variant: 'default')
+        }.not_to have_enqueued_job(described_class)
+
+        expect(DemoMode::Session.available_for(:the_everyperson, 'default').count).to eq(2)
+      end
+
+      it 'does nothing when the pool is already at target' do
+        2.times do
+          s = DemoMode::Session.new(persona_name: :the_everyperson, variant: 'default', pool_session: true)
+          s.signinable = DummyUser.create!(name: 'test')
+          s.status = 'available'
+          s.save!(validate: false)
+        end
+
+        expect {
+          described_class.perform_now(persona_name: :the_everyperson, variant: 'default')
+        }.not_to have_enqueued_job(described_class)
+
+        expect(DemoMode::Session.available_for(:the_everyperson, 'default').count).to eq(2)
+      end
+
+      it 'uses a custom count over minimum_pool_size' do
+        expect {
+          described_class.perform_now(persona_name: :the_everyperson, variant: 'default', count: 3)
+        }.to have_enqueued_job(described_class)
+          .with(persona_name: :the_everyperson, variant: 'default', count: 3)
+      end
     end
   end
 end
