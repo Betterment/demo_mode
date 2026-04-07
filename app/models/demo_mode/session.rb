@@ -52,8 +52,23 @@ module DemoMode
       DemoMode.personas.find { |p| p.name.to_s == persona_name.to_s }
     end
 
+    def self.claim_for(**opts)
+      transaction do
+        prototype = new(**opts)
+        available_for(prototype.persona_name, prototype.variant)
+          .lock
+          .first_or_initialize(persona_name: prototype.persona_name, variant: prototype.variant)
+          .tap(&:claim!)
+      end
+    end
+
     def claim!
-      lock!.update!(claimed_at: Time.zone.now, status: 'in_use')
+      if new_record?
+        self.claimed_at = Time.zone.now
+        save!
+      else
+        lock!.update!(claimed_at: Time.zone.now, status: 'in_use')
+      end
     end
 
     def save_and_generate_account!(**options)
