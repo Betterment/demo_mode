@@ -18,7 +18,7 @@ module DemoMode
 
     def hydrate(persona_name, variant, count)
       target = count || DemoMode.minimum_pool_size
-      deficit = target - DemoMode::Session.pool_count(persona_name, variant)
+      deficit = target - DemoMode::Session.available_for(persona_name, variant).count
       deficit.times do
         DemoMode::Session.new(persona_name: persona_name, variant: variant, pool_session: true)
           .save_and_generate_account_later!
