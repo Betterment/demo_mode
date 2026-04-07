@@ -24,8 +24,7 @@ module DemoMode
     end
 
     def create
-      @session = Session.claim_for(**create_params.to_h.symbolize_keys)
-      AccountGenerationJob.perform_later(@session, **options_params.to_unsafe_h.deep_symbolize_keys) if @session.signinable.blank?
+      @session = Session.claim_for(**create_params.to_h.symbolize_keys, **options_params.to_unsafe_h.deep_symbolize_keys)
       @session.reload
       session[:demo_session] = { 'id' => @session.id, 'last_request_at' => Time.zone.now }
       respond_to do |f|

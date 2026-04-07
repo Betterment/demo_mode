@@ -4,7 +4,9 @@ module DemoMode
   class Session < ActiveRecord::Base
     include ::SteadyState
 
-    attribute :variant, default: :default
+    DEFAULT_VARIANT = 'default'
+
+    attribute :variant, default: DEFAULT_VARIANT
 
     attr_accessor :pool_session
 
@@ -52,12 +54,14 @@ module DemoMode
       DemoMode.personas.find { |p| p.name.to_s == persona_name.to_s }
     end
 
-    def self.claim_for(**opts)
+    def self.claim_for(persona_name:, variant: DEFAULT_VARIANT, **generation_opts)
       transaction do
-        prototype = new(**opts)
-        session = available_for(prototype.persona_name, prototype.variant).lock.first
-        session ||= new(persona_name: prototype.persona_name, variant: prototype.variant)
-        session.tap(&:claim!)
+        session = available_for(persona_name, variant).lock.first
+        session ||= new(persona_name: persona_name, variant: variant)
+        session.tap do |s|
+          s.claim!
+          AccountGenerationJob.perform_later(s, **generation_opts) if s.signinable.blank?
+        end
       end
     end
 

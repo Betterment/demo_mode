@@ -211,6 +211,29 @@ RSpec.describe DemoMode::Session do
       expect(result.claimed_at).to be_present
     end
 
+    it 'enqueues an account generation job for a new session', with_queue_adapter: :test do
+      expect {
+        described_class.claim_for(persona_name: :the_everyperson, variant: 'default')
+      }.to have_enqueued_job(DemoMode::AccountGenerationJob)
+    end
+
+    it 'does not enqueue an account generation job when claiming a pool session', with_queue_adapter: :test do
+      pooled = described_class.new(persona_name: :the_everyperson, variant: 'default', pool_session: true)
+      pooled.signinable = DummyUser.create!(name: 'test')
+      pooled.status = 'available'
+      pooled.save!(validate: false)
+
+      expect {
+        described_class.claim_for(persona_name: :the_everyperson, variant: 'default')
+      }.not_to have_enqueued_job(DemoMode::AccountGenerationJob)
+    end
+
+    it 'passes generation options through to the account generation job', with_queue_adapter: :test do
+      expect {
+        described_class.claim_for(persona_name: :the_everyperson, variant: 'default', custom_option: 'value')
+      }.to have_enqueued_job(DemoMode::AccountGenerationJob).with(anything, custom_option: 'value')
+    end
+
     it 'uses the default variant when none is specified' do
       result = described_class.claim_for(persona_name: :the_everyperson)
 
