@@ -183,26 +183,109 @@ RSpec.describe DemoMode::Session do
     end
   end
 
+  describe '.claim_for' do
+    before do
+      DemoMode.configure do
+        personas_path 'config/system-test-personas'
+      end
+    end
+
+    it 'claims and returns an existing available pool session' do
+      pooled = described_class.new(persona_name: :the_everyperson, variant: 'default', pool_session: true)
+      pooled.signinable = DummyUser.create!(name: 'test')
+      pooled.status = 'available'
+      pooled.save!(validate: false)
+
+      result = described_class.claim_for(persona_name: :the_everyperson, variant: 'default')
+
+      expect(result.id).to eq(pooled.id)
+      expect(result.status).to eq('in_use')
+      expect(result.claimed_at).to be_present
+    end
+
+    it 'creates a new session when no pool session is available' do
+      result = described_class.claim_for(persona_name: :the_everyperson, variant: 'default')
+
+      expect(result).to be_persisted
+      expect(result.status).to eq('processing')
+      expect(result.claimed_at).to be_present
+    end
+
+    it 'enqueues an account generation job for a new session', with_queue_adapter: :test do
+      expect {
+        described_class.claim_for(persona_name: :the_everyperson, variant: 'default')
+      }.to have_enqueued_job(DemoMode::AccountGenerationJob)
+    end
+
+    it 'does not enqueue an account generation job when claiming a pool session', with_queue_adapter: :test do
+      pooled = described_class.new(persona_name: :the_everyperson, variant: 'default', pool_session: true)
+      pooled.signinable = DummyUser.create!(name: 'test')
+      pooled.status = 'available'
+      pooled.save!(validate: false)
+
+      expect {
+        described_class.claim_for(persona_name: :the_everyperson, variant: 'default')
+      }.not_to have_enqueued_job(DemoMode::AccountGenerationJob)
+    end
+
+    it 'passes generation options through to the account generation job', with_queue_adapter: :test do
+      expect {
+        described_class.claim_for(persona_name: :the_everyperson, variant: 'default', custom_option: 'value')
+      }.to have_enqueued_job(DemoMode::AccountGenerationJob).with(anything, custom_option: 'value')
+    end
+
+    it 'uses the default variant when none is specified' do
+      result = described_class.claim_for(persona_name: :the_everyperson)
+
+      expect(result.variant).to eq('default')
+    end
+  end
+
   describe '#claim!' do
-    let(:session) do
-      s = described_class.new(persona_name: :the_everyperson, pool_session: true)
-      s.signinable = DummyUser.create!(name: 'test')
-      s.status = 'available'
-      s.save!(validate: false)
-      s
+    context 'with an existing available session' do
+      let(:session) do
+        s = described_class.new(persona_name: :the_everyperson, pool_session: true)
+        s.signinable = DummyUser.create!(name: 'test')
+        s.status = 'available'
+        s.save!(validate: false)
+        s
+      end
+
+      it 'transitions status to in_use' do
+        expect { session.claim! }.to change { session.reload.status }.from('available').to('in_use')
+      end
+
+      it 'sets claimed_at' do
+        expect { session.claim! }.to change { session.reload.claimed_at }.from(nil)
+      end
+
+      it 'raises when the session is already in_use' do
+        session.claim!
+        expect { session.claim! }.to raise_error(ActiveRecord::RecordInvalid)
+      end
     end
 
-    it 'transitions status to in_use' do
-      expect { session.claim! }.to change { session.reload.status }.from('available').to('in_use')
-    end
+    context 'with a new record' do
+      before do
+        DemoMode.configure do
+          personas_path 'config/system-test-personas'
+        end
+      end
 
-    it 'sets claimed_at' do
-      expect { session.claim! }.to change { session.reload.claimed_at }.from(nil)
-    end
+      let(:session) { described_class.new(persona_name: :the_everyperson) }
 
-    it 'raises when the session is already in_use' do
-      session.claim!
-      expect { session.claim! }.to raise_error(ActiveRecord::RecordInvalid)
+      it 'persists the record' do
+        expect { session.claim! }.to change { session.persisted? }.from(false).to(true)
+      end
+
+      it 'sets claimed_at' do
+        expect { session.claim! }.to change { session.claimed_at }.from(nil)
+      end
+
+      it 'leaves status as processing since there is no signinable yet' do
+        session.claim!
+        expect(session.status).to eq('processing')
+      end
     end
   end
 
