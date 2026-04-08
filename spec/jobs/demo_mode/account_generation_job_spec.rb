@@ -17,7 +17,7 @@ RSpec.describe DemoMode::AccountGenerationJob do
     expect {
       described_class.perform_now(session)
     }.to change { session.reload.signinable }.from(nil).to(kind_of(DummyUser))
-      .and change { session.reload.status }.from('processing').to('successful')
+      .and change { session.reload.status }.from('processing').to('in_use')
       .and emit_notification('demo_mode.persona.generate').with_payload(
         name: 'the_everyperson',
         variant: 'default',

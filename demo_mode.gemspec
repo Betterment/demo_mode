@@ -28,6 +28,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'activesupport', rails_constraints
   s.add_dependency 'cli-ui', '~> 2.3'
   s.add_dependency 'railties', rails_constraints
+  s.add_dependency 'steady_state'
 
   s.add_development_dependency 'actionmailer', rails_constraints
   s.add_development_dependency 'appraisal'

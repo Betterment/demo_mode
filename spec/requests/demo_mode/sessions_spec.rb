@@ -178,6 +178,39 @@ RSpec.describe DemoMode::SessionsController do # rubocop:disable RSpec/FilePath
           end
         end
       end
+
+      context 'with a pooled session available (pool hit)' do
+        it 'claims the pooled session and returns completed json immediately' do
+          pooled = DemoMode::Session.new(persona_name: 'the_everyperson', variant: 'default')
+          pooled.pool_session = true
+          pooled.save!
+          DemoMode::AccountGenerationJob.perform_now(pooled)
+          pooled.reload
+
+          post '/ohno/sessions', params: {
+            session: { persona_name: 'the_everyperson' },
+          }.to_json, headers: request_headers
+
+          expect(response_json['id']).to eq pooled.id
+          expect(response_json['processing']).to be false
+          expect(response_json['username']).not_to be_nil
+          expect(response_json['password']).not_to be_nil
+          expect(response_json['status']).to eq 'in_use'
+        end
+      end
+
+      context 'with no pooled session available (pool miss)' do
+        it 'falls back to async generation and returns processing json' do
+          post '/ohno/sessions', params: {
+            session: { persona_name: 'the_everyperson' },
+          }.to_json, headers: request_headers
+
+          last_session = DemoMode::Session.last
+          expect(response_json['id']).to eq last_session.id
+          expect(response_json['processing']).to be true
+          expect(response_json['username']).to be_nil
+        end
+      end
     end
 
     describe 'GET /sessions/new' do
@@ -258,7 +291,7 @@ RSpec.describe DemoMode::SessionsController do # rubocop:disable RSpec/FilePath
           expect(response_json['processing']).to be false
           expect(response_json['username']).not_to be_nil
           expect(response_json['password']).not_to be_nil
-          expect(response_json['status']).to eq 'successful'
+          expect(response_json['status']).to eq 'in_use'
         end
       end
     end

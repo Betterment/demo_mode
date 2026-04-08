@@ -8,7 +8,8 @@ module DemoMode
         raise "Unknown persona: #{session.persona_name}" if persona.blank?
 
         signinable = persona.generate!(variant: session.variant, password: session.signinable_password, options: options)
-        session.update!(signinable: signinable, status: 'successful')
+        new_status = session.claimed_at? ? 'in_use' : 'available'
+        session.update!(signinable: signinable, status: new_status)
       end
     rescue StandardError => e
       session.update!(status: 'failed')

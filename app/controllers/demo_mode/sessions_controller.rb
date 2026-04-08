@@ -24,8 +24,7 @@ module DemoMode
     end
 
     def create
-      @session = Session.new(create_params)
-      @session.save_and_generate_account_later!(**options_params.to_unsafe_h.deep_symbolize_keys)
+      @session = Session.claim_for(**create_params.to_h.symbolize_keys, **options_params.to_h.deep_symbolize_keys)
       @session.reload
       session[:demo_session] = { 'id' => @session.id, 'last_request_at' => Time.zone.now }
       respond_to do |f|
@@ -51,12 +50,12 @@ module DemoMode
 
     def render_signinable_json
       if @session.signinable.blank?
-        render json: { id: @session.id, processing: @session.processing?, status: @session.status }
+        render json: { id: @session.id, processing: @session.processing?, status: @session.status.to_s }
       else
         render json: {
           id: @session.id,
           processing: @session.processing?,
-          status: @session.status,
+          status: @session.status.to_s,
           username: @session.signinable_username,
           password: @session.signinable_password,
           metadata: @session.signinable_metadata,

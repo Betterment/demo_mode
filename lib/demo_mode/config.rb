@@ -14,6 +14,7 @@ module DemoMode
     configurable_value(:personas_path) { 'config/personas' }
     configurable_value(:session_timeout) { 30.minutes }
     configurable_value(:log_level) { :debug }
+    configurable_value(:minimum_pool_size) { 5 }
     configurable_boolean(:display_credentials)
     configurations << :stylesheets
     configurations << :logo
