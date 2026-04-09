@@ -259,6 +259,25 @@ RSpec.describe DemoMode::Session do
 
       expect(result.variant).to eq('default')
     end
+
+    it 'emits demo_mode.session.claimed with pool_hit: true when claiming a pool session' do
+      pooled = described_class.new(persona_name: :the_everyperson, variant: 'default', pool_session: true)
+      pooled.signinable = DummyUser.create!(name: 'test')
+      pooled.status = 'available'
+      pooled.save!(validate: false)
+
+      expect {
+        described_class.claim_for(persona_name: :the_everyperson, variant: 'default')
+      }.to emit_notification('demo_mode.session.claimed')
+        .with_payload(persona_name: :the_everyperson, variant: 'default', pool_hit: true)
+    end
+
+    it 'emits demo_mode.session.claimed with pool_hit: false when no pool session is available' do
+      expect {
+        described_class.claim_for(persona_name: :the_everyperson, variant: 'default')
+      }.to emit_notification('demo_mode.session.claimed')
+        .with_payload(persona_name: :the_everyperson, variant: 'default', pool_hit: false)
+    end
   end
 
   describe '#claim!' do
