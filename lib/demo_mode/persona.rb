@@ -6,7 +6,7 @@ module DemoMode
   class Persona
     include ActiveModel::Model
 
-    attr_accessor :name
+    attr_accessor :name, :file_checksum
 
     validates :name, presence: true
     validate :persona_must_have_at_least_one_feature

@@ -52,6 +52,7 @@ RSpec.describe DemoMode::PoolHydrationJob do
         s = DemoMode::Session.new(persona_name: :the_everyperson, variant: 'default', pool_session: true)
         s.signinable = DummyUser.create!(name: 'test')
         s.status = 'available'
+        s.persona_checksum = s.persona&.file_checksum
         s.save!(validate: false)
 
         expect {
@@ -66,6 +67,7 @@ RSpec.describe DemoMode::PoolHydrationJob do
           s = DemoMode::Session.new(persona_name: :the_everyperson, variant: 'default', pool_session: true)
           s.signinable = DummyUser.create!(name: 'test')
           s.status = 'available'
+          s.persona_checksum = s.persona&.file_checksum
           s.save!(validate: false)
         end
 

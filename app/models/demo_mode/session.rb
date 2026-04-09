@@ -20,7 +20,8 @@ module DemoMode
     scope :unclaimed, -> { where(claimed_at: nil) }
     scope :claimed,   -> { where.not(claimed_at: nil) }
     scope :available_for, ->(persona_name, variant) {
-      available.unclaimed.where(persona_name: persona_name, variant: variant)
+      persona = DemoMode.personas.find { |p| p.name.to_s == persona_name.to_s }
+      available.unclaimed.where(persona_name: persona_name, variant: variant, persona_checksum: persona&.file_checksum)
     }
 
     validates :persona_name, :variant, presence: true
