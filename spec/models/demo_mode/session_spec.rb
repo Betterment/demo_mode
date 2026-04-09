@@ -65,6 +65,23 @@ RSpec.describe DemoMode::Session do
 
       expect(described_class.available_for(:the_everyperson, 'default')).not_to include(session)
     end
+
+    it 'excludes sessions with a stale checksum' do
+      session = described_class.new(persona_name: :the_everyperson, variant: 'default', pool_session: true)
+      session.status = 'available'
+      session.persona_checksum = 'stale_checksum'
+      session.save!(validate: false)
+
+      expect(described_class.available_for(:the_everyperson, 'default')).not_to include(session)
+    end
+
+    it 'excludes sessions with no checksum' do
+      session = described_class.new(persona_name: :the_everyperson, variant: 'default', pool_session: true)
+      session.status = 'available'
+      session.save!(validate: false)
+
+      expect(described_class.available_for(:the_everyperson, 'default')).not_to include(session)
+    end
   end
 
   it 'validates persona name' do

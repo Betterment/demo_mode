@@ -24,6 +24,11 @@ RSpec.describe DemoMode::AccountGenerationJob do
       )
   end
 
+  it 'stores the persona checksum on the session' do
+    described_class.perform_now(session)
+    expect(session.reload.persona_checksum).to eq(session.persona.file_checksum)
+  end
+
   context 'when the persona must exist' do
     let(:session) do
       session = DemoMode::Session.new(persona_name: :garbage)
