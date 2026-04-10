@@ -89,6 +89,14 @@ module DemoMode
       true
     end
 
+    def enabled(&block)
+      @enabled_condition = block
+    end
+
+    def enabled?
+      @enabled_condition ? @enabled_condition.call : true
+    end
+
     def callout(callout = true) # rubocop:disable Style/OptionalBooleanParameter
       @callout = callout
     end

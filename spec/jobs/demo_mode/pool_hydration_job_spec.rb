@@ -16,6 +16,16 @@ RSpec.describe DemoMode::PoolHydrationJob do
         expect { described_class.perform_now }.to have_enqueued_job(described_class).exactly(5).times
       end
 
+      it 'skips disabled personas' do
+        DemoMode.add_persona(:disabled_test_persona) do
+          features << 'test'
+          enabled { false }
+          sign_in_as { DummyUser.create!(name: 'test') }
+        end
+
+        expect { described_class.perform_now }.to have_enqueued_job(described_class).exactly(5).times
+      end
+
       it 'skips persona/variant combinations already at target' do
         s = DemoMode::Session.new(persona_name: :the_everyperson, variant: 'default', pool_session: true)
         s.signinable = DummyUser.create!(name: 'test')

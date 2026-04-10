@@ -96,6 +96,18 @@ RSpec.describe DemoMode::Session do
     expect(subject.errors.full_messages).to match_array("Persona must exist")
   end
 
+  it 'treats a disabled persona as non-existent on create' do
+    DemoMode.add_persona(:disabled_persona) do
+      features << 'test'
+      enabled { false }
+      sign_in_as { DummyUser.create!(name: 'test') }
+    end
+
+    subject.persona_name = 'disabled_persona'
+    expect(subject).not_to be_valid
+    expect(subject.errors.full_messages).to match_array("Persona must exist")
+  end
+
   it 'allows persisted records to reference non-existent personas' do
     subject.persona_name = :the_everyperson
     subject.variant = 'XIV'

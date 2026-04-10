@@ -213,6 +213,38 @@ RSpec.describe DemoMode do
           end
       ERR
     end
+
+    context 'when a persona has enabled { false }' do
+      before do
+        described_class.add_persona('disabled_persona') do
+          features << 'foo'
+          enabled { false }
+          sign_in_as { 'banana' }
+        end
+        described_class.add_persona('enabled_persona') do
+          features << 'bar'
+          sign_in_as { 'apple' }
+        end
+      end
+
+      it 'excludes the disabled persona from .personas' do
+        expect(described_class.personas.map(&:name)).to eq ['enabled_persona']
+      end
+    end
+
+    it 'evaluates the enabled block lazily at access time' do
+      flag = [true]
+      described_class.add_persona('dynamic_persona') do
+        features << 'foo'
+        enabled { flag[0] }
+        sign_in_as { 'banana' }
+      end
+
+      expect(described_class.personas.map(&:name)).to include('dynamic_persona')
+
+      flag[0] = false
+      expect(described_class.personas.map(&:name)).not_to include('dynamic_persona')
+    end
   end
 
   describe '.session_url' do
