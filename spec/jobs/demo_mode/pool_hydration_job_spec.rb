@@ -109,6 +109,20 @@ RSpec.describe DemoMode::PoolHydrationJob do
         }.to have_enqueued_job(described_class)
           .with(persona_name: :the_everyperson, variant: 'default', count: nil)
       end
+
+      it 'does nothing when the persona is disabled' do
+        DemoMode.add_persona(:disabled_test_persona) do
+          features << 'test'
+          enabled { false }
+          sign_in_as { DummyUser.create!(name: 'test') }
+        end
+
+        expect {
+          described_class.perform_now(persona_name: :disabled_test_persona, variant: 'default')
+        }.not_to have_enqueued_job(described_class)
+
+        expect(DemoMode::Session.count).to eq(0)
+      end
     end
   end
 end

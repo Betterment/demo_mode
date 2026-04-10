@@ -26,6 +26,8 @@ module DemoMode
     end
 
     def hydrate(persona_name, variant, count)
+      return unless DemoMode.personas.any? { |p| p.name.to_s == persona_name.to_s }
+
       target = count || DemoMode.minimum_pool_size
       return if DemoMode::Session.available_for(persona_name, variant).count >= target
 
