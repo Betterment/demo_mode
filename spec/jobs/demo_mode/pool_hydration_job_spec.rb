@@ -26,6 +26,19 @@ RSpec.describe DemoMode::PoolHydrationJob do
         expect { described_class.perform_now }.to have_enqueued_job(described_class).exactly(5).times
       end
 
+      it 'skips disabled variants' do
+        DemoMode.add_persona(:persona_with_disabled_variant) do
+          features << 'test'
+          variant('enabled_variant') { sign_in_as { DummyUser.create!(name: 'test') } }
+          variant('disabled_variant') do
+            enabled { false }
+            sign_in_as { DummyUser.create!(name: 'test') }
+          end
+        end
+
+        expect { described_class.perform_now }.to have_enqueued_job(described_class).exactly(6).times
+      end
+
       it 'skips persona/variant combinations already at target' do
         s = DemoMode::Session.new(persona_name: :the_everyperson, variant: 'default', pool_session: true)
         s.signinable = DummyUser.create!(name: 'test')
@@ -119,6 +132,22 @@ RSpec.describe DemoMode::PoolHydrationJob do
 
         expect {
           described_class.perform_now(persona_name: :disabled_test_persona, variant: 'default')
+        }.not_to have_enqueued_job(described_class)
+
+        expect(DemoMode::Session.count).to eq(0)
+      end
+
+      it 'does nothing when the variant is disabled' do
+        DemoMode.add_persona(:persona_with_disabled_variant) do
+          features << 'test'
+          variant('disabled_variant') do
+            enabled { false }
+            sign_in_as { DummyUser.create!(name: 'test') }
+          end
+        end
+
+        expect {
+          described_class.perform_now(persona_name: :persona_with_disabled_variant, variant: 'disabled_variant')
         }.not_to have_enqueued_job(described_class)
 
         expect(DemoMode::Session.count).to eq(0)

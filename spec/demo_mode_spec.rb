@@ -245,6 +245,41 @@ RSpec.describe DemoMode do
       flag[0] = false
       expect(described_class.personas.map(&:name)).not_to include('dynamic_persona')
     end
+
+    context 'when a persona has a variant with enabled { false }' do
+      before do
+        described_class.add_persona('persona_with_variants') do
+          features << 'foo'
+          variant('enabled_variant') { sign_in_as { 'apple' } }
+          variant('disabled_variant') do
+            enabled { false }
+            sign_in_as { 'banana' }
+          end
+        end
+      end
+
+      it 'excludes the disabled variant from persona.variants' do
+        persona = described_class.personas.find { |p| p.name.to_s == 'persona_with_variants' }
+        expect(persona.variants.keys).to eq ['enabled_variant']
+      end
+    end
+
+    it 'evaluates the variant enabled block lazily at access time' do
+      flag = [true]
+      described_class.add_persona('persona_with_dynamic_variant') do
+        features << 'foo'
+        variant('dynamic_variant') do
+          enabled { flag[0] }
+          sign_in_as { 'banana' }
+        end
+      end
+
+      persona = described_class.personas.find { |p| p.name.to_s == 'persona_with_dynamic_variant' }
+      expect(persona.variants.keys).to include('dynamic_variant')
+
+      flag[0] = false
+      expect(persona.variants.keys).not_to include('dynamic_variant')
+    end
   end
 
   describe '.session_url' do

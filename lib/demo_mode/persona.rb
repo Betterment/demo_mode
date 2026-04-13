@@ -53,13 +53,13 @@ module DemoMode
     end
 
     def variant(name, &block)
-      variants[name] = Variant.new(name: name).tap do |v|
+      (@variants ||= {}.with_indifferent_access)[name] = Variant.new(name: name).tap do |v|
         v.instance_eval(&block)
       end
     end
 
     def variants
-      @variants ||= {}.with_indifferent_access
+      (@variants ||= {}.with_indifferent_access).select { |_, v| v.enabled? }
     end
 
     def generate!(variant: :default, password: nil, options: {})
@@ -144,6 +144,14 @@ module DemoMode
     Variant = Struct.new(:name, keyword_init: true) do
       def sign_in_as(&signinable_generator)
         @signinable_generator = signinable_generator
+      end
+
+      def enabled(&block)
+        @enabled_condition = block
+      end
+
+      def enabled?
+        @enabled_condition ? @enabled_condition.call : true
       end
 
       def title
