@@ -264,6 +264,7 @@ RSpec.describe DemoMode::Session do
       pooled = described_class.new(persona_name: :the_everyperson, variant: 'default', pool_session: true)
       pooled.signinable = DummyUser.create!(name: 'test')
       pooled.status = 'available'
+      pooled.persona_checksum = pooled.persona&.file_checksum
       pooled.save!(validate: false)
 
       expect {
