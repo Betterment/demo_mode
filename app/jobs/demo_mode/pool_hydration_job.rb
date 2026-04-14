@@ -20,7 +20,7 @@ module DemoMode
         persona.variants.each_key do |v|
           available = current_counts[[persona.name.to_s, v.to_s]] || 0
           ActiveSupport::Notifications.instrument('demo_mode.pool.depth',
-            persona_name: persona.name, variant: v, available: available, target: target)
+            persona_name: persona.name, variant: v, value: target - available)
           next if available >= target
 
           PoolHydrationJob.perform_later(persona_name: persona.name, variant: v, count: count)

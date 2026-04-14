@@ -37,7 +37,7 @@ RSpec.describe DemoMode::PoolHydrationJob do
         }.to have_enqueued_job(described_class).with(hash_including(count: 5)).exactly(5).times
       end
 
-      it 'emits demo_mode.pool.depth for each persona/variant with current available count and target' do
+      it 'emits demo_mode.pool.depth for each persona/variant with value as deficit from target' do
         s = DemoMode::Session.new(persona_name: :the_everyperson, variant: 'default', pool_session: true)
         s.signinable = DummyUser.create!(name: 'test')
         s.status = 'available'
@@ -46,14 +46,14 @@ RSpec.describe DemoMode::PoolHydrationJob do
         expect {
           described_class.perform_now
         }.to emit_notification('demo_mode.pool.depth')
-          .with_payload(persona_name: 'the_everyperson', variant: 'default', available: 1, target: 2)
+          .with_payload(persona_name: 'the_everyperson', variant: 'default', value: 1)
       end
 
-      it 'emits demo_mode.pool.depth with available: 0 when pool is empty' do
+      it 'emits demo_mode.pool.depth with value equal to full target when pool is empty' do
         expect {
           described_class.perform_now
         }.to emit_notification('demo_mode.pool.depth')
-          .with_payload(persona_name: 'the_everyperson', variant: 'default', available: 0, target: 2)
+          .with_payload(persona_name: 'the_everyperson', variant: 'default', value: 2)
       end
     end
 
