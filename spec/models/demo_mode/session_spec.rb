@@ -37,6 +37,7 @@ RSpec.describe DemoMode::Session do
     it 'returns available unclaimed sessions matching persona and variant' do
       session = described_class.new(persona_name: :the_everyperson, variant: 'default', pool_session: true)
       session.status = 'available'
+      session.persona_checksum = session.persona&.file_checksum
       session.save!(validate: false)
 
       expect(described_class.available_for(:the_everyperson, 'default')).to include(session)
@@ -59,6 +60,23 @@ RSpec.describe DemoMode::Session do
 
     it 'excludes sessions with a different persona or variant' do
       session = described_class.new(persona_name: :the_everyperson, variant: 'other', pool_session: true)
+      session.status = 'available'
+      session.save!(validate: false)
+
+      expect(described_class.available_for(:the_everyperson, 'default')).not_to include(session)
+    end
+
+    it 'excludes sessions with a stale checksum' do
+      session = described_class.new(persona_name: :the_everyperson, variant: 'default', pool_session: true)
+      session.status = 'available'
+      session.persona_checksum = 'stale_checksum'
+      session.save!(validate: false)
+
+      expect(described_class.available_for(:the_everyperson, 'default')).not_to include(session)
+    end
+
+    it 'excludes sessions with no checksum' do
+      session = described_class.new(persona_name: :the_everyperson, variant: 'default', pool_session: true)
       session.status = 'available'
       session.save!(validate: false)
 
@@ -194,6 +212,7 @@ RSpec.describe DemoMode::Session do
       pooled = described_class.new(persona_name: :the_everyperson, variant: 'default', pool_session: true)
       pooled.signinable = DummyUser.create!(name: 'test')
       pooled.status = 'available'
+      pooled.persona_checksum = pooled.persona&.file_checksum
       pooled.save!(validate: false)
 
       result = described_class.claim_for(persona_name: :the_everyperson, variant: 'default')
@@ -221,6 +240,7 @@ RSpec.describe DemoMode::Session do
       pooled = described_class.new(persona_name: :the_everyperson, variant: 'default', pool_session: true)
       pooled.signinable = DummyUser.create!(name: 'test')
       pooled.status = 'available'
+      pooled.persona_checksum = pooled.persona&.file_checksum
       pooled.save!(validate: false)
 
       expect {

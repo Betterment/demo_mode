@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'digest'
 require_relative 'concerns/configurable'
 
 module DemoMode
@@ -121,13 +122,16 @@ module DemoMode
     private
 
     def auto_load_personas!
-      Rails.root.glob("#{personas_path}/**/*.rb").sort.each do |persona|
-        raise <<~ERROR if File.readlines(persona).grep(/DemoMode\.add_persona/).empty?
-          This file does not define a persona: #{persona}\n
+      Rails.root.glob("#{personas_path}/**/*.rb").sort.each do |persona_file|
+        raise <<~ERROR if File.readlines(persona_file).grep(/DemoMode\.add_persona/).empty?
+          This file does not define a persona: #{persona_file}\n
           Please use `DemoMode.add_persona`
         ERROR
 
-        load(persona)
+        checksum = Digest::SHA256.hexdigest(File.read(persona_file))
+        before_count = @personas.length
+        load(persona_file)
+        @personas[before_count..].each { |p| p.file_checksum = checksum }
       end
     end
   end

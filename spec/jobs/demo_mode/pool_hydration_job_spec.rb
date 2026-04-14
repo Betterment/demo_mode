@@ -52,6 +52,7 @@ RSpec.describe DemoMode::PoolHydrationJob do
         s = DemoMode::Session.new(persona_name: :the_everyperson, variant: 'default', pool_session: true)
         s.signinable = DummyUser.create!(name: 'test')
         s.status = 'available'
+        s.persona_checksum = s.persona&.file_checksum
         s.save!(validate: false)
 
         expect {
@@ -66,6 +67,7 @@ RSpec.describe DemoMode::PoolHydrationJob do
           s = DemoMode::Session.new(persona_name: :the_everyperson, variant: 'default', pool_session: true)
           s.signinable = DummyUser.create!(name: 'test')
           s.status = 'available'
+          s.persona_checksum = s.persona&.file_checksum
           s.save!(validate: false)
         end
 
@@ -81,6 +83,21 @@ RSpec.describe DemoMode::PoolHydrationJob do
           described_class.perform_now(persona_name: :the_everyperson, variant: 'default', count: 3)
         }.to have_enqueued_job(described_class)
           .with(persona_name: :the_everyperson, variant: 'default', count: 3)
+      end
+
+      it 'does not count stale sessions toward the pool target' do
+        2.times do
+          s = DemoMode::Session.new(persona_name: :the_everyperson, variant: 'default', pool_session: true)
+          s.signinable = DummyUser.create!(name: 'test')
+          s.status = 'available'
+          s.persona_checksum = 'stale_checksum'
+          s.save!(validate: false)
+        end
+
+        expect {
+          described_class.perform_now(persona_name: :the_everyperson, variant: 'default')
+        }.to have_enqueued_job(described_class)
+          .with(persona_name: :the_everyperson, variant: 'default', count: nil)
       end
     end
   end
