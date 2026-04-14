@@ -46,14 +46,16 @@ RSpec.describe DemoMode::PoolHydrationJob do
         expect {
           described_class.perform_now
         }.to emit_notification('demo_mode.pool.depth')
-          .with_payload(persona_name: 'the_everyperson', variant: 'default', value: 1)
+          .with_payload(persona_name: 'the_everyperson', variant: 'default')
+          .with_value(1)
       end
 
       it 'emits demo_mode.pool.depth with value equal to full target when pool is empty' do
         expect {
           described_class.perform_now
         }.to emit_notification('demo_mode.pool.depth')
-          .with_payload(persona_name: 'the_everyperson', variant: 'default', value: 2)
+          .with_payload(persona_name: 'the_everyperson', variant: 'default')
+          .with_value(2)
       end
     end
 
