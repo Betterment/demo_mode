@@ -23,7 +23,6 @@ module DemoMode
     configurations << :icon
     configurations << :password
     configurations << :around_persona_generation
-    configurations << :personas
     configurations << :sign_up_path
     configurations << :sign_in_path
 

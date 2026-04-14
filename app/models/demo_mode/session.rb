@@ -52,7 +52,7 @@ module DemoMode
 
     # Heads up: finding a persona is not guaranteed (e.g. past sessions)
     def persona
-      DemoMode.personas.find { |p| p.name.to_s == persona_name.to_s }
+      DemoMode.personas.find { |p| p.name.to_s == persona_name.to_s && p.variants.key?(variant) }
     end
 
     def self.claim_for(persona_name:, variant: DEFAULT_VARIANT, **generation_opts)

@@ -36,6 +36,10 @@ module DemoMode
       configuration.persona(name, &)
     end
 
+    def personas
+      configuration.personas.select(&:enabled?)
+    end
+
     def callout_personas
       personas.select(&:callout?)
     end
