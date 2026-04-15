@@ -48,6 +48,8 @@ To learn more about how we use `demo_mode` at **Betterment**, check out :sparkle
   - [Non-User Personas](#non-user-personas)
   - [FactoryBot `sequence` extension](#factorybot-sequence-extension)
   - [Database-backed sequences](#database-backed-sequences)
+  - [Persona Pooling](#persona-pooling)
+  - [Disabling Personas or Variants](#disabling-personas-or-variants)
 - [Deploying a demo environment to the cloud](#deploying-a-demo-environment-to-the-cloud)
   - [How to avoid breaking your new "demo" env](#how-to-avoid-breaking-your-new-demo-env)
 - [How to Contribute](#how-to-contribute)
@@ -570,6 +572,68 @@ You can check this setting with:
 ```ruby
 CleverSequence.enforce_sequences_exist? # => false (default)
 ```
+
+### Persona Pooling
+
+By default, Demo Mode generates persona accounts on-demand when a user clicks the persona picker. This means each click triggers a background job, and the user waits on a loading spinner. With persona pooling, accounts are pre-generated in the background so that sign-in is near-instant.
+
+To enable pooling, schedule `DemoMode::PoolHydrationJob` to run periodically — every few minutes is a good starting point:
+
+```ruby
+# Enqueue via your scheduler (e.g. Sidekiq-Cron, GoodJob, solid_queue, etc.)
+DemoMode::PoolHydrationJob.perform_later
+```
+
+When called without arguments, the job runs in "orchestrator" mode: it checks the current pool depth for every persona+variant combination and enqueues individual hydration jobs for any that fall below the target size. Those leaf jobs each create one pre-generated session, then re-enqueue themselves until the target is reached.
+
+You can adjust the target pool size (default: `5`) per persona+variant:
+
+```ruby
+DemoMode.configure do
+  minimum_pool_size 10
+end
+```
+
+When a user selects a persona, Demo Mode atomically claims a pre-generated session from the pool ("pool hit") or falls back to on-demand generation if the pool is empty.
+
+**Automatic invalidation:** Pool sessions are tied to a checksum of the persona file. If you change a persona's definition, stale sessions are automatically skipped and fresh ones are generated on the next hydration run — no manual cleanup required.
+
+**Monitoring:** Demo Mode emits `ActiveSupport::Notifications` events you can subscribe to:
+
+| Event | Emitted when | Notable payload |
+|---|---|---|
+| `demo_mode.pool.depth` | Each orchestration run, per persona+variant | `persona_name`, `variant`, `value` (sessions needed to reach target) |
+| `demo_mode.session.claimed` | Each sign-in | `persona_name`, `variant`, `pool_hit: true/false` |
+
+A `pool_hit: false` on `demo_mode.session.claimed` means the pool was empty at sign-in time and generation happened on-demand — a signal to increase `minimum_pool_size` or run hydration more frequently.
+
+### Disabling Personas or Variants
+
+You can conditionally disable a persona or a variant by providing an `enabled` block. When the block returns false, the persona (or variant) is hidden from the picker UI, excluded from pool hydration, and treated as non-existent for session creation.
+
+**Persona-level:**
+
+```ruby
+DemoMode.add_persona 'Beta Feature' do
+  enabled { FeatureFlags.beta_enabled? }
+  features << 'Access to beta'
+  sign_in_as { FactoryBot.create(:user, :beta) }
+end
+```
+
+**Variant-level:**
+
+```ruby
+DemoMode.add_persona 'Investor' do
+  variant('default') { sign_in_as { FactoryBot.create(:investor) } }
+  variant('accredited') do
+    enabled { ENV['ACCREDITED_ENABLED'].present? }
+    sign_in_as { FactoryBot.create(:investor, :accredited) }
+  end
+end
+```
+
+Common use cases include feature-flag-gated personas, environment-specific personas (e.g. only in staging), and temporarily hiding a persona without deleting its definition.
 
 ## Deploying a demo environment to the cloud
 
