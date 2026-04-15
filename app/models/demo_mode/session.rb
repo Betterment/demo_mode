@@ -56,14 +56,18 @@ module DemoMode
     end
 
     def self.claim_for(persona_name:, variant: DEFAULT_VARIANT, **generation_opts)
-      transaction do
-        session = available_for(persona_name, variant).lock.first
-        session ||= new(persona_name: persona_name, variant: variant)
-        session.tap do |s|
+      pool_hit = false
+      session = transaction do
+        existing = available_for(persona_name, variant).lock.first
+        pool_hit = existing.present?
+        (existing || new(persona_name: persona_name, variant: variant)).tap do |s|
           s.claim!
           AccountGenerationJob.perform_later(s, **generation_opts) if s.signinable.blank?
         end
       end
+      ActiveSupport::Notifications.instrument('demo_mode.session.claimed',
+        persona_name: persona_name, variant: variant, pool_hit: pool_hit)
+      session
     end
 
     def claim!
