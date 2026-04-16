@@ -586,8 +586,6 @@ DemoMode::PoolHydrationJob.perform_later
 
 When called without arguments, the job runs in "orchestrator" mode: it checks the current pool depth for every persona+variant combination and enqueues individual hydration jobs for any that fall below the target size. Those leaf jobs each create one pre-generated session, then re-enqueue themselves until the target is reached.
 
-You can adjust the target pool size (default: `5`) per persona+variant:
-
 ```ruby
 DemoMode.configure do
   minimum_pool_size 10
