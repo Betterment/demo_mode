@@ -43,15 +43,29 @@ RSpec.describe DemoMode::PoolHydrationJob do
         s = DemoMode::Session.new(persona_name: :the_everyperson, variant: 'default', pool_session: true)
         s.signinable = DummyUser.create!(name: 'test')
         s.status = 'available'
+        s.persona_checksum = s.persona&.file_checksum
         s.save!(validate: false)
         2.times do
           s = DemoMode::Session.new(persona_name: :zendaya, variant: 'default', pool_session: true)
           s.signinable = DummyUser.create!(name: 'test')
           s.status = 'available'
+          s.persona_checksum = s.persona&.file_checksum
           s.save!(validate: false)
         end
 
         expect { described_class.perform_now }.to have_enqueued_job(described_class).exactly(4).times
+      end
+
+      it 'does not count stale-checksum sessions toward the pool target' do
+        2.times do
+          s = DemoMode::Session.new(persona_name: :the_everyperson, variant: 'default', pool_session: true)
+          s.signinable = DummyUser.create!(name: 'test')
+          s.status = 'available'
+          s.persona_checksum = 'stale_checksum'
+          s.save!(validate: false)
+        end
+
+        expect { described_class.perform_now }.to have_enqueued_job(described_class).exactly(5).times
       end
 
       it 'passes a custom count through to leaf jobs' do
@@ -64,6 +78,7 @@ RSpec.describe DemoMode::PoolHydrationJob do
         s = DemoMode::Session.new(persona_name: :the_everyperson, variant: 'default', pool_session: true)
         s.signinable = DummyUser.create!(name: 'test')
         s.status = 'available'
+        s.persona_checksum = s.persona&.file_checksum
         s.save!(validate: false)
 
         expect {

@@ -14,11 +14,10 @@ module DemoMode
 
     def orchestrate(count)
       target = count || DemoMode.minimum_pool_size
-      current_counts = DemoMode::Session.available.group(:persona_name, :variant).count
 
       DemoMode.personas.each do |persona|
         persona.variants.each_key do |v|
-          available = current_counts[[persona.name.to_s, v.to_s]] || 0
+          available = DemoMode::Session.available_for(persona.name, v).count
           ActiveSupport::Notifications.instrument('demo_mode.pool.depth',
             persona_name: persona.name, variant: v, value: target - available)
           next if available >= target
