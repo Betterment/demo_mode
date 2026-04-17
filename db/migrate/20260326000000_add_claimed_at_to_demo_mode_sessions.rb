@@ -12,8 +12,9 @@ class AddClaimedAtToDemoModeSessions < ActiveRecord::Migration[5.1]
 
     safety_assured do
       add_index :demo_mode_sessions,
-        %i(persona_name variant status claimed_at),
+        %i(persona_name variant),
         name: :index_demo_mode_sessions_on_pool_lookup,
+        where: "status = 'available' AND claimed_at IS NULL",
         algorithm: :concurrently
     end
   end
