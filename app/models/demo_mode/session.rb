@@ -11,7 +11,7 @@ module DemoMode
     attr_accessor :pool_session
 
     steady_state :status do
-      state 'processing', default: true
+      state 'processing', default: true, from: 'failed'
       state 'available', from: 'processing'
       state 'in_use', from: %w(processing available)
       state 'failed', from: 'processing'
