@@ -39,6 +39,29 @@ RSpec.describe DemoMode::PoolHydrationJob do
         expect { described_class.perform_now }.to have_enqueued_job(described_class).exactly(6).times
       end
 
+      it 'skips personas with allow_in_pool? false' do
+        DemoMode.add_persona(:non_poolable_persona) do
+          features << 'test'
+          allow_in_pool { false }
+          sign_in_as { DummyUser.create!(name: 'test') }
+        end
+
+        expect { described_class.perform_now }.to have_enqueued_job(described_class).exactly(5).times
+      end
+
+      it 'skips variants with allow_in_pool? false' do
+        DemoMode.add_persona(:persona_with_non_poolable_variant) do
+          features << 'test'
+          variant('enabled_variant') { sign_in_as { DummyUser.create!(name: 'test') } }
+          variant('disabled_variant') do
+            allow_in_pool { false }
+            sign_in_as { DummyUser.create!(name: 'test') }
+          end
+        end
+
+        expect { described_class.perform_now }.to have_enqueued_job(described_class).exactly(6).times
+      end
+
       it 'skips persona/variant combinations already at target' do
         s = DemoMode::Session.new(persona_name: :the_everyperson, variant: 'default', pool_session: true)
         s.signinable = DummyUser.create!(name: 'test')

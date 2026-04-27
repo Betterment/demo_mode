@@ -82,6 +82,38 @@ RSpec.describe DemoMode::Session do
 
       expect(described_class.available_for(:the_everyperson, 'default')).not_to include(session)
     end
+
+    it 'excludes sessions for a persona with allow_in_pool? false' do
+      DemoMode.add_persona(:non_poolable_persona) do
+        features << 'test'                                                                                                                                                            
+        allow_in_pool { false }
+        sign_in_as { DummyUser.create!(name: 'test') }                                                                                                                                
+      end
+                                                                                                                                                                                      
+      session = described_class.new(persona_name: :non_poolable_persona, variant: 'default', pool_session: true)                                                                      
+      session.status = 'available'
+      session.persona_checksum = session.persona&.file_checksum                                                                                                                       
+      session.save!(validate: false)
+
+      expect(described_class.available_for(:non_poolable_persona, 'default')).not_to include(session)
+    end
+
+    it 'excludes sessions for a variant with allow_in_pool? false' do
+      DemoMode.add_persona(:persona_with_not_allowed_variant) do
+        features << 'test'
+        variant('not_allowed_variant') do
+          sign_in_as { DummyUser.create!(name: 'test') }
+          allow_in_pool { false }
+        end
+      end
+
+      session = described_class.new(persona_name: :persona_with_not_allowed_variant, variant: 'not_allowed_variant', pool_session: true)                                                                      
+      session.status = 'available'
+      session.persona_checksum = session.persona&.file_checksum                                                                                                                       
+      session.save!(validate: false)
+
+      expect(described_class.available_for(:persona_with_not_allowed_variant, 'not_allowed_variant')).not_to include(session)
+    end
   end
 
   it 'validates persona name' do
@@ -298,6 +330,23 @@ RSpec.describe DemoMode::Session do
         described_class.claim_for(persona_name: :the_everyperson, variant: 'default')
       }.to emit_notification('demo_mode.session.claimed')
         .with_payload(persona_name: :the_everyperson, variant: 'default', pool_hit: true)
+    end
+
+    it 'does not emit demo_mode.session.claimed for a persona with allow_in_pool? false' do
+      DemoMode.add_persona(:non_poolable_persona) do
+        features << 'test'                                                                                                                                                            
+        allow_in_pool { false }
+        sign_in_as { DummyUser.create!(name: 'test') }                                                                                                                                
+      end
+                                                                                                                                                                                      
+      session = described_class.new(persona_name: :non_poolable_persona, variant: 'default', pool_session: true)                                                                      
+      session.status = 'available'
+      session.persona_checksum = session.persona&.file_checksum                                                                                                                       
+      session.save!(validate: false)
+
+      expect {
+        described_class.claim_for(persona_name: :non_poolable_persona, variant: 'default')
+      }.not_to emit_notification('demo_mode.session.claimed')
     end
 
     it 'emits demo_mode.session.claimed with pool_hit: false when no pool session is available' do

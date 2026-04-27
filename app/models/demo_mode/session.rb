@@ -21,6 +21,8 @@ module DemoMode
     scope :claimed,   -> { where.not(claimed_at: nil) }
     scope :available_for, ->(persona_name, variant) {
       persona = DemoMode.personas.find { |p| p.name.to_s == persona_name.to_s }
+      return none unless persona&.allow_in_pool? && persona.variants[variant]&.allow_in_pool?
+
       available.unclaimed.where(persona_name: persona_name, variant: variant, persona_checksum: persona&.file_checksum)
     }
 
@@ -56,6 +58,7 @@ module DemoMode
     end
 
     def self.claim_for(persona_name:, variant: DEFAULT_VARIANT, **generation_opts)
+      persona = DemoMode.personas.find { |p| p.name.to_s == persona_name.to_s && p.variants.key?(variant) }
       pool_hit = false
       session = transaction do
         existing = available_for(persona_name, variant).lock.first
@@ -65,8 +68,10 @@ module DemoMode
           AccountGenerationJob.perform_later(s, **generation_opts) if s.signinable.blank?
         end
       end
-      ActiveSupport::Notifications.instrument('demo_mode.session.claimed',
-        persona_name: persona_name, variant: variant, pool_hit: pool_hit)
+      if persona&.allow_in_pool?
+        ActiveSupport::Notifications.instrument('demo_mode.session.claimed',
+          persona_name: persona_name, variant: variant, pool_hit: pool_hit)
+      end
       session
     end
 

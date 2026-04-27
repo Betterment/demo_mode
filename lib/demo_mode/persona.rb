@@ -97,6 +97,14 @@ module DemoMode
       @enabled_condition ? @enabled_condition.call : true
     end
 
+    def allow_in_pool(&block)
+      @allow_in_pool_condition = block
+    end
+
+    def allow_in_pool?
+      @allow_in_pool_condition ? @allow_in_pool_condition.call : true
+    end
+
     def callout(callout = true) # rubocop:disable Style/OptionalBooleanParameter
       @callout = callout
     end
@@ -152,6 +160,14 @@ module DemoMode
 
       def enabled?
         @enabled_condition ? @enabled_condition.call : true
+      end
+
+      def allow_in_pool(&block)
+        @allow_in_pool_condition = block
+      end
+
+      def allow_in_pool?
+        @allow_in_pool_condition ? @allow_in_pool_condition.call : true
       end
 
       def title

@@ -16,7 +16,11 @@ module DemoMode
       target = count || DemoMode.minimum_pool_size
 
       DemoMode.personas.each do |persona|
-        persona.variants.each_key do |v|
+        next unless persona.allow_in_pool?
+
+        persona.variants.each do |v, variant|
+          next unless variant.allow_in_pool?
+
           available = DemoMode::Session.available_for(persona.name, v).count
           ActiveSupport::Notifications.instrument('demo_mode.pool.depth',
             persona_name: persona.name, variant: v, value: target - available)
@@ -28,7 +32,9 @@ module DemoMode
     end
 
     def hydrate(persona_name, variant, count)
-      return unless DemoMode.personas.any? { |p| p.name.to_s == persona_name.to_s && p.variants.key?(variant) }
+      persona = DemoMode.personas.find { |p| p.name.to_s == persona_name.to_s && p.variants.key?(variant) }
+
+      return unless persona&.allow_in_pool?
 
       target = count || DemoMode.minimum_pool_size
       return if DemoMode::Session.available_for(persona_name, variant).count >= target
