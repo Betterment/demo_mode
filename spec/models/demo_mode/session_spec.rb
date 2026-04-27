@@ -85,14 +85,17 @@ RSpec.describe DemoMode::Session do
 
     it 'excludes sessions for a persona with allow_in_pool? false' do
       DemoMode.add_persona(:non_poolable_persona) do
-        features << 'test'                                                                                                                                                            
+        features << 'test'
         allow_in_pool { false }
-        sign_in_as { DummyUser.create!(name: 'test') }                                                                                                                                
+        sign_in_as do
+          DummyUser.create!(name: 'test')
+        end
       end
-                                                                                                                                                                                      
-      session = described_class.new(persona_name: :non_poolable_persona, variant: 'default', pool_session: true)                                                                      
+
+      session = described_class.new(persona_name: :non_poolable_persona, variant: 'default',
+        pool_session: true)
       session.status = 'available'
-      session.persona_checksum = session.persona&.file_checksum                                                                                                                       
+      session.persona_checksum = session.persona&.file_checksum
       session.save!(validate: false)
 
       expect(described_class.available_for(:non_poolable_persona, 'default')).not_to include(session)
@@ -107,9 +110,10 @@ RSpec.describe DemoMode::Session do
         end
       end
 
-      session = described_class.new(persona_name: :persona_with_not_allowed_variant, variant: 'not_allowed_variant', pool_session: true)                                                                      
+      session = described_class.new(persona_name: :persona_with_not_allowed_variant, variant: 'not_allowed_variant',
+        pool_session: true)
       session.status = 'available'
-      session.persona_checksum = session.persona&.file_checksum                                                                                                                       
+      session.persona_checksum = session.persona&.file_checksum
       session.save!(validate: false)
 
       expect(described_class.available_for(:persona_with_not_allowed_variant, 'not_allowed_variant')).not_to include(session)
@@ -334,14 +338,17 @@ RSpec.describe DemoMode::Session do
 
     it 'does not emit demo_mode.session.claimed for a persona with allow_in_pool? false' do
       DemoMode.add_persona(:non_poolable_persona) do
-        features << 'test'                                                                                                                                                            
+        features << 'test'
         allow_in_pool { false }
-        sign_in_as { DummyUser.create!(name: 'test') }                                                                                                                                
+        sign_in_as do
+          DummyUser.create!(name: 'test')
+        end
       end
-                                                                                                                                                                                      
-      session = described_class.new(persona_name: :non_poolable_persona, variant: 'default', pool_session: true)                                                                      
+
+      session = described_class.new(persona_name: :non_poolable_persona, variant: 'default',
+        pool_session: true)
       session.status = 'available'
-      session.persona_checksum = session.persona&.file_checksum                                                                                                                       
+      session.persona_checksum = session.persona&.file_checksum
       session.save!(validate: false)
 
       expect {
