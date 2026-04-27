@@ -287,6 +287,48 @@ RSpec.describe DemoMode::Session do
       expect(result.variant).to eq('default')
     end
 
+    context 'when a pooled session has an at_claim callback' do
+      before do
+        DemoMode.add_persona :at_claim_persona do
+          features << 'test'
+          sign_in_as { DummyUser.create!(name: 'before_claim') }
+          at_claim { |u| u.update!(name: 'after_claim') }
+        end
+      end
+
+      it 'invokes the at_claim callback' do
+        pooled = described_class.new(persona_name: :at_claim_persona, variant: 'default', pool_session: true)
+        pooled.signinable = DummyUser.create!(name: 'before_claim')
+        pooled.status = 'available'
+        pooled.persona_checksum = pooled.persona&.file_checksum
+        pooled.save!(validate: false)
+
+        result = described_class.claim_for(persona_name: :at_claim_persona)
+
+        expect(result.reload.signinable.name).to eq('after_claim')
+      end
+
+      it 'marks the session as failed and re-raises when the at_claim callback raises' do
+        DemoMode.add_persona :at_claim_error_persona do
+          features << 'test'
+          sign_in_as { DummyUser.create!(name: 'test') }
+          at_claim { |_| raise 'at_claim failed' }
+        end
+
+        pooled = described_class.new(persona_name: :at_claim_error_persona, variant: 'default', pool_session: true)
+        pooled.signinable = DummyUser.create!(name: 'test')
+        pooled.status = 'available'
+        pooled.persona_checksum = pooled.persona&.file_checksum
+        pooled.save!(validate: false)
+
+        expect {
+          described_class.claim_for(persona_name: :at_claim_error_persona)
+        }.to raise_error(RuntimeError, 'at_claim failed')
+
+        expect(pooled.reload.status).to eq('failed')
+      end
+    end
+
     it 'emits demo_mode.session.claimed with pool_hit: true when claiming a pool session' do
       pooled = described_class.new(persona_name: :the_everyperson, variant: 'default', pool_session: true)
       pooled.signinable = DummyUser.create!(name: 'test')

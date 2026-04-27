@@ -282,6 +282,66 @@ RSpec.describe DemoMode do
     end
   end
 
+  context 'when a persona has persona-level at_claim_callback' do
+    before do
+      described_class.add_persona('at_claim_persona') do
+        features << 'foo'
+        at_claim { |signinable| "#{signinable}-foo" }
+        variant('default') do
+          sign_in_as { 'banana' }
+        end
+      end
+    end
+
+    it 'returns the at_claim_callback' do
+      persona = described_class.personas.find { |p| p.name.to_s == 'at_claim_persona' }
+
+      value = persona.effective_at_claim_callback('default')&.call('banana')
+
+      expect(value).to eq('banana-foo')
+    end
+  end
+
+  context 'when a persona has variant-level at_claim_callback' do
+    before do
+      described_class.add_persona('at_claim_persona') do
+        features << 'foo'
+        variant('default') do
+          at_claim { |signinable| "#{signinable}-foo" }
+          sign_in_as { 'banana' }
+        end
+      end
+    end
+
+    it 'returns the at_claim_callback' do
+      persona = described_class.personas.find { |p| p.name.to_s == 'at_claim_persona' }
+
+      value = persona.effective_at_claim_callback('default')&.call('banana')
+
+      expect(value).to eq('banana-foo')
+    end
+  end
+
+  context 'when a persona has both a persona-level and variant-level at_claim_callback' do
+    before do
+      described_class.add_persona('at_claim_persona') do
+        features << 'foo'
+        at_claim { |signinable| "#{signinable}-bar" }
+        variant('default') do
+          at_claim { |signinable| "#{signinable}-foo" }
+          sign_in_as { 'banana' }
+        end
+      end
+    end
+
+    it 'returns the variant at_claim_callback' do
+      persona = described_class.personas.find { |p| p.name.to_s == 'at_claim_persona' }
+
+      value = persona.effective_at_claim_callback('default')&.call('banana')
+
+      expect(value).to eq('banana-foo')
+    end
+  end
   describe '.session_url' do
     let(:session) { DemoMode::Session.new(id: 2) }
     let(:demo_mode_options) { {} }

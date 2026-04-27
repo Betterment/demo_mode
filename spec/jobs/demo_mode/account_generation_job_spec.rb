@@ -24,6 +24,54 @@ RSpec.describe DemoMode::AccountGenerationJob do
       )
   end
 
+  context 'when the persona has an at_claim callback' do
+    before do
+      DemoMode.add_persona('at_claim_persona') do
+        features << 'test'
+        at_claim { |u| u.update!(name: 'claimed') }
+        sign_in_as { DummyUser.create!(name: 'original') }
+      end
+    end
+
+    context 'when the session was claimed (pool miss)' do
+      let(:session) { DemoMode::Session.create!(persona_name: 'at_claim_persona') }
+
+      it 'invokes the callback after account generation' do
+        described_class.perform_now(session)
+        expect(session.reload.signinable.name).to eq('claimed')
+      end
+    end
+
+    context 'when the session is a pool pre-generation' do
+      let(:session) { DemoMode::Session.create!(persona_name: 'at_claim_persona', pool_session: true) }
+
+      it 'does not invoke the callback' do
+        described_class.perform_now(session)
+        expect(session.reload.signinable.name).to eq('original')
+      end
+    end
+
+    context 'when the at_claim callback raises' do
+      before do
+        DemoMode.add_persona('erroring_at_claim_persona') do
+          features << 'test'
+          at_claim { |_| raise 'oops!' }
+          sign_in_as { DummyUser.create!(name: 'original') }
+        end
+      end
+
+      let(:session) { DemoMode::Session.create!(persona_name: 'erroring_at_claim_persona') }
+
+      it 'marks the session as failed and re-raises' do
+        expect {
+          described_class.perform_now(session)
+        }.to raise_error(RuntimeError, 'oops!')
+
+        expect(session.reload.status).to eq('failed')
+      end
+    end
+  end
+
   it 'stores the persona checksum on the session' do
     described_class.perform_now(session)
     expect(session.reload.persona_checksum).to eq(session.persona.file_checksum)
