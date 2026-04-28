@@ -62,12 +62,11 @@ RSpec.describe DemoMode::AccountGenerationJob do
 
       let(:session) { DemoMode::Session.create!(persona_name: 'erroring_at_claim_persona') }
 
-      it 'marks the session as failed and re-raises' do
+      it 'marks the session as failed and re-raises the error' do
         expect {
           described_class.perform_now(session)
         }.to raise_error(RuntimeError, 'oops!')
-
-        expect(session.reload.status).to eq('failed')
+          .and change { session.reload.status }.to('failed')
       end
     end
   end

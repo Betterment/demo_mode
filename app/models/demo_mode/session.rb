@@ -58,18 +58,15 @@ module DemoMode
     def self.claim_for(persona_name:, variant: DEFAULT_VARIANT, **generation_opts)
       persona = DemoMode.personas.find { |p| p.name.to_s == persona_name.to_s && p.variants.key?(variant) }
       pool_hit = false
-      claim_error = nil
       session = transaction do
         existing = available_for(persona_name, variant).lock.first
         pool_hit = existing.present?
         if existing
-          claim_pool_session(existing, persona, variant) { |e| claim_error = e }
+          claim_pool_session(existing, persona, variant)
         else
           new_claimed_session(persona_name, variant, generation_opts)
         end
       end
-      raise claim_error if claim_error
-
       ActiveSupport::Notifications.instrument('demo_mode.session.claimed',
         persona_name: persona_name, variant: variant, pool_hit: pool_hit)
       session
@@ -79,12 +76,15 @@ module DemoMode
       private
 
       def claim_pool_session(session, persona, variant)
-        persona&.effective_at_claim_callback(variant)&.call(session.signinable)
-        session.claim!
-        session
-      rescue StandardError => e
-        yield e
-        session.update!(status: 'failed')
+        claimed = false
+        transaction(requires_new: true) do
+          persona&.effective_at_claim_callback(variant)&.call(session.signinable)
+          session.claim!
+          claimed = true
+        rescue StandardError
+          raise ActiveRecord::Rollback
+        end
+        session.update!(status: 'failed') unless claimed
         session
       end
 

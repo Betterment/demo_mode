@@ -308,7 +308,7 @@ RSpec.describe DemoMode::Session do
         expect(result.reload.signinable.name).to eq('after_claim')
       end
 
-      it 'marks the session as failed and re-raises when the at_claim callback raises' do
+      it 'marks the session as failed when the at_claim callback raises' do
         DemoMode.add_persona :at_claim_error_persona do
           features << 'test'
           sign_in_as { DummyUser.create!(name: 'test') }
@@ -321,11 +321,9 @@ RSpec.describe DemoMode::Session do
         pooled.persona_checksum = pooled.persona&.file_checksum
         pooled.save!(validate: false)
 
-        expect {
-          described_class.claim_for(persona_name: :at_claim_error_persona)
-        }.to raise_error(RuntimeError, 'at_claim failed')
+        result = described_class.claim_for(persona_name: :at_claim_error_persona)
 
-        expect(pooled.reload.status).to eq('failed')
+        expect(result.reload.status).to eq('failed')
       end
     end
 
