@@ -97,6 +97,16 @@ module DemoMode
       @enabled_condition ? @enabled_condition.call : true
     end
 
+    def at_claim(&block)
+      @at_claim_callback = block
+    end
+
+    attr_reader :at_claim_callback
+
+    def effective_at_claim_callback(variant_name)
+      variants[variant_name]&.at_claim_callback || @at_claim_callback
+    end
+
     def callout(callout = true) # rubocop:disable Style/OptionalBooleanParameter
       @callout = callout
     end
@@ -154,10 +164,15 @@ module DemoMode
         @enabled_condition ? @enabled_condition.call : true
       end
 
+      def at_claim(&block)
+        @at_claim_callback = block
+      end
+
       def title
         name.is_a?(Symbol) ? name.to_s.titleize : name.to_s
       end
 
+      attr_reader :at_claim_callback
       attr_reader :signinable_generator
     end
   end

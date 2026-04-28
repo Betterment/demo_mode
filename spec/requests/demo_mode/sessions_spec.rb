@@ -199,6 +199,31 @@ RSpec.describe DemoMode::SessionsController do # rubocop:disable RSpec/FilePath
         end
       end
 
+      context 'with a pooled session available but at_claim raises (pool hit failure)' do
+        before do
+          DemoMode.add_persona('at_claim_error_persona') do
+            features << 'test'
+            at_claim { |_| raise 'at_claim failed' }
+            sign_in_as { DummyUser.create!(name: 'test') }
+          end
+        end
+
+        it 'returns a failed session' do
+          pooled = DemoMode::Session.new(persona_name: 'at_claim_error_persona', variant: 'default')
+          pooled.pool_session = true
+          pooled.save!
+          DemoMode::AccountGenerationJob.perform_now(pooled)
+
+          post '/ohno/sessions', params: {
+            session: { persona_name: 'at_claim_error_persona' },
+          }.to_json, headers: request_headers
+
+          expect(response_json['id']).to eq pooled.id
+          expect(response_json['status']).to eq 'failed'
+          expect(response_json['processing']).to be false
+        end
+      end
+
       context 'with no pooled session available (pool miss)' do
         it 'falls back to async generation and returns processing json' do
           post '/ohno/sessions', params: {

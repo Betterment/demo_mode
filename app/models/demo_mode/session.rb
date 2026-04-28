@@ -14,7 +14,7 @@ module DemoMode
       state 'processing', default: true, from: 'failed'
       state 'available', from: 'processing'
       state 'in_use', from: %w(processing available)
-      state 'failed', from: 'processing'
+      state 'failed', from: %w(processing available)
     end
 
     scope :unclaimed, -> { where(claimed_at: nil) }
@@ -56,18 +56,42 @@ module DemoMode
     end
 
     def self.claim_for(persona_name:, variant: DEFAULT_VARIANT, **generation_opts)
+      persona = DemoMode.personas.find { |p| p.name.to_s == persona_name.to_s && p.variants.key?(variant) }
       pool_hit = false
       session = transaction do
         existing = available_for(persona_name, variant).lock.first
         pool_hit = existing.present?
-        (existing || new(persona_name: persona_name, variant: variant)).tap do |s|
-          s.claim!
-          AccountGenerationJob.perform_later(s, **generation_opts) if s.signinable.blank?
+        if existing
+          claim_pool_session(existing, persona, variant)
+        else
+          new_claimed_session(persona_name, variant, generation_opts)
         end
       end
       ActiveSupport::Notifications.instrument('demo_mode.session.claimed',
         persona_name: persona_name, variant: variant, pool_hit: pool_hit)
       session
+    end
+
+    class << self
+      private
+
+      def claim_pool_session(session, persona, variant)
+        transaction(requires_new: true) do
+          persona&.effective_at_claim_callback(variant)&.call(session.signinable)
+          session.claim!
+        rescue StandardError
+          raise ActiveRecord::Rollback
+        end
+        session.update!(status: 'failed') unless session.claimed_at?
+        session
+      end
+
+      def new_claimed_session(persona_name, variant, generation_opts)
+        new(persona_name: persona_name, variant: variant).tap do |s|
+          s.claim!
+          AccountGenerationJob.perform_later(s, **generation_opts) if s.signinable.blank?
+        end
+      end
     end
 
     def claim!
