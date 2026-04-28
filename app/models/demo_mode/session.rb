@@ -76,15 +76,13 @@ module DemoMode
       private
 
       def claim_pool_session(session, persona, variant)
-        claimed = false
         transaction(requires_new: true) do
           persona&.effective_at_claim_callback(variant)&.call(session.signinable)
           session.claim!
-          claimed = true
         rescue StandardError
           raise ActiveRecord::Rollback
         end
-        session.update!(status: 'failed') unless claimed
+        session.update!(status: 'failed') unless session.claimed_at?
         session
       end
 
