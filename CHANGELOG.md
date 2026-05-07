@@ -9,6 +9,8 @@ and this project aims to adhere to [Semantic Versioning](http://semver.org/spec/
 
 ### Added <!-- for new features. -->
 
+- `clever_sequence:discover` rake task that discovers required PostgreSQL sequences for the `CleverSequence` `PostgresBackend` and prints migration instructions for any that are missing.
+
 ### Changed <!-- for changes in existing functionality. -->
 
 ### Deprecated <!-- for soon-to-be removed features. -->

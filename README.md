@@ -573,6 +573,14 @@ You can check this setting with:
 CleverSequence.enforce_sequences_exist? # => false (default)
 ```
 
+To find out which PostgreSQL sequences your personas actually need, run:
+
+```sh
+bundle exec rake clever_sequence:discover
+```
+
+This iterates every persona/variant in a rolled-back transaction, captures any `CleverSequence` calls that would have hit a missing sequence, and prints a ready-to-paste migration body for the missing sequences. It must be run in `development` and is a no-op once every required sequence already exists.
+
 ### Persona Pooling
 
 By default, Demo Mode generates persona accounts on-demand when a user clicks the persona picker. This means each click triggers a background job, and the user waits on a loading spinner. With persona pooling, accounts are pre-generated in the background so that sign-in is near-instant.
