@@ -68,13 +68,17 @@ module DemoMode
         variant = variants[variant]
         CleverSequence.reset! if defined?(CleverSequence)
         DemoMode.current_password = password if password
-        DemoMode.around_persona_generation.call(variant.signinable_generator, **options)
+        ActiveRecord::Base.transaction(requires_new: true) do
+          DemoMode.around_persona_generation.call(variant.signinable_generator, **options)
+        end
       rescue ActiveRecord::RecordNotUnique, ActiveRecord::RecordInvalid => e
         raise if retried || !should_retry_with_sequence_adjustment?(e)
 
         retried = true
         CleverSequence.with_sequence_adjustment do
-          DemoMode.around_persona_generation.call(variant.signinable_generator, **options)
+          ActiveRecord::Base.transaction(requires_new: true) do
+            DemoMode.around_persona_generation.call(variant.signinable_generator, **options)
+          end
         end
       ensure
         DemoMode.current_password = nil
