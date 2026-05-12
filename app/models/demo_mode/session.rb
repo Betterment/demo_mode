@@ -103,10 +103,10 @@ module DemoMode
       end
     end
 
-    def save_and_generate_account!(**)
+    def save_and_generate_account!(**options)
       transaction do
         save!
-        AccountGenerationJob.perform_now(self, **)
+        AccountGenerationJob.perform_now(self, **options)
       end
     end
 
