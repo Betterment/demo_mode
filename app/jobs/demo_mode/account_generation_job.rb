@@ -3,7 +3,7 @@
 module DemoMode
   class AccountGenerationJob < DemoMode.base_job_name.constantize
     def perform(session, **options)
-      session.with_lock do
+      session.with_lock(requires_new: true) do
         session.update!(status: 'processing') if session.failed?
         persona = session.persona
         raise "Unknown persona: #{session.persona_name}" if persona.blank?

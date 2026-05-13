@@ -69,6 +69,25 @@ RSpec.describe DemoMode::AccountGenerationJob do
           .and change { session.reload.status }.to('failed')
       end
     end
+
+    context 'when the at_claim callback raises a uniqueness violation' do
+      before do
+        DemoMode.add_persona('uniqueness_violating_at_claim_persona') do
+          features << 'test'
+          at_claim { |u| DummyUser.create!(id: u.id, name: 'duplicate') }
+          sign_in_as { DummyUser.create!(name: 'original') }
+        end
+      end
+
+      # Exercise the joinable outer transaction in save_and_generate_account! so the
+      # PG-aborted state would propagate without the savepoint inside #perform.
+      it 'propagates the original RecordNotUnique through the joinable outer transaction' do
+        session = DemoMode::Session.new(persona_name: 'uniqueness_violating_at_claim_persona')
+        expect {
+          session.save_and_generate_account!
+        }.to raise_error(ActiveRecord::RecordNotUnique)
+      end
+    end
   end
 
   it 'stores the persona checksum on the session' do
