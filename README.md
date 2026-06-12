@@ -573,6 +573,19 @@ You can check this setting with:
 CleverSequence.enforce_sequences_exist? # => false (default)
 ```
 
+When a `SequenceNotFoundError` is raised, generate the migration that creates
+the missing sequence with the `demo_mode:clever_sequence` generator, passing the
+model and the attribute from the error:
+
+```bash
+bundle exec rails generate demo_mode:clever_sequence Widget integer_column
+```
+
+This creates a timestamped migration in `db/migrate` that creates the
+PostgreSQL sequence (named the same way `CleverSequence` looks it up) and
+advances it past any existing rows so demo-generated records don't collide with
+real data. Review it and run `bundle exec rails db:migrate`.
+
 ### Persona Pooling
 
 By default, Demo Mode generates persona accounts on-demand when a user clicks the persona picker. This means each click triggers a background job, and the user waits on a loading spinner. With persona pooling, accounts are pre-generated in the background so that sign-in is near-instant.
