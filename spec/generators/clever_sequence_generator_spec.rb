@@ -53,11 +53,27 @@ RSpec.describe DemoMode::CleverSequenceGenerator do
     expect(contents).to include('SELECT COALESCE(MAX(integer_column), 0) FROM widgets')
   end
 
-  it 'writes to an explicit --migrations-path (e.g. an adjacent engine in a monorepo)' do
-    run_generator(%w[Widget integer_column --migrations-path ../engine/db/migrate])
+  it 'omits MAX/setval seeding for a non-integer column' do
+    run_generator(%w[Widget string_column])
 
-    expect(Dir[File.join(@destination_root, 'db/migrate/*.rb')]).to be_empty
-    written = Dir[File.join(@destination_root, '../engine/db/migrate/*.rb')]
+    _filename, contents = generated_migration
+
+    expect(contents).to include('CREATE SEQUENCE IF NOT EXISTS cs_widgets_string_column')
+    expect(contents).not_to include('MAX(')
+    expect(contents).not_to include('setval')
+  end
+
+  it 'writes to an explicit --migrations-path (e.g. an adjacent engine in a monorepo)' do
+    # Run from an `app` subdir so the `../engine` target stays inside the
+    # cleaned tmp root, mirroring a monorepo's app/engine layout.
+    app_root = File.join(@destination_root, 'app')
+    described_class.start(
+      %w[Widget integer_column --migrations-path ../engine/db/migrate],
+      destination_root: app_root,
+    )
+
+    expect(Dir[File.join(app_root, 'db/migrate/*.rb')]).to be_empty
+    written = Dir[File.join(@destination_root, 'engine/db/migrate/*.rb')]
     expect(written.sole).to match(/create_clever_sequence_cs_widgets_integer_column\.rb\z/)
   end
 end

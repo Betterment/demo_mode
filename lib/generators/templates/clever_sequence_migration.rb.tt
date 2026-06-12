@@ -8,6 +8,7 @@
 class <%= migration_class_name %> < ActiveRecord::Migration<%= migration_version %>
   def up
     execute("CREATE SEQUENCE IF NOT EXISTS <%= sequence_name %>")
+<% if integer_column? -%>
 
     # Advance the sequence past any existing data so demo-generated records
     # don't collide with real rows. Mirrors the runtime adjustment in
@@ -17,6 +18,7 @@ class <%= migration_class_name %> < ActiveRecord::Migration<%= migration_version
     ).to_i
 
     execute("SELECT setval('<%= sequence_name %>', #{max_value})") if max_value >= 1
+<% end -%>
   end
 
   def down

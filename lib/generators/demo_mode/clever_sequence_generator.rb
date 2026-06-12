@@ -59,6 +59,14 @@ module DemoMode
         model_class.attribute_aliases.fetch(attribute.to_s, attribute.to_s)
       end
 
+      # Whether the backing column is an integer, so seeding the sequence
+      # past MAX(column) is meaningful. Other columns (e.g. a string column)
+      # are created at their default start; runtime adjustment handles
+      # advancing them.
+      def integer_column?
+        model_class.columns_hash[column_name]&.type == :integer
+      end
+
       private
 
       # Where the migration is written. An explicit --migrations-path wins;
