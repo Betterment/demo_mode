@@ -52,4 +52,12 @@ RSpec.describe DemoMode::CleverSequenceGenerator do
     # ...while the MAX query resolves the alias to the real DB column.
     expect(contents).to include('SELECT COALESCE(MAX(integer_column), 0) FROM widgets')
   end
+
+  it 'writes to an explicit --migrations-path (e.g. an adjacent engine in a monorepo)' do
+    run_generator(%w[Widget integer_column --migrations-path ../engine/db/migrate])
+
+    expect(Dir[File.join(@destination_root, 'db/migrate/*.rb')]).to be_empty
+    written = Dir[File.join(@destination_root, '../engine/db/migrate/*.rb')]
+    expect(written.sole).to match(/create_clever_sequence_cs_widgets_integer_column\.rb\z/)
+  end
 end

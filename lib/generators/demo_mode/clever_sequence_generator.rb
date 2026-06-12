@@ -11,6 +11,10 @@ module DemoMode
   #
   #   bundle exec rails generate demo_mode:clever_sequence Widget integer_column
   #
+  # By default the migration is written to the app's primary db/migrate path.
+  # Use --database to target a connection's migrations_paths (from
+  # config/database.yml), or --migrations-path to write to an explicit
+  # directory (e.g. an engine's migrate dir in a monorepo).
   class CleverSequenceGenerator < Rails::Generators::Base
     include ActiveRecord::Generators::Migration
 
@@ -20,10 +24,15 @@ module DemoMode
     argument :model, type: :string, banner: 'Model'
     argument :attribute, type: :string, banner: 'attribute'
 
+    class_option :database, type: :string, aliases: %w[--db],
+                            desc: "The database whose migrations_paths to use (from config/database.yml)."
+    class_option :migrations_path, type: :string,
+                                   desc: 'Explicit directory to write the migration into (overrides --database and the default).'
+
     def create_sequence_migration
       migration_template(
         'clever_sequence_migration.rb.tt',
-        "db/migrate/create_clever_sequence_#{sequence_name}.rb",
+        File.join(target_migrate_path, "create_clever_sequence_#{sequence_name}.rb"),
       )
     end
 
@@ -51,6 +60,13 @@ module DemoMode
       end
 
       private
+
+      # Where the migration is written. An explicit --migrations-path wins;
+      # otherwise fall back to Rails' resolution (db_migrate_path), which
+      # honors --database via config/database.yml's migrations_paths.
+      def target_migrate_path
+        options[:migrations_path].presence || db_migrate_path
+      end
 
       def model_class
         @model_class ||= model.camelize.constantize
