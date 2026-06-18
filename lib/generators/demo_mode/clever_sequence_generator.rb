@@ -24,10 +24,10 @@ module DemoMode
     argument :model, type: :string, banner: 'Model'
     argument :attribute, type: :string, banner: 'attribute'
 
-    class_option :database, type: :string, aliases: %w[--db],
-                            desc: "The database whose migrations_paths to use (from config/database.yml)."
+    class_option :database, type: :string, aliases: %w(--db),
+      desc: "The database whose migrations_paths to use (from config/database.yml)."
     class_option :migrations_path, type: :string,
-                                   desc: 'Explicit directory to write the migration into (overrides --database and the default).'
+      desc: 'Explicit directory to write the migration into (overrides --database and the default).'
 
     def create_sequence_migration
       migration_template(

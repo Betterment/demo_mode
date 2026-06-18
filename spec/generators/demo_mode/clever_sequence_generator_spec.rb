@@ -6,24 +6,21 @@ require 'rails/generators'
 require 'generators/demo_mode/clever_sequence_generator'
 
 RSpec.describe DemoMode::CleverSequenceGenerator do
-  around do |example|
-    Dir.mktmpdir do |dir|
-      @destination_root = dir
-      example.run
-    end
-  end
+  let(:destination_root) { Dir.mktmpdir }
+
+  after { FileUtils.remove_entry(destination_root) }
 
   def run_generator(args)
-    described_class.start(args, destination_root: @destination_root)
+    described_class.start(args, destination_root: destination_root)
   end
 
   def generated_migration
-    path = Dir[File.join(@destination_root, 'db/migrate/*.rb')].sole
+    path = Dir[File.join(destination_root, 'db/migrate/*.rb')].sole
     [File.basename(path), File.read(path)]
   end
 
   it 'creates a timestamped migration that creates the sequence' do
-    run_generator(%w[Widget integer_column])
+    run_generator(%w(Widget integer_column))
 
     filename, contents = generated_migration
 
@@ -34,7 +31,7 @@ RSpec.describe DemoMode::CleverSequenceGenerator do
   end
 
   it 'seeds the sequence past existing data using the backing column' do
-    run_generator(%w[Widget integer_column])
+    run_generator(%w(Widget integer_column))
 
     _filename, contents = generated_migration
 
@@ -43,7 +40,7 @@ RSpec.describe DemoMode::CleverSequenceGenerator do
   end
 
   it 'names the sequence from the attribute but reads MAX from the aliased column' do
-    run_generator(%w[Widget integer_aliased])
+    run_generator(%w(Widget integer_aliased))
 
     _filename, contents = generated_migration
 
@@ -54,7 +51,7 @@ RSpec.describe DemoMode::CleverSequenceGenerator do
   end
 
   it 'omits MAX/setval seeding for a non-integer column' do
-    run_generator(%w[Widget string_column])
+    run_generator(%w(Widget string_column))
 
     _filename, contents = generated_migration
 
@@ -66,14 +63,14 @@ RSpec.describe DemoMode::CleverSequenceGenerator do
   it 'writes to an explicit --migrations-path (e.g. an adjacent engine in a monorepo)' do
     # Run from an `app` subdir so the `../engine` target stays inside the
     # cleaned tmp root, mirroring a monorepo's app/engine layout.
-    app_root = File.join(@destination_root, 'app')
+    app_root = File.join(destination_root, 'app')
     described_class.start(
-      %w[Widget integer_column --migrations-path ../engine/db/migrate],
+      %w(Widget integer_column --migrations-path ../engine/db/migrate),
       destination_root: app_root,
     )
 
     expect(Dir[File.join(app_root, 'db/migrate/*.rb')]).to be_empty
-    written = Dir[File.join(@destination_root, 'engine/db/migrate/*.rb')]
+    written = Dir[File.join(destination_root, 'engine/db/migrate/*.rb')]
     expect(written.sole).to match(/create_clever_sequence_cs_widgets_integer_column\.rb\z/)
   end
 end
