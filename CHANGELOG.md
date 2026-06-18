@@ -17,6 +17,14 @@ and this project aims to adhere to [Semantic Versioning](http://semver.org/spec/
 
 ### Fixed <!-- for any bug fixes. -->
 
+## [3.9.0] - 2026-06-12
+
+### Added
+
+- `demo_mode:clever_sequence` generator that creates a migration to add a
+  missing PostgreSQL-backed `CleverSequence`, advancing it past existing data.
+  The `SequenceNotFoundError` message now suggests the exact command to run.
+
 ## [3.3.0] - 2025-09-05
 
 ### Removed

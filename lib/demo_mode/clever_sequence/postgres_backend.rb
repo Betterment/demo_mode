@@ -13,7 +13,9 @@ class CleverSequence
         @attribute = attribute
 
         super(
-          "Sequence '#{sequence_name}' not found for #{klass.name}##{attribute}. "
+          "Sequence '#{sequence_name}' not found for #{klass.name}##{attribute}. " \
+          "Generate a migration to create it with: " \
+          "bin/rails generate demo_mode:clever_sequence #{klass.name} #{attribute}"
         )
       end
     end
