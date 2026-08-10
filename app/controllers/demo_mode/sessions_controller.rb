@@ -77,7 +77,7 @@ module DemoMode
     end
 
     def create_params
-      params.require(:session).permit(:persona_name, :variant)
+      params.expect(session: %i(persona_name variant))
     end
 
     def options_params

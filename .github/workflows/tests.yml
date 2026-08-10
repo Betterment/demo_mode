@@ -22,9 +22,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ruby: ["3.2", "3.3"]
+        ruby: ["3.3"]
         gemfile:
-          - gemfiles/rails_7_2.gemfile
           - gemfiles/rails_8_0.gemfile
           - gemfiles/rails_8_1.gemfile
         database: ["sqlite3", "postgresql"]

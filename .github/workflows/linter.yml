@@ -10,7 +10,7 @@ jobs:
     - uses: actions/checkout@ee0669bd1cc54295c223e0bb666b733df41de1c5 # v2
     - uses: ruby/setup-ruby@a4effe49ee8ee5b8b5091268c473a4628afb5651 # v1
       with:
-        ruby-version: 3.2
+        ruby-version: 3.3
         bundler-cache: true
     - name: Run Linter
       run: bundle exec rubocop --parallel
