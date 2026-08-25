@@ -367,6 +367,49 @@ RSpec.describe DemoMode do
       end
     end
 
+    describe 'folder-derived groups' do
+      before do
+        described_class.configure do
+          personas_path 'config/grouped-personas'
+        end
+      end
+
+      context 'when group_by_folder is disabled' do
+        it 'does not derive a group from the folder' do
+          persona = described_class.personas.find { |p| p.name.to_s == 'retail: alice' }
+          expect(persona.group).to be_nil
+        end
+      end
+
+      context 'when group_by_folder is enabled' do
+        before do
+          described_class.configure do
+            group_by_folder true
+          end
+        end
+
+        it 'derives a one-level group from the folder' do
+          persona = described_class.personas.find { |p| p.name.to_s == 'retail: alice' }
+          expect(persona.group).to eq 'retail'
+        end
+
+        it 'compacts nested folders into a single top-level label' do
+          persona = described_class.personas.find { |p| p.name.to_s == 'retail: team1 — carol' }
+          expect(persona.group).to eq 'retail/team1'
+        end
+
+        it 'leaves a root-level persona ungrouped' do
+          persona = described_class.personas.find { |p| p.name.to_s == 'dave' }
+          expect(persona.group).to be_nil
+        end
+
+        it 'lets an explicit group override the folder-derived group' do
+          persona = described_class.personas.find { |p| p.name.to_s == 'wealth: erin' }
+          expect(persona.group).to eq 'Explicit group'
+        end
+      end
+    end
+
     describe '.grouped_personas' do
       it 'buckets personas by group name, ungrouped under nil' do
         described_class.add_persona('first_playwright') do
@@ -384,11 +427,12 @@ RSpec.describe DemoMode do
           sign_in_as { 'cherry' }
         end
 
-        grouped = described_class.grouped_personas
+        grouped = described_class.grouped_personas.transform_values { |personas| personas.map { |p| p.name.to_s } }
 
-        expect(grouped.fetch('Playwright tests').map { |p| p.name.to_s })
-          .to eq %w(first_playwright second_playwright)
-        expect(grouped.fetch(nil).map { |p| p.name.to_s }).to eq %w(plain_persona)
+        expect(grouped).to eq(
+          'Playwright tests' => %w(first_playwright second_playwright),
+          nil => %w(plain_persona),
+        )
       end
 
       it 'excludes callout personas' do

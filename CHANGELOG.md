@@ -21,10 +21,11 @@ and this project aims to adhere to [Semantic Versioning](http://semver.org/spec/
 
 ### Added
 
-- Optional persona grouping. Set a group with `group 'My Group'` inside `add_persona`. Grouped personas
-  render in collapsed `<details>` sections on the splash page, and search filters across every group
-  (opening a collapsed group when a match is inside it). Ungrouped personas render in the existing
-  table, so the change is backward compatible.
+- Optional persona grouping. Set a group with `group 'My Group'` inside `add_persona`, or opt into
+  deriving groups from persona subfolders with `config.group_by_folder = true`. Grouped personas render
+  in collapsed `<details>` sections on the splash page, and search filters across every group (opening a
+  collapsed group when a match is inside it). Ungrouped personas render in the existing table, so the
+  change is backward compatible.
 
 ## [4.0.0] - 2026-09-17
 

@@ -6,7 +6,7 @@ module DemoMode
   class Persona
     include ActiveModel::Model
 
-    attr_accessor :name, :file_checksum
+    attr_accessor :name, :file_checksum, :file_path
 
     validates :name, presence: true
     validate :persona_must_have_at_least_one_feature
@@ -15,7 +15,7 @@ module DemoMode
       if name
         @group = name
       else
-        @group
+        @group || folder_group
       end
     end
 
@@ -148,6 +148,15 @@ module DemoMode
     end
 
     private
+
+    def folder_group
+      return unless DemoMode.group_by_folder?
+      return unless file_path
+
+      relative = Pathname.new(file_path).relative_path_from(Rails.root.join(DemoMode.personas_path))
+      folder = relative.dirname.to_s
+      folder unless folder == '.'
+    end
 
     def persona_must_have_at_least_one_feature
       errors.add(:base, <<~ERR) unless features.count >= 1

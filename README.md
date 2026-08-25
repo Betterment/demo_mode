@@ -295,6 +295,22 @@ section (labeled with the group name and a count), while ungrouped personas stay
 in the main table. The search box filters across every group and automatically
 opens a collapsed group when a match is found inside it.
 
+Alternatively, if you already organize your persona files into subfolders (e.g.
+`config/personas/orders/...`, `config/personas/advanced/...`), you can derive groups from
+that folder structure with a single config flag:
+
+```ruby
+DemoMode.configure do
+  group_by_folder true
+end
+```
+
+With `group_by_folder` enabled, each persona's group defaults to its subfolder
+(relative to `personas_path`). Folders nested more than one level deep are
+compacted into a single label (e.g. `orders/checkout`). An explicit `group` always
+overrides the folder-derived group, and personas at the root of `personas_path`
+remain ungrouped.
+
 ## Customizing the Design
 
 To supply your own branding, you can override the logo

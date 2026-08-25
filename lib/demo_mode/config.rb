@@ -17,6 +17,7 @@ module DemoMode
     configurable_value(:log_level) { :debug }
     configurable_value(:minimum_pool_size) { 5 }
     configurable_boolean(:display_credentials)
+    configurable_boolean(:group_by_folder)
     configurations << :stylesheets
     configurations << :logo
     configurations << :loader
@@ -130,7 +131,10 @@ module DemoMode
         checksum = Digest::SHA256.hexdigest(File.read(persona_file))
         before_count = @personas.length
         load(persona_file)
-        @personas[before_count..].each { |p| p.file_checksum = checksum }
+        @personas[before_count..].each do |p|
+          p.file_checksum = checksum
+          p.file_path = persona_file.to_s
+        end
       end
     end
   end
