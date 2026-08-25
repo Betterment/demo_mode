@@ -23,19 +23,12 @@
     <section>
       <input type="text" placeholder="Search..." data-table="persona-table" data-behavior="table-filter" />
     </section>
-    <% if DemoMode.ungrouped_personas.any? %>
-      <section>
-        <%= render 'persona_table', personas: DemoMode.ungrouped_personas %>
-      </section>
-    <% end %>
-    <% DemoMode.grouped_personas.each do |group, personas| %>
-      <% next if group.nil? %>
-      <section>
-        <details class="persona-group">
-          <summary><%= group %> (<%= personas.count %>)</summary>
-          <%= render 'persona_table', personas: personas %>
-        </details>
-      </section>
+    <% if DemoMode.ungrouped_first? %>
+      <%= render 'ungrouped_personas' %>
+      <%= render 'grouped_personas' %>
+    <% else %>
+      <%= render 'grouped_personas' %>
+      <%= render 'ungrouped_personas' %>
     <% end %>
   </article>
 <% end %>

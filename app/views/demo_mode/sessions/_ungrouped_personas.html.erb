@@ -1,0 +1,5 @@
+<% if DemoMode.ungrouped_personas.any? %>
+  <section>
+    <%= render 'persona_table', personas: DemoMode.ungrouped_personas %>
+  </section>
+<% end %>

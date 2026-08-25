@@ -240,6 +240,34 @@ describe 'Demo Splash' do
 
         expect(page).to have_text('Your Name: A Grouped Persona')
       end
+
+      it 'renders ungrouped personas before groups by default' do
+        visit '/'
+
+        sections = page.all('article section, article details').map(&:text)
+        ungrouped_index = sections.index { |text| text.include?('An Ungrouped Persona') }
+        group_index = sections.index { |text| text.include?('Playwright tests') }
+
+        expect(ungrouped_index).to be < group_index
+      end
+
+      context 'when ungrouped_first is disabled' do
+        before do
+          DemoMode.configure do
+            ungrouped_first false
+          end
+        end
+
+        it 'renders groups before ungrouped personas' do
+          visit '/'
+
+          sections = page.all('article section, article details').map(&:text)
+          ungrouped_index = sections.index { |text| text.include?('An Ungrouped Persona') }
+          group_index = sections.index { |text| text.include?('Playwright tests') }
+
+          expect(group_index).to be < ungrouped_index
+        end
+      end
     end
 
     context 'when a persona uses a custom sign in method' do

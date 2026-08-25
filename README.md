@@ -311,6 +311,15 @@ compacted into a single label (e.g. `orders/checkout`). An explicit `group` alwa
 overrides the folder-derived group, and personas at the root of `personas_path`
 remain ungrouped.
 
+By default, ungrouped personas render above every named group (matching the
+pre-grouping table layout). Set `ungrouped_first` to `false` to render them
+after the named groups instead:
+
+```ruby
+DemoMode.configure do
+  ungrouped_first false
+end
+```
 ## Customizing the Design
 
 To supply your own branding, you can override the logo

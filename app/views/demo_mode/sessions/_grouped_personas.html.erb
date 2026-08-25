@@ -1,0 +1,9 @@
+<% DemoMode.grouped_personas.each do |group, personas| %>
+  <% next if group.nil? %>
+  <section>
+    <details class="persona-group">
+      <summary><%= group %> (<%= personas.count %>)</summary>
+      <%= render 'persona_table', personas: personas %>
+    </details>
+  </section>
+<% end %>

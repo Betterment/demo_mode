@@ -18,6 +18,7 @@ module DemoMode
     configurable_value(:minimum_pool_size) { 5 }
     configurable_boolean(:display_credentials)
     configurable_boolean(:group_by_folder)
+    configurable_boolean(:ungrouped_first, default: true)
     configurations << :stylesheets
     configurations << :logo
     configurations << :loader
