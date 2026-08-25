@@ -39,6 +39,7 @@ To learn more about how we use `demo_mode` at **Betterment**, check out :sparkle
   - [Installation](#installation)
   - [App-Specific Setup](#app-specific-setup)
 - [Defining Personas](#defining-personas)
+  - [Grouping Personas](#grouping-personas)
 - [Customizing the Design](#customizing-the-design)
 - [Optional Features](#optional-features)
   - [The "Sign Up" Link](#the-sign-up-link)
@@ -272,6 +273,27 @@ end
 
 If defined, the non-variant `sign_in_as` will show up as "default" in the
 dropdown.
+
+### Grouping Personas
+
+When an app has many personas, the single table can get hard to scan. You can
+optionally organize personas into collapsible groups. Grouping is entirely
+opt-in: personas without a group render in the table exactly as before.
+
+Set a group name directly on a persona:
+
+```ruby
+DemoMode.add_persona do
+  group 'Playwright tests'
+  features << 'Account Overview'
+  # ...
+end
+```
+
+Personas that share a group name render together in a collapsed `<details>`
+section (labeled with the group name and a count), while ungrouped personas stay
+in the main table. The search box filters across every group and automatically
+opens a collapsed group when a match is found inside it.
 
 ## Customizing the Design
 

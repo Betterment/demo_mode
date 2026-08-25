@@ -48,6 +48,14 @@ module DemoMode
       personas - callout_personas
     end
 
+    def grouped_personas
+      standard_personas.group_by(&:group)
+    end
+
+    def ungrouped_personas
+      grouped_personas.fetch(nil, [])
+    end
+
     def current_password
       Thread.current[:_demo_mode_password] ||= password.call
     end

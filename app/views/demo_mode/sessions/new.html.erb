@@ -23,35 +23,19 @@
     <section>
       <input type="text" placeholder="Search..." data-table="persona-table" data-behavior="table-filter" />
     </section>
-    <section>
-      <table class="persona-table">
-        <thead>
-          <tr>
-            <th></th>
-            <th>Persona name</th>
-            <th>Variant</th>
-            <th>Features</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% DemoMode.standard_personas.each do |persona| %>
-            <tr class="<%= persona.css_class %>">
-              <td>
-                <%= form_for @session, html: { id: persona.name.to_s.underscore } do |f| %>
-                  <%= f.hidden_field :persona_name, value: persona.name %>
-                  <%= f.submit 'Sign In', class: 'secondary small' %>
-                  <% @f = f %>
-                <% end %>
-              </td>
-              <td><%= persona.name.to_s.titleize %></td>
-              <td>
-                <%= render 'variant_dropdown', f: @f, persona: persona %>
-              </td>
-              <td><%= persona.features.join(", ") %></td>
-            </tr>
-          <% end %>
-        </tbody>
-      </table>
-    </section>
+    <% if DemoMode.ungrouped_personas.any? %>
+      <section>
+        <%= render 'persona_table', personas: DemoMode.ungrouped_personas %>
+      </section>
+    <% end %>
+    <% DemoMode.grouped_personas.each do |group, personas| %>
+      <% next if group.nil? %>
+      <section>
+        <details class="persona-group">
+          <summary><%= group %> (<%= personas.count %>)</summary>
+          <%= render 'persona_table', personas: personas %>
+        </details>
+      </section>
+    <% end %>
   </article>
 <% end %>

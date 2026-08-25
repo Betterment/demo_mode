@@ -342,6 +342,75 @@ RSpec.describe DemoMode do
       expect(value).to eq('banana-foo')
     end
   end
+
+  describe 'persona grouping' do
+    describe 'Persona#group' do
+      it 'defaults to nil when no group is set' do
+        described_class.add_persona('ungrouped_persona') do
+          features << 'foo'
+          sign_in_as { 'banana' }
+        end
+
+        persona = described_class.personas.find { |p| p.name.to_s == 'ungrouped_persona' }
+        expect(persona.group).to be_nil
+      end
+
+      it 'returns the explicitly set group name' do
+        described_class.add_persona('grouped_persona') do
+          group 'Playwright tests'
+          features << 'foo'
+          sign_in_as { 'banana' }
+        end
+
+        persona = described_class.personas.find { |p| p.name.to_s == 'grouped_persona' }
+        expect(persona.group).to eq 'Playwright tests'
+      end
+    end
+
+    describe '.grouped_personas' do
+      it 'buckets personas by group name, ungrouped under nil' do
+        described_class.add_persona('first_playwright') do
+          group 'Playwright tests'
+          features << 'foo'
+          sign_in_as { 'banana' }
+        end
+        described_class.add_persona('second_playwright') do
+          group 'Playwright tests'
+          features << 'bar'
+          sign_in_as { 'apple' }
+        end
+        described_class.add_persona('plain_persona') do
+          features << 'baz'
+          sign_in_as { 'cherry' }
+        end
+
+        grouped = described_class.grouped_personas
+
+        expect(grouped.fetch('Playwright tests').map { |p| p.name.to_s })
+          .to eq %w(first_playwright second_playwright)
+        expect(grouped.fetch(nil).map { |p| p.name.to_s }).to eq %w(plain_persona)
+      end
+
+      it 'excludes callout personas' do
+        described_class.add_persona('a_callout') do
+          group 'Playwright tests'
+          callout true
+          features << 'foo'
+          sign_in_as { 'banana' }
+        end
+        described_class.add_persona('a_standard') do
+          group 'Playwright tests'
+          features << 'bar'
+          sign_in_as { 'apple' }
+        end
+
+        grouped = described_class.grouped_personas
+
+        expect(grouped.fetch('Playwright tests').map { |p| p.name.to_s }).to eq %w(a_standard)
+      end
+    end
+  end
+
   describe '.session_url' do
     let(:session) { DemoMode::Session.new(id: 2) }
     let(:demo_mode_options) { {} }

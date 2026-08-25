@@ -11,6 +11,14 @@ module DemoMode
     validates :name, presence: true
     validate :persona_must_have_at_least_one_feature
 
+    def group(name = nil)
+      if name
+        @group = name
+      else
+        @group
+      end
+    end
+
     def icon(name_or_path = nil, &block)
       if block
         @icon = block

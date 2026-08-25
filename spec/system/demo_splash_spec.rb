@@ -186,6 +186,62 @@ describe 'Demo Splash' do
       end
     end
 
+    context 'with grouped personas' do
+      before do
+        DemoMode.add_persona :an_ungrouped_persona do
+          features << 'Cool feature'
+          sign_in_as { DummyUser.create!(name: 'An Ungrouped Persona') }
+        end
+        DemoMode.add_persona :a_grouped_persona do
+          group 'Playwright tests'
+          features << 'Test feature'
+          sign_in_as { DummyUser.create!(name: 'A Grouped Persona') }
+        end
+      end
+
+      it 'renders grouped personas in a collapsed section with a count' do
+        visit '/'
+
+        expect(page).to have_text('An Ungrouped Persona')
+        expect(page).to have_text('Playwright tests')
+        expect(page).to have_text('Playwright tests (1)')
+
+        # collapsed: the grouped persona is hidden until the section is expanded
+        expect(page).to have_no_text('A Grouped Persona')
+
+        find('summary', text: 'Playwright tests').click
+        expect(page).to have_text('A Grouped Persona')
+      end
+
+      it 'filters across every group and opens a group when a search matches a hidden row' do
+        visit '/'
+
+        expect(page).to have_no_text('A Grouped Persona')
+
+        fill_in 'Search...', with: 'A Grouped Persona'
+
+        expect(page).to have_text('A Grouped Persona')
+        expect(page).to have_no_text('An Ungrouped Persona')
+
+        fill_in 'Search...', with: 'An Ungrouped Persona'
+
+        expect(page).to have_text('An Ungrouped Persona')
+        expect(page).to have_no_text('A Grouped Persona')
+      end
+
+      it 'signs in with a grouped persona' do
+        visit '/'
+
+        find('summary', text: 'Playwright tests').click
+
+        within '.dm-Persona--aGroupedPersona' do
+          click_button 'Sign In'
+        end
+
+        expect(page).to have_text('Your Name: A Grouped Persona')
+      end
+    end
+
     context 'when a persona uses a custom sign in method' do
       before do
         DemoMode.add_persona :redirects_to_not_found do
