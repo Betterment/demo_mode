@@ -320,6 +320,32 @@ DemoMode.configure do
   ungrouped_first false
 end
 ```
+
+You can also control the order groups render in, and give them human-friendly
+labels, with `groups`. Pass an array to set the order (any group not listed
+falls back to alphabetical, after the listed ones):
+
+```ruby
+DemoMode.configure do
+  groups %w(transactions activity locked)
+end
+```
+
+Or pass a hash to set the order *and* a friendly label, using the group's raw
+name (e.g. a folder path like `orders/checkout`) as the key:
+
+```ruby
+DemoMode.configure do
+  groups(
+    'orders' => 'Orders',
+    'orders/checkout' => 'Checkout',
+  )
+end
+```
+
+`groups` only affects named groups; use `ungrouped_first` to control where
+ungrouped personas render relative to them.
+
 ## Customizing the Design
 
 To supply your own branding, you can override the logo

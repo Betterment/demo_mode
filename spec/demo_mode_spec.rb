@@ -410,47 +410,27 @@ RSpec.describe DemoMode do
       end
     end
 
-    describe '.grouped_personas' do
-      it 'buckets personas by group name, ungrouped under nil' do
-        described_class.add_persona('first_playwright') do
-          group 'Playwright tests'
-          features << 'foo'
-          sign_in_as { 'banana' }
-        end
-        described_class.add_persona('second_playwright') do
-          group 'Playwright tests'
-          features << 'bar'
-          sign_in_as { 'apple' }
-        end
-        described_class.add_persona('plain_persona') do
-          features << 'baz'
-          sign_in_as { 'cherry' }
-        end
-
-        grouped = described_class.grouped_personas.transform_values { |personas| personas.map { |p| p.name.to_s } }
-
-        expect(grouped).to eq(
-          'Playwright tests' => %w(first_playwright second_playwright),
-          nil => %w(plain_persona),
-        )
-      end
-
-      it 'excludes callout personas' do
+    describe '.grouper' do
+      it 'builds a Grouper from standard personas, excluding callouts' do
         described_class.add_persona('a_callout') do
-          group 'Playwright tests'
           callout true
           features << 'foo'
           sign_in_as { 'banana' }
         end
         described_class.add_persona('a_standard') do
-          group 'Playwright tests'
           features << 'bar'
           sign_in_as { 'apple' }
         end
 
-        grouped = described_class.grouped_personas
+        expect(described_class.grouper.ungrouped.map { |p| p.name.to_s }).to eq %w(a_standard)
+      end
 
-        expect(grouped.fetch('Playwright tests').map { |p| p.name.to_s }).to eq %w(a_standard)
+      it "passes the configured groups through to the Grouper's name_for" do
+        described_class.configure do
+          groups('some_group' => 'Some Group')
+        end
+
+        expect(described_class.grouper.name_for('some_group')).to eq 'Some Group'
       end
     end
   end

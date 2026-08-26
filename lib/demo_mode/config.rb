@@ -19,6 +19,7 @@ module DemoMode
     configurable_boolean(:display_credentials)
     configurable_boolean(:group_by_folder)
     configurable_boolean(:ungrouped_first, default: true)
+    configurable_value(:groups) { [] }
     configurations << :stylesheets
     configurations << :logo
     configurations << :loader

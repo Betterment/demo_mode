@@ -6,6 +6,7 @@ require 'demo_mode/version'
 require 'demo_mode/clever_sequence'
 require 'demo_mode/config'
 require 'demo_mode/engine'
+require 'demo_mode/grouper'
 require 'demo_mode/persona'
 
 module DemoMode
@@ -48,12 +49,8 @@ module DemoMode
       personas - callout_personas
     end
 
-    def grouped_personas
-      standard_personas.group_by(&:group)
-    end
-
-    def ungrouped_personas
-      grouped_personas.fetch(nil, [])
+    def grouper
+      Grouper.new(standard_personas, groups: groups)
     end
 
     def current_password

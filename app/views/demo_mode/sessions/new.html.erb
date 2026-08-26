@@ -24,11 +24,11 @@
       <input type="text" placeholder="Search..." data-table="persona-table" data-behavior="table-filter" />
     </section>
     <% if DemoMode.ungrouped_first? %>
-      <%= render 'ungrouped_personas' %>
-      <%= render 'grouped_personas' %>
+      <%= render 'ungrouped_personas', personas: DemoMode.grouper.ungrouped %>
+      <%= render 'grouped_personas', named_groups: DemoMode.grouper.named_groups %>
     <% else %>
-      <%= render 'grouped_personas' %>
-      <%= render 'ungrouped_personas' %>
+      <%= render 'grouped_personas', named_groups: DemoMode.grouper.named_groups %>
+      <%= render 'ungrouped_personas', personas: DemoMode.grouper.ungrouped %>
     <% end %>
   </article>
 <% end %>
