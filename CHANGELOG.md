@@ -11,14 +11,18 @@ and this project aims to adhere to [Semantic Versioning](http://semver.org/spec/
 
 ### Changed <!-- for changes in existing functionality. -->
 
-- Dropped the `html { font-size: 10px }` override from the demo mode stylesheet and rebased its `rem` values to the
-  browser default 16px root. Host stylesheets added via `DemoMode.stylesheets` are no longer scaled to 0.625x.
-
 ### Deprecated <!-- for soon-to-be removed features. -->
 
 ### Removed <!-- for now removed features. -->
 
 ### Fixed <!-- for any bug fixes. -->
+
+## [4.0.0] - 2026-09-17
+
+### Changed
+
+- Dropped the `html { font-size: 10px }` override from the demo mode stylesheet and rebased its `rem` values to the
+  browser default 16px root. Host stylesheets added via `DemoMode.stylesheets` are no longer scaled to 0.625x.
 
 ## [3.10.0] - 2026-08-10
 
