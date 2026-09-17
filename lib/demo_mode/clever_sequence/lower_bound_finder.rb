@@ -55,7 +55,7 @@ class CleverSequence
     end
 
     def exists?(value)
-      klass.public_send(finder_method, block.call(value))
+      klass.respond_to?(finder_method) && klass.public_send(finder_method, block.call(value))
     end
 
     # TODO: Move onto modern finder methods.
