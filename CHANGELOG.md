@@ -17,6 +17,22 @@ and this project aims to adhere to [Semantic Versioning](http://semver.org/spec/
 
 ### Fixed <!-- for any bug fixes. -->
 
+## [3.11.0] - 2026-08-28
+
+### Added
+
+- Optional persona grouping. Set a group with `group 'My Group'` inside `add_persona`, or opt into
+  deriving groups from persona subfolders with `config.group_by_folder = true`. Grouped personas render
+  in collapsed `<details>` sections on the splash page, and search filters across every group (opening a
+  collapsed group when a match is inside it). Ungrouped personas render in the existing table, so the
+  change is backward compatible.
+
+- `ungrouped_first` config (default `true`) to control whether ungrouped personas render before or
+  after named groups
+
+- `groups` config to control the display order of named groups (array or hash), and to give groups
+  human-friendly labels (hash form, keyed by the group's raw name).
+
 ## [3.10.0] - 2026-08-10
 
 ### Removed

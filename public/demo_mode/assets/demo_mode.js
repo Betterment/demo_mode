@@ -55,14 +55,25 @@
     }
 
     function updateTable() {
-      var table = document.querySelector(`.${input.dataset.table}`);
-      if (table) {
+      var tables = document.querySelectorAll(`.${input.dataset.table}`);
+      if (tables.length === 0) {
+        alert("TableFilter cannot find its table");
+        return;
+      }
+      Array.prototype.forEach.call(tables, function (table) {
         Array.prototype.forEach.call(table.tBodies, function (tbody) {
           Array.prototype.forEach.call(tbody.rows, filter);
         });
-      } else {
-        alert("TableFilter cannot find its table");
-      }
+      });
+      revealGroupsWithMatches();
+    }
+
+    function revealGroupsWithMatches() {
+      var groups = document.querySelectorAll("details.persona-group");
+      Array.prototype.forEach.call(groups, function (group) {
+        var hasMatch = !!group.querySelector("tbody tr[data-matches]");
+        group.open = inputValue !== "" && hasMatch;
+      });
     }
 
     function updateHistory() {
@@ -75,8 +86,13 @@
 
     function filter(row) {
       var text = row.textContent.toLowerCase().replace(/[^0-9a-zA-Z ]/g, "");
-      row.style.display =
-        text.indexOf(inputValue) === -1 ? "none" : "table-row";
+      var matches = text.indexOf(inputValue) !== -1;
+      row.style.display = matches ? "table-row" : "none";
+      if (matches) {
+        row.setAttribute("data-matches", "");
+      } else {
+        row.removeAttribute("data-matches");
+      }
     }
 
     function debounce(func, threshold) {

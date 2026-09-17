@@ -1,0 +1,8 @@
+<% named_groups.each do |name, personas| %>
+  <section>
+    <details class="persona-group">
+      <summary><%= name %> (<%= personas.count %>)</summary>
+      <%= render 'persona_table', personas: personas %>
+    </details>
+  </section>
+<% end %>

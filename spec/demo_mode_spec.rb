@@ -342,6 +342,99 @@ RSpec.describe DemoMode do
       expect(value).to eq('banana-foo')
     end
   end
+
+  describe 'persona grouping' do
+    describe 'Persona#group' do
+      it 'defaults to nil when no group is set' do
+        described_class.add_persona('ungrouped_persona') do
+          features << 'foo'
+          sign_in_as { 'banana' }
+        end
+
+        persona = described_class.personas.find { |p| p.name.to_s == 'ungrouped_persona' }
+        expect(persona.group).to be_nil
+      end
+
+      it 'returns the explicitly set group name' do
+        described_class.add_persona('grouped_persona') do
+          group 'Playwright tests'
+          features << 'foo'
+          sign_in_as { 'banana' }
+        end
+
+        persona = described_class.personas.find { |p| p.name.to_s == 'grouped_persona' }
+        expect(persona.group).to eq 'Playwright tests'
+      end
+    end
+
+    describe 'folder-derived groups' do
+      before do
+        described_class.configure do
+          personas_path 'config/grouped-personas'
+        end
+      end
+
+      context 'when group_by_folder is disabled' do
+        it 'does not derive a group from the folder' do
+          persona = described_class.personas.find { |p| p.name.to_s == 'retail: alice' }
+          expect(persona.group).to be_nil
+        end
+      end
+
+      context 'when group_by_folder is enabled' do
+        before do
+          described_class.configure do
+            group_by_folder true
+          end
+        end
+
+        it 'derives a one-level group from the folder' do
+          persona = described_class.personas.find { |p| p.name.to_s == 'retail: alice' }
+          expect(persona.group).to eq 'retail'
+        end
+
+        it 'compacts nested folders into a single top-level label' do
+          persona = described_class.personas.find { |p| p.name.to_s == 'retail: team1 — carol' }
+          expect(persona.group).to eq 'retail/team1'
+        end
+
+        it 'leaves a root-level persona ungrouped' do
+          persona = described_class.personas.find { |p| p.name.to_s == 'dave' }
+          expect(persona.group).to be_nil
+        end
+
+        it 'lets an explicit group override the folder-derived group' do
+          persona = described_class.personas.find { |p| p.name.to_s == 'wealth: erin' }
+          expect(persona.group).to eq 'Explicit group'
+        end
+      end
+    end
+
+    describe '.grouper' do
+      it 'builds a Grouper from standard personas, excluding callouts' do
+        described_class.add_persona('a_callout') do
+          callout true
+          features << 'foo'
+          sign_in_as { 'banana' }
+        end
+        described_class.add_persona('a_standard') do
+          features << 'bar'
+          sign_in_as { 'apple' }
+        end
+
+        expect(described_class.grouper.ungrouped.map { |p| p.name.to_s }).to eq %w(a_standard)
+      end
+
+      it "passes the configured groups through to the Grouper's name_for" do
+        described_class.configure do
+          groups('some_group' => 'Some Group')
+        end
+
+        expect(described_class.grouper.name_for('some_group')).to eq 'Some Group'
+      end
+    end
+  end
+
   describe '.session_url' do
     let(:session) { DemoMode::Session.new(id: 2) }
     let(:demo_mode_options) { {} }

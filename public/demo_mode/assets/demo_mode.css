@@ -320,3 +320,13 @@ td {
 .hidden {
     display: none;
 }
+
+.persona-group {
+    margin-top: 1rem;
+}
+
+.persona-group summary {
+    cursor: pointer;
+    font-weight: bold;
+    padding: 0.5rem 0;
+}
