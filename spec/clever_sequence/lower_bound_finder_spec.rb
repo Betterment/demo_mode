@@ -170,6 +170,14 @@ RSpec.describe CleverSequence::LowerBoundFinder do
       expect(finder.send(:exists?, 5)).to be_truthy
       expect(finder.send(:exists?, 6)).to be_falsey
     end
+
+    it 'treats a missing finder method as no matching records' do
+      finder = described_class.new(klass, :nonexistent_column, ->(i) { i })
+
+      expect(klass).not_to respond_to(:find_by_nonexistent_column)
+      expect(finder.send(:exists?, 1)).to be false
+      expect(finder.lower_bound).to eq 0
+    end
   end
 
   describe '#finder_method' do
