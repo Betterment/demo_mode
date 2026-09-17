@@ -1,7 +1,7 @@
 PATH
   remote: ..
   specs:
-    demo_mode (4.0.0)
+    demo_mode (4.0.1)
       actionpack (>= 8.0, < 8.2)
       activejob (>= 8.0, < 8.2)
       activerecord (>= 8.0, < 8.2)
@@ -129,7 +129,7 @@ GEM
     matrix (0.4.3)
     mini_mime (1.1.5)
     minitest (5.26.1)
-    net-imap (0.4.22)
+    net-imap (0.5.15)
       date
       net-protocol
     net-pop (0.1.2)
@@ -138,11 +138,11 @@ GEM
       timeout
     net-smtp (0.5.1)
       net-protocol
-    nokogiri (1.19.3-arm64-darwin)
+    nokogiri (1.19.4-arm64-darwin)
       racc (~> 1.4)
-    nokogiri (1.19.3-x86_64-darwin)
+    nokogiri (1.19.4-x86_64-darwin)
       racc (~> 1.4)
-    nokogiri (1.19.3-x86_64-linux-gnu)
+    nokogiri (1.19.4-x86_64-linux-gnu)
       racc (~> 1.4)
     parallel (1.27.0)
     parser (3.3.10.0)
@@ -303,9 +303,9 @@ DEPENDENCIES
   cuprite
   demo_mode!
   factory_bot
-  net-imap (~> 0.4.20)
+  net-imap (~> 0.5.15)
   net-smtp
-  nokogiri (~> 1.19.3)
+  nokogiri (~> 1.19.4)
   pg
   railties (~> 8.0.0)
   rspec-rails
