@@ -309,5 +309,8 @@ DEPENDENCIES
   with_transactional_lock (~> 3.2.0)
   zeitwerk (~> 2.6.18)
 
+RUBY VERSION
+   ruby 3.4.10p104
+
 BUNDLED WITH
    2.7.2
