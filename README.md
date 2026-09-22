@@ -276,28 +276,10 @@ dropdown.
 
 ### Grouping Personas
 
-When an app has many personas, the single table can get hard to scan. You can
-optionally organize personas into collapsible groups. Grouping is entirely
-opt-in: personas without a group render in the table exactly as before.
-
-Set a group name directly on a persona:
-
-```ruby
-DemoMode.add_persona do
-  group 'Playwright tests'
-  features << 'Account Overview'
-  # ...
-end
-```
-
-Personas that share a group name render together in a collapsed `<details>`
-section (labeled with the group name and a count), while ungrouped personas stay
-in the main table. The search box filters across every group and automatically
-opens a collapsed group when a match is found inside it.
-
-Alternatively, if you already organize your persona files into subfolders (e.g.
-`config/personas/orders/...`, `config/personas/advanced/...`), you can derive groups from
-that folder structure with a single config flag:
+When an app has many personas, the single table can become hard to scan. To
+improve the end-user experience, you can organize your persona files into subfolders
+(e.g. `config/personas/orders...`, `config/personas/advanced/...`) and then enable
+the following setting to collapse those personas into labeled groupings:
 
 ```ruby
 DemoMode.configure do
@@ -305,46 +287,32 @@ DemoMode.configure do
 end
 ```
 
-With `group_by_folder` enabled, each persona's group defaults to its subfolder
-(relative to `personas_path`). Folders nested more than one level deep are
-compacted into a single label (e.g. `orders/checkout`). An explicit `group` always
-overrides the folder-derived group, and personas at the root of `personas_path`
-remain ungrouped.
-
-By default, ungrouped personas render above every named group (matching the
-pre-grouping table layout). Set `ungrouped_first` to `false` to render them
-after the named groups instead:
+Alternatively, you can set a group name directly on any persona:
 
 ```ruby
-DemoMode.configure do
-  ungrouped_first false
+DemoMode.add_persona do
+  group 'Playwright testing'
+  # ...
 end
 ```
 
-You can also control the order groups render in, and give them human-friendly
-labels, with `groups`. Pass an array to set the order (any group not listed
-falls back to alphabetical, after the listed ones):
+To directly control page ordering, use the `groups` config:
 
 ```ruby
 DemoMode.configure do
+  # Specify group order directly:
   groups %w(transactions activity locked)
-end
-```
 
-Or pass a hash to set the order *and* a friendly label, using the group's raw
-name (e.g. a folder path like `orders/checkout`) as the key:
-
-```ruby
-DemoMode.configure do
+  # ...or specify friendly labels along with the order:
   groups(
     'orders' => 'Orders',
     'orders/checkout' => 'Checkout',
   )
+
+  # If you prefer, move ungrouped personas to the bottom:
+  groups %w(inbound outbound), ungrouped_first: false
 end
 ```
-
-`groups` only affects named groups; use `ungrouped_first` to control where
-ungrouped personas render relative to them.
 
 ## Customizing the Design
 

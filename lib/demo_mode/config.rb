@@ -18,8 +18,8 @@ module DemoMode
     configurable_value(:minimum_pool_size) { 5 }
     configurable_boolean(:display_credentials)
     configurable_boolean(:group_by_folder)
-    configurable_boolean(:ungrouped_first, default: true)
-    configurable_value(:groups) { [] }
+    configurations << :groups
+    configurations << :ungrouped_first?
     configurations << :stylesheets
     configurations << :logo
     configurations << :loader
@@ -31,6 +31,15 @@ module DemoMode
 
     def self.app_name
       Rails.application.class.module_parent.name
+    end
+
+    def groups(value = nil, **kwargs)
+      configure_groups(value, **kwargs) if value || kwargs.any?
+      @groups || []
+    end
+
+    def ungrouped_first?
+      @ungrouped_first.nil? ? true : @ungrouped_first
     end
 
     def stylesheets
@@ -122,6 +131,11 @@ module DemoMode
     end
 
     private
+
+    def configure_groups(value, **kwargs)
+      @ungrouped_first = kwargs.delete(:ungrouped_first)
+      @groups = kwargs.any? ? kwargs : value
+    end
 
     def auto_load_personas!
       Rails.root.glob("#{personas_path}/**/*.rb").sort.each do |persona_file|

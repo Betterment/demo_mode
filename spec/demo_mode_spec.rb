@@ -433,6 +433,30 @@ RSpec.describe DemoMode do
         expect(described_class.grouper.name_for('some_group')).to eq 'Some Group'
       end
     end
+
+    describe '.ungrouped_first?' do
+      it 'defaults to true' do
+        expect(described_class.ungrouped_first?).to be true
+      end
+
+      it 'is set via the ungrouped_first: kwarg on groups' do
+        described_class.configure do
+          groups %w(a b), ungrouped_first: false
+        end
+
+        expect(described_class.ungrouped_first?).to be false
+        expect(described_class.groups).to eq %w(a b)
+      end
+
+      it 'can be set independently of the group order/labels' do
+        described_class.configure do
+          groups(ungrouped_first: false)
+        end
+
+        expect(described_class.ungrouped_first?).to be false
+        expect(described_class.groups).to eq []
+      end
+    end
   end
 
   describe '.session_url' do

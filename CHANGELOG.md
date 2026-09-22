@@ -27,11 +27,9 @@ and this project aims to adhere to [Semantic Versioning](http://semver.org/spec/
   collapsed group when a match is inside it). Ungrouped personas render in the existing table, so the
   change is backward compatible.
 
-- `ungrouped_first` config (default `true`) to control whether ungrouped personas render before or
-  after named groups
-
-- `groups` config to control the display order of named groups (array or hash), and to give groups
-  human-friendly labels (hash form, keyed by the group's raw name).
+- `groups` config to control the display order of named groups (array or hash), to give groups
+  human-friendly labels (hash form, keyed by the group's raw name), and, via the `ungrouped_first:`
+  kwarg (default `true`), whether ungrouped personas render before or after named groups.
 
 ## [4.0.0] - 2026-09-17
 
