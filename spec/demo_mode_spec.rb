@@ -410,8 +410,8 @@ RSpec.describe DemoMode do
       end
     end
 
-    describe '.grouper' do
-      it 'builds a Grouper from standard personas, excluding callouts' do
+    describe '.ungrouped_personas' do
+      it 'returns standard personas with no group, excluding callouts' do
         described_class.add_persona('a_callout') do
           callout true
           features << 'foo'
@@ -422,15 +422,22 @@ RSpec.describe DemoMode do
           sign_in_as { 'apple' }
         end
 
-        expect(described_class.grouper.ungrouped.map { |p| p.name.to_s }).to eq %w(a_standard)
+        expect(described_class.ungrouped_personas.map { |p| p.name.to_s }).to eq %w(a_standard)
       end
+    end
 
-      it "passes the configured groups through to the Grouper's name_for" do
+    describe '.personas_by_group' do
+      it "pairs each group with its resolved name, per the configured groups" do
         described_class.configure do
           groups('some_group' => 'Some Group')
         end
+        described_class.add_persona('a_persona') do
+          group 'some_group'
+          features << 'foo'
+          sign_in_as { 'banana' }
+        end
 
-        expect(described_class.grouper.name_for('some_group')).to eq 'Some Group'
+        expect(described_class.personas_by_group.map(&:first)).to eq ['Some Group']
       end
     end
 

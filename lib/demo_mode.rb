@@ -49,8 +49,12 @@ module DemoMode
       personas - callout_personas
     end
 
-    def grouper
-      Grouper.new(standard_personas, groups: groups)
+    def ungrouped_personas
+      grouper.ungrouped
+    end
+
+    def personas_by_group
+      grouper.named_groups
     end
 
     def current_password
@@ -74,6 +78,10 @@ module DemoMode
     end
 
     private
+
+    def grouper
+      Grouper.new(standard_personas, groups: groups)
+    end
 
     def configuration
       @configuration ||= Config.new
