@@ -17,6 +17,9 @@ module DemoMode
     configurable_value(:log_level) { :debug }
     configurable_value(:minimum_pool_size) { 5 }
     configurable_boolean(:display_credentials)
+    configurable_boolean(:group_by_folder)
+    configurations << :groups
+    configurations << :ungrouped_first?
     configurations << :stylesheets
     configurations << :logo
     configurations << :loader
@@ -28,6 +31,15 @@ module DemoMode
 
     def self.app_name
       Rails.application.class.module_parent.name
+    end
+
+    def groups(value = nil, **kwargs)
+      configure_groups(value, **kwargs) if value || kwargs.any?
+      @groups || []
+    end
+
+    def ungrouped_first?
+      @ungrouped_first.nil? ? true : @ungrouped_first
     end
 
     def stylesheets
@@ -120,6 +132,11 @@ module DemoMode
 
     private
 
+    def configure_groups(value, **kwargs)
+      @ungrouped_first = kwargs.delete(:ungrouped_first)
+      @groups = kwargs.any? ? kwargs : value
+    end
+
     def auto_load_personas!
       Rails.root.glob("#{personas_path}/**/*.rb").sort.each do |persona_file|
         raise <<~ERROR if File.readlines(persona_file).grep(/DemoMode\.add_persona/).empty?
@@ -130,7 +147,10 @@ module DemoMode
         checksum = Digest::SHA256.hexdigest(File.read(persona_file))
         before_count = @personas.length
         load(persona_file)
-        @personas[before_count..].each { |p| p.file_checksum = checksum }
+        @personas[before_count..].each do |p|
+          p.file_checksum = checksum
+          p.file_path = persona_file.to_s
+        end
       end
     end
   end

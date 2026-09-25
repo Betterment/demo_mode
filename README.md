@@ -39,6 +39,7 @@ To learn more about how we use `demo_mode` at **Betterment**, check out :sparkle
   - [Installation](#installation)
   - [App-Specific Setup](#app-specific-setup)
 - [Defining Personas](#defining-personas)
+  - [Grouping Personas](#grouping-personas)
 - [Customizing the Design](#customizing-the-design)
 - [Optional Features](#optional-features)
   - [The "Sign Up" Link](#the-sign-up-link)
@@ -272,6 +273,46 @@ end
 
 If defined, the non-variant `sign_in_as` will show up as "default" in the
 dropdown.
+
+### Grouping Personas
+
+When an app has many personas, the single table can become hard to scan. To
+improve the end-user experience, you can organize your persona files into subfolders
+(e.g. `config/personas/orders...`, `config/personas/advanced/...`) and then enable
+the following setting to collapse those personas into labeled groupings:
+
+```ruby
+DemoMode.configure do
+  group_by_folder true
+end
+```
+
+Alternatively, you can set a group name directly on any persona:
+
+```ruby
+DemoMode.add_persona do
+  group 'Playwright testing'
+  # ...
+end
+```
+
+To directly control page ordering, use the `groups` config:
+
+```ruby
+DemoMode.configure do
+  # Specify group order directly:
+  groups %w(transactions activity locked)
+
+  # ...or specify friendly labels along with the order:
+  groups(
+    'orders' => 'Orders',
+    'orders/checkout' => 'Checkout',
+  )
+
+  # If you prefer, move ungrouped personas to the bottom:
+  groups %w(inbound outbound), ungrouped_first: false
+end
+```
 
 ## Customizing the Design
 

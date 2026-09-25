@@ -6,6 +6,7 @@ require 'demo_mode/version'
 require 'demo_mode/clever_sequence'
 require 'demo_mode/config'
 require 'demo_mode/engine'
+require 'demo_mode/grouper'
 require 'demo_mode/persona'
 
 module DemoMode
@@ -48,6 +49,14 @@ module DemoMode
       personas - callout_personas
     end
 
+    def ungrouped_personas
+      grouper.ungrouped
+    end
+
+    def personas_by_group
+      grouper.named_groups
+    end
+
     def current_password
       Thread.current[:_demo_mode_password] ||= password.call
     end
@@ -69,6 +78,10 @@ module DemoMode
     end
 
     private
+
+    def grouper
+      Grouper.new(standard_personas, groups: groups)
+    end
 
     def configuration
       @configuration ||= Config.new

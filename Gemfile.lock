@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    demo_mode (4.0.1)
+    demo_mode (4.1.0)
       actionpack (>= 8.0, < 8.2)
       activejob (>= 8.0, < 8.2)
       activerecord (>= 8.0, < 8.2)
