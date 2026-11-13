@@ -282,6 +282,37 @@ RSpec.describe DemoMode do
     end
   end
 
+  context 'when a persona has tagged variants' do
+    before do
+      described_class.add_persona('persona_with_tagged_variants') do
+        features << 'foo'
+        variant('untagged') { sign_in_as { 'apple' } }
+        variant('tagged', tags: ['skip_generation_spec', :slow]) { sign_in_as { 'banana' } }
+      end
+    end
+
+    it 'exposes the tags on the variant' do
+      persona = described_class.personas.find { |p| p.name.to_s == 'persona_with_tagged_variants' }
+
+      expect(persona.variants['tagged'].tags).to eq %i(skip_generation_spec slow)
+      expect(persona.variants['tagged'].tagged?(:skip_generation_spec)).to be true
+      expect(persona.variants['tagged'].tagged?('slow')).to be true
+      expect(persona.variants['tagged'].tagged?(:other)).to be false
+      expect(persona.variants['untagged'].tags).to eq []
+      expect(persona.variants['untagged'].tagged?(:skip_generation_spec)).to be false
+    end
+  end
+
+  it 'gives the default variant from a persona-level sign_in_as no tags' do
+    described_class.add_persona('persona_with_default_variant') do
+      features << 'foo'
+      sign_in_as { 'apple' }
+    end
+
+    persona = described_class.personas.find { |p| p.name.to_s == 'persona_with_default_variant' }
+    expect(persona.variants['default'].tags).to eq []
+  end
+
   context 'when a persona has persona-level at_claim_callback' do
     before do
       described_class.add_persona('at_claim_persona') do
