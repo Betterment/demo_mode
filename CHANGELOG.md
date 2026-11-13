@@ -17,6 +17,14 @@ and this project aims to adhere to [Semantic Versioning](http://semver.org/spec/
 
 ### Fixed <!-- for any bug fixes. -->
 
+## [4.2.0] - 2026-11-13
+
+### Added
+
+- `tags:` option on `variant` to attach labels to a persona variant, read with `Variant#tags` and
+  `Variant#tagged?`. Demo Mode does not act on tags; they let apps mark variants (for example, to skip
+  some in a spec that generates every variant) without keeping a separate list of names.
+
 ## [4.1.0] - 2026-08-28
 
 ### Added

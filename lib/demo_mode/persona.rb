@@ -60,8 +60,8 @@ module DemoMode
       end
     end
 
-    def variant(name, &block)
-      (@variants ||= {}.with_indifferent_access)[name] = Variant.new(name: name).tap do |v|
+    def variant(name, tags: [], &block)
+      (@variants ||= {}.with_indifferent_access)[name] = Variant.new(name: name, tags: Array(tags).map(&:to_sym)).tap do |v|
         v.instance_eval(&block)
       end
     end
@@ -172,7 +172,11 @@ module DemoMode
       ERR
     end
 
-    Variant = Struct.new(:name, keyword_init: true) do
+    Variant = Struct.new(:name, :tags, keyword_init: true) do
+      def tagged?(tag)
+        Array(tags).include?(tag.to_sym)
+      end
+
       def sign_in_as(&signinable_generator)
         @signinable_generator = signinable_generator
       end

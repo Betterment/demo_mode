@@ -51,6 +51,7 @@ To learn more about how we use `demo_mode` at **Betterment**, check out :sparkle
   - [Database-backed sequences](#database-backed-sequences)
   - [Persona Pooling](#persona-pooling)
   - [Disabling Personas or Variants](#disabling-personas-or-variants)
+  - [Tagging Variants](#tagging-variants)
 - [Deploying a demo environment to the cloud](#deploying-a-demo-environment-to-the-cloud)
   - [How to avoid breaking your new "demo" env](#how-to-avoid-breaking-your-new-demo-env)
 - [How to Contribute](#how-to-contribute)
@@ -673,6 +674,44 @@ end
 ```
 
 Common use cases include feature-flag-gated personas, environment-specific personas (e.g. only in staging), and temporarily hiding a persona without deleting its definition.
+
+### Tagging Variants
+
+You can attach tags to a variant with the `tags:` option. Demo Mode does not act on tags itself; they let
+your own code ask questions about a variant without keeping a separate list of persona and variant names.
+
+```ruby
+DemoMode.add_persona do
+  features << 'A customer with a full order history'
+
+  variant :default do
+    sign_in_as { FactoryBot.create(:user, :with_orders) }
+  end
+
+  variant :guest_checkout, tags: %i(skip_generation_spec) do
+    sign_in_as { FactoryBot.create(:user, :with_orders, :guest) }
+  end
+end
+```
+
+Read them with `tags` or `tagged?`. For example, a spec that generates every persona variant can skip the
+ones whose differences it can't observe:
+
+```ruby
+DemoMode.personas.each do |persona|
+  persona.variants.each do |name, variant|
+    it "generates #{persona.name} / #{name}" do
+      skip 'Covered by another variant' if variant.tagged?(:skip_generation_spec)
+
+      persona.generate!(variant: name)
+    end
+  end
+end
+```
+
+Tags are stored as symbols, so `tagged?('skip_generation_spec')` and `tagged?(:skip_generation_spec)`
+are equivalent. A variant defined without `tags:`, including the default variant created by a persona-level
+`sign_in_as`, has no tags.
 
 ## Deploying a demo environment to the cloud
 
