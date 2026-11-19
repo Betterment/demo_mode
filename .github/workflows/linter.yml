@@ -8,9 +8,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@ee0669bd1cc54295c223e0bb666b733df41de1c5 # v2
-    - uses: ruby/setup-ruby@a4effe49ee8ee5b8b5091268c473a4628afb5651 # v1
       with:
-        ruby-version: 3.3
+        persist-credentials: false
+    - uses: ruby/setup-ruby@f9c4492e86def3e644ab32a0ef185eda5b0c20d0 # v1.342.0
+      with:
+        ruby-version: mise.toml
         bundler-cache: true
     - name: Run Linter
       run: bundle exec rubocop --parallel

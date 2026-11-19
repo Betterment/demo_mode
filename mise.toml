@@ -2,8 +2,8 @@
 ruby-next = "core:ruby"
 
 [tools]
-ruby = "3.3.12"
-ruby-next = "3.4.10"
+ruby = "3.3.14"
+ruby-next = "3.4.13"
 
 [settings]
 enable_tools = ["ruby-next"]
